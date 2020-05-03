@@ -5,11 +5,13 @@ export DEBIAN_FRONTEND
 apt-get update
 apt-get upgrade -y
 # This makes debugging less work
-apt-get install -y tmate emacs nano
+apt-get install -y tmate emacs nano net-tools nmap
 # Necessary build magics
 # Note: QEMU means we're running a different kernel
 # than the one we use on the board
 apt install -y linux-headers-raspi2  cmake gcc clang libyaml-cpp-dev libyaml-dev pkg-config curl
+# For K3s
+apt install systemd-sysv
 # Start installing falco
 if [ ! -d falco ]; then
   git clone https://github.com/falcosecurity/falco.git

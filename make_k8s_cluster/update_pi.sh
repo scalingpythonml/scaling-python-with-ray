@@ -13,7 +13,7 @@ if [ ! -f /updated_pi ]; then
   apt install -y linux-headers-raspi2 || echo "Probably not a pi image"
   apt install -y cmake gcc clang libyaml-cpp-dev libyaml-dev pkg-config curl jq libjq-dev ssh
   # For storage adventures
-  apt isntall -y xfsprogs glusterfs-server
+  apt install -y xfsprogs glusterfs-server
   # For K3s
   apt install -y systemd-sysv
   # I hate netplan

@@ -58,10 +58,13 @@ update_ubuntu () {
   sudo cp setup_*.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/
 }
-function resize_partition {
-  dd if=/dev/zero bs=1G count=$((${TARGET_SIZE}+2)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
-  sudo parted ubuntu-arm64-customized.img resizepart 2 ${TARGET_SIZE}g
-  partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
+resize_partition () {
+  local img_name=$1
+  local partition_num=$2
+  local target_size=$3
+  dd if=/dev/zero bs=1G count=$((${target_size}+2)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
+  sudo parted ${img_name} resizepart ${partition_num} ${target_size}g
+  partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
   sudo e2fsck -f /dev/mapper/${partition}
   sudo resize2fs /dev/mapper/${partition}
   sync
@@ -81,8 +84,7 @@ if [ ! -f ubuntu-arm64-customized.img ]; then
   sudo kpartx -dv ubuntu-arm64-customized.img
   sync
   sleep 5
-  TARGET_SIZE=${PI_TARGET_SIZE}
-  resize_partition
+  resize_partition ubuntu-arm64-customized.img 2 ${PI_TARGET_SIZE}
   setup_ubuntu_mounts
   copy_ssh_keys
   update_ubuntu
@@ -122,8 +124,7 @@ if [ ! -f jetson-nano-custom.img ]; then
   setup_ubuntu_mounts
   copy_ssh_keys
   cleanup_ubuntu_mounts
-  TARGET_SIZE=${JETSON_TARGET_SIZE}
-  resize_partition
+  resize_partition jetson-nano-custom.img 1 ${JETSON_TARGET_SIZE}
   setup_ubuntu_mounts
   update_ubuntu
   sudo cp first_run_worker.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh

@@ -46,8 +46,10 @@ update_ubuntu () {
   sudo cp /usr/bin/qemu-arm-static ubuntu-image/usr/bin/
   sudo cp update_pi.sh ubuntu-image/
   sudo chroot ubuntu-image/ /update_pi.sh
-  sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml
+  # I'm not super sure bout this
+  sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
   sudo cp setup_*.sh ubuntu-image/
+  sudo cp first_run.sh ubuntu-image/
 }
 function resize_partition {
   dd if=/dev/zero bs=1G count=$((${TARGET_SIZE}+1)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
@@ -72,20 +74,21 @@ if [ ! -f ubuntu-arm64-customized.img ]; then
   sudo kpartx -dv ubuntu-arm64-customized.img
   sync
   sleep 5
-  TARGET_SIZE=PI_TARGET_SIZE
+  TARGET_SIZE=${PI_TARGET_SIZE}
   resize_partition
   setup_ubuntu_mounts
   update_ubuntu
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-customized.img
 fi
-exit 0
+echo "Baking master/worker images"
 # Setup K3s
 if [ ! -f ubuntu-arm64-master.img ]; then
   # Setup the master
   cp ubuntu-arm64-customized.img ubuntu-arm64-master.img
   partition=$(sudo kpartx -av ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
+  sudo chroot ubuntu-image/ /usr/bin/hostname k8s-master
   sudo cp first_run_master.sh ubuntu-image/etc/init.d/rc.local/99-firstboot.sh
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-master.img
@@ -98,7 +101,7 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   sudo kpartx -dv ubuntu-arm64-worker.img
   sync
 fi
-#echo "Done!"
+echo "Baking jetson nano worker image"
 if [ ! -f jetson-nano.zip ] && [ ! -f sd-blob-b01.img ]; then
   wget https://developer.nvidia.com/jetson-nano-sd-card-image -O jetson-nano.zip
 fi
@@ -111,7 +114,7 @@ if [ ! -f jetson-nano-custom.img ]; then
   setup_ubuntu_mounts
   copy_ssh_keys
   cleanup_ubuntu_mounts
-  TARGET_SIZE=JETSON_TARGET_SIZE
+  TARGET_SIZE=${JETSON_TARGET_SIZE}
   resize_partition
   setup_ubuntu_mounts
   update_ubuntu

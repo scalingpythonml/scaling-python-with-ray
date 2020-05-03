@@ -11,7 +11,7 @@ if [ ! -f /updated_pi ]; then
   # Note: QEMU means we're running a different kernel
   # than the one we use on the board
   apt install -y linux-headers-raspi2 || echo "Probably not a pi image"
-  apt install -y cmake gcc clang libyaml-cpp-dev libyaml-dev pkg-config curl
+  apt install -y cmake gcc clang libyaml-cpp-dev libyaml-dev pkg-config curl jq libjq-dev ssh
   # For K3s
   apt install systemd-sysv
   # I hate netplan

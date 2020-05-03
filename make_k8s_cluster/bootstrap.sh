@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 # In gigabytes
-PI_TARGET_SIZE=${PI_TARGET_SIZE:-21}
+PI_TARGET_SIZE=${PI_TARGET_SIZE:-20}
 #JETSON_DATA_SIZE
 # Set up dependencies
 command -v unxz || sudo apt-get install xz-utils
@@ -12,6 +12,9 @@ command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static
 # Cleanup existing loopbacks
 sudo losetup -D
 # Download the base images
+if [ ! -f jetson-nano.zip ] && [ ! -f sd-blob-b01.img ]; then
+  wget https://developer.nvidia.com/jetson-nano-sd-card-image-r3231 -O jetson-nano.zip &
+fi
 if [ ! -f ubuntu-arm64.img.xz ] &&  [ ! -f ubuntu-arm64.img ]; then
   wget http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -O ubuntu-arm64.img.xz
 fi
@@ -62,7 +65,7 @@ resize_partition () {
   local img_name=$1
   local partition_num=$2
   local target_size=$3
-  dd if=/dev/zero bs=1G count=$((${target_size}+2)) of=./$img_name conv=sparse,notrunc oflag=append
+  dd if=/dev/zero bs=1G count=$((${target_size} * 120/100)) of=./$img_name conv=sparse,notrunc oflag=append
   sudo parted ${img_name} resizepart ${partition_num} ${target_size}g
   partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
   sudo e2fsck -f /dev/mapper/${partition}
@@ -114,9 +117,6 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   sync
 fi
 echo "Baking jetson nano worker image"
-if [ ! -f jetson-nano.zip ] && [ ! -f sd-blob-b01.img ]; then
-  wget https://developer.nvidia.com/jetson-nano-sd-card-image -O jetson-nano.zip
-fi
 if [ ! -f sd-blob-b01.img ]; then
   unzip jetson-nano.zip
 fi

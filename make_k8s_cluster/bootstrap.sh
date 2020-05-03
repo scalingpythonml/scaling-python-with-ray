@@ -8,7 +8,7 @@ command -v unxz || sudo apt-get install xz-utils
 command -v kpartx || sudo apt install kpartx
 command -v parted || sudo apt-get install parted
 # Setup qemu
-(command -v qemu-system-arm && qemu-aarch64-static) || sudo apt-get install qemu-system qemu-user-static qemu binfmt-support debootstrap
+command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static qemu binfmt-support debootstrap
 # Cleanup existing loopbacks
 sudo losetup -D
 # Download the base images

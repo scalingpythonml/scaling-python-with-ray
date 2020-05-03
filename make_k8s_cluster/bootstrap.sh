@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ex
 # In gigabytes
-PI_TARGET_SIZE=${PI_TARGET_SIZE:-25}
-JETSON_TARGET_SIZE=${JETSON_TARGET_SIZE:-120}
+PI_TARGET_SIZE=${PI_TARGET_SIZE:-21}
+JETSON_TARGET_SIZE=${JETSON_TARGET_SIZE:-110}
 # Set up dependencies
 command -v unxz || sudo apt-get install xz-utils
 command -v kpartx || sudo apt install kpartx
@@ -33,13 +33,13 @@ setup_ubuntu_mounts () {
   sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
 }
 cleanup_ubuntu_mounts () {
-  sudo umount ubuntu-image/proc ubuntu-image/dev/pts
   sync
   sleep 1
-  sudo umount ubuntu-image/sys ubuntu-image/dev
-  sleep 1
-  sudo umount ubuntu-image
-  sleep 1
+  sudo umount ubuntu-image/proc ubuntu-image/dev/pts || (sleep 1 && sudo umount ubuntu-image/proc ubuntu-image/dev/pts)
+  sync
+  sudo umount ubuntu-image/sys ubuntu-image/dev || (sleep 1 && sudo umount ubuntu-image/sys ubuntu-image/dev)
+  sync
+  sudo umount ubuntu-image || (sleep 1 && sudo umount ubuntu-image)
   sync
 }
 copy_ssh_keys () {
@@ -60,7 +60,7 @@ update_ubuntu () {
   sudo cp first_run.sh ubuntu-image/
 }
 function resize_partition {
-  dd if=/dev/zero bs=1G count=$((${TARGET_SIZE}+1)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
+  dd if=/dev/zero bs=1G count=$((${TARGET_SIZE}+2)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
   sudo parted ubuntu-arm64-customized.img resizepart 2 ${TARGET_SIZE}g
   partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
   sudo e2fsck -f /dev/mapper/${partition}
@@ -98,7 +98,6 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   setup_ubuntu_mounts
   sudo chroot ubuntu-image/ /usr/bin/hostname k8s-master
   sudo cp first_run_master.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
-  sudo cp first_run.sh ubuntu-image/
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-master.img
   # Setup the worker
@@ -106,7 +105,6 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   partition=$(sudo kpartx -av ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
   sudo cp first_run_worker.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
-  sudo cp first_run.sh ubuntu-image/
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-worker.img
   sync

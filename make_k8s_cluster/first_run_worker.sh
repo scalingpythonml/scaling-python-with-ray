@@ -13,5 +13,6 @@ if [ ! -f /first_run_done ]; then
   echo "Starting run" | tee /first_run.log
   /first_run.sh | tee /first_run.log
   /setup_k3s_worker.sh | tee /first_run.log
+  /setup_gluster_worker.sh | tee /first_run.log
   touch /first_run_done
 fi

@@ -12,8 +12,10 @@ if [ ! -f /updated_pi ]; then
   # than the one we use on the board
   apt install -y linux-headers-raspi2 || echo "Probably not a pi image"
   apt install -y cmake gcc clang libyaml-cpp-dev libyaml-dev pkg-config curl jq libjq-dev ssh
+  # For storage adventures
+  apt isntall -y xfsprogs glusterfs-server
   # For K3s
-  apt install systemd-sysv
+  apt install -y systemd-sysv
   # I hate netplan
   netplan generate
   # Start installing falco

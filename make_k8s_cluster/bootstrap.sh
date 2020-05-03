@@ -46,7 +46,8 @@ copy_ssh_keys () {
   sudo mkdir -p ubuntu-image/root/.ssh
   sudo cp ~/.ssh/authorized_keys ubuntu-image/root/.ssh/
   cat ssh_secret.pub | sudo tee ubuntu-image/root/.ssh/authorized_keys
-  curl https://github.com/holdenk.keys | sudo tee ubuntu-image/root/.ssh/authorized_keys
+  GH_USER=${GH_USER:-holdenk}
+  curl https://github.com/${GH_USER}.keys | sudo tee ubuntu-image/root/.ssh/authorized_keys
   sudo cp secret ubuntu-image/root/.ssh/id_rsa
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }

@@ -127,7 +127,9 @@ if [ ! -f jetson-nano-custom.img ]; then
   copy_ssh_keys
   cleanup_ubuntu_mounts
   setup_ubuntu_mounts
-  update_ubuntu
+  # update_ubuntu
+  sudo cp update_pi.sh ubuntu-image/first_run.sh
+  cat first_run.sh | sudo tee ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts

@@ -1,4 +1,5 @@
 #!/bin/bash
 pushd /falco
-./init.sh
+./build/init.sh
 make -j 4
+popd

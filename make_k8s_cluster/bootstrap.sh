@@ -32,8 +32,10 @@ setup_ubuntu_mounts () {
   sudo mount --bind /sys ubuntu-image/sys/
   sudo mount --bind /proc ubuntu-image/proc/
   sudo mount --bind /dev/pts ubuntu-image/dev/pts
+  # Technicall not mounts but being able to resolve is necessary for a lot
   sudo rm ubuntu-image/etc/resolv.conf
   sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
+  sudo cp /etc/hosts ubuntu-image/etc/hosts
 }
 cleanup_ubuntu_mounts () {
   local -r cmd="$@"

@@ -65,7 +65,7 @@ update_ubuntu () {
   sudo cp first_run.sh ubuntu-image/
 }
 cleanup_misc () {
-  rm ubuntu-image/bin/qemu-*-static
+  sudo rm ubuntu-image/bin/qemu-*-static
 }
 resize_partition () {
   local img_name=$1

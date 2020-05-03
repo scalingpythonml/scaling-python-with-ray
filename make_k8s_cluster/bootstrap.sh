@@ -46,7 +46,7 @@ copy_ssh_keys () {
   cat ssh_secret.pub | sudo tee ubuntu-image/root/.ssh/authorized_keys
   GH_USER=${GH_USER:-holdenk}
   curl https://github.com/${GH_USER}.keys | sudo tee ubuntu-image/root/.ssh/authorized_keys
-  sudo cp secret ubuntu-image/root/.ssh/id_rsa
+  sudo cp ssh_secret ubuntu-image/root/.ssh/id_rsa
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }
 update_ubuntu () {
@@ -84,6 +84,7 @@ if [ ! -f ubuntu-arm64-customized.img ]; then
   TARGET_SIZE=${PI_TARGET_SIZE}
   resize_partition
   setup_ubuntu_mounts
+  copy_ssh_keys
   update_ubuntu
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-customized.img

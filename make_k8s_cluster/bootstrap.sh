@@ -2,6 +2,7 @@
 set -ex
 # In gigabytes
 PI_TARGET_SIZE=${PI_TARGET_SIZE:-21}
+#JETSON_DATA_SIZE
 # Set up dependencies
 command -v unxz || sudo apt-get install xz-utils
 command -v kpartx || sudo apt install kpartx
@@ -130,5 +131,6 @@ if [ ! -f jetson-nano-custom.img ]; then
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
+  # TODO: Add an ext4 partition with JETSON_DATA_SIZE
   sudo kpartx -dv jetson-nano-custom.img
 fi

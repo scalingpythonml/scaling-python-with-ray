@@ -15,49 +15,80 @@ fi
 if [ ! -f ubuntu-arm64.img ]; then
   unxz ubuntu-arm64.img.xz
 fi
-# Customize the image
-if [ -f ubuntu-arm64-customized.img ]; then
-  rm ubuntu-arm64-customized.img
-fi
-cp ubuntu-arm64.img ubuntu-arm64-customized.img
 mkdir -p ubuntu-image
-partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
-sudo mount  /dev/mapper/${partition} ubuntu-image
-sudo mkdir -p ubuntu-image/root/.ssh
-sudo cp ~/.ssh/authorized_keys ubuntu-image/root/.ssh/
-sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
-sync
-sleep 5
-# Extend the image
-sudo umount /dev/mapper/${partition}
-sync
-sleep 1
-sudo e2fsck -f /dev/mapper/${partition}
-sudo kpartx -dv ubuntu-arm64-customized.img
-sync
-sleep 5
-dd if=/dev/zero bs=1G count=$((${PI_TARGET_SIZE}+1)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
-sudo parted ubuntu-arm64-customized.img resizepart 2 ${PI_TARGET_SIZE}g
-partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
-sudo e2fsck -f /dev/mapper/${partition}
-sudo resize2fs /dev/mapper/${partition}
-sync
-sleep 5
-sudo mount  /dev/mapper/${partition} ubuntu-image
-sudo mount --bind /dev ubuntu-image/dev/
-sudo mount --bind /sys ubuntu-image/sys/
-sudo mount --bind /proc ubuntu-image/proc/
-sudo mount --bind /dev/pts ubuntu-image/dev/pts
-sudo rm ubuntu-image/etc/resolv.conf
-sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
-#cp ubuntu-image/etc/ld.so.preload ubuntu-image/etc/ld.so.preload.back
-#sed -i 's/^/#CHROOT /g' ubuntu-image/etc/ld.so.preload
-sudo cp /usr/bin/qemu-arm-static ubuntu-image/usr/bin/
-sudo cp update_pi.sh ubuntu-image/
-sudo chroot ubuntu-image/ /update_pi.sh
-sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/
-#sudo umount ubuntu-image/sys ubuntu-image/proc ubuntu-image/dev/pts ubuntu-image/dev ubuntu-image
-#sudo kpartx -dv ubuntu-arm64-customized.img
-#sync
-#sleep 5
+setup_ubuntu_mounts () {
+  sudo mount  /dev/mapper/${partition} ubuntu-image
+  sudo mount --bind /dev ubuntu-image/dev/
+  sudo mount --bind /sys ubuntu-image/sys/
+  sudo mount --bind /proc ubuntu-image/proc/
+  sudo mount --bind /dev/pts ubuntu-image/dev/pts
+  sudo rm ubuntu-image/etc/resolv.conf
+  sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
+}
+cleanup_ubuntu_mounts() {
+  sudo umount ubuntu-image/sys ubuntu-image/proc ubuntu-image/dev/pts ubuntu-image/dev ubuntu-image
+  sync
+  sleep 5
+}
+if [ ! -f ubuntu-arm64-customized.img ]; then
+  cp ubuntu-arm64.img ubuntu-arm64-customized.img
+  partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
+  sudo mount  /dev/mapper/${partition} ubuntu-image
+  sudo mkdir -p ubuntu-image/root/.ssh
+  sudo cp ~/.ssh/authorized_keys ubuntu-image/root/.ssh/
+  sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
+  sync
+  sleep 5
+  # Extend the image
+  sudo umount /dev/mapper/${partition}
+  sync
+  sleep 1
+  sudo e2fsck -f /dev/mapper/${partition}
+  sudo kpartx -dv ubuntu-arm64-customized.img
+  sync
+  sleep 5
+  dd if=/dev/zero bs=1G count=$((${PI_TARGET_SIZE}+1)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
+  sudo parted ubuntu-arm64-customized.img resizepart 2 ${PI_TARGET_SIZE}g
+  partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
+  sudo e2fsck -f /dev/mapper/${partition}
+  sudo resize2fs /dev/mapper/${partition}
+  sync
+  sleep 5
+  setup_ubuntu_mounts
+  #cp ubuntu-image/etc/ld.so.preload ubuntu-image/etc/ld.so.preload.back
+  #sed -i 's/^/#CHROOT /g' ubuntu-image/etc/ld.so.preload
+  sudo cp /usr/bin/qemu-arm-static ubuntu-image/usr/bin/
+  sudo cp update_pi.sh ubuntu-image/
+  sudo chroot ubuntu-image/ /update_pi.sh
+  sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/
+  cleanup_ubuntu_mounts
+  sudo kpartx -dv ubuntu-arm64-customized.img
+fi
+# Setup K3s
+if [ ! -f ubuntu-arm64-master.img ]; then
+  # Setup the master
+  cp ubuntu-arm64-customized.img ubuntu-arm64-master.img
+  partition=$(sudo kpartx -av ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
+  setup_ubuntu_mounts
+  sudo cp setup_k3s_master.sh ubuntu-image/
+  sudo chroot ubuntu-image/ /setup_k3s_master.sh
+  K3S_TOKEN=$(cat ubuntu-image/var/lib/rancher/k3s/server/node-token)
+  export K3S_TOKEN
+  cleanup_ubuntu_mounts
+  sudo kpartx -dv ubuntu-arm64-master.img
+  # Setup the worker
+  cp ubuntu-arm64-customized.img ubuntu-arm64-worker.img
+  partition=$(sudo kpartx -av ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
+  setup_ubuntu_mounts
+  sudo cp setup_k3s_worker.sh ubuntu-image/
+  sudo chroot ubuntu-image /setup_k3s_worker.sh
+  cleanup_ubuntu_mounts
+  sudo kpartx -dv ubuntu-arm64-worker.img
+fi
 #echo "Done!"
+if [ ! -f jetson-nano.zip ] && [ ! -f sd-blob-b01.img ]; then
+  wget https://developer.nvidia.com/jetson-nano-sd-card-image -O jetson-nano.zip
+fi
+if [ ! -f sd-blob-b01.img ]; then
+  unzip jetson-nano.zip
+fi

@@ -47,7 +47,7 @@ update_ubuntu () {
   sudo cp update_pi.sh ubuntu-image/
   sudo chroot ubuntu-image/ /update_pi.sh
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml
-  sudo cp setup_k3s_*.sh ubuntu-image/
+  sudo cp setup_*.sh ubuntu-image/
 }
 function resize_partition {
   dd if=/dev/zero bs=1G count=$((${TARGET_SIZE}+1)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append

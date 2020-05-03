@@ -9,6 +9,8 @@ command -v kpartx || sudo apt install kpartx
 command -v parted || sudo apt-get install parted
 # Setup qemu
 command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static
+# Cleanup existing loopbacks
+sudo losetup -D
 # Download the base images
 if [ ! -f ubuntu-arm64.img.xz ] &&  [ ! -f ubuntu-arm64.img ]; then
   wget http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -O ubuntu-arm64.img.xz
@@ -31,14 +33,20 @@ setup_ubuntu_mounts () {
   sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
 }
 cleanup_ubuntu_mounts () {
-  sudo umount ubuntu-image/sys ubuntu-image/proc ubuntu-image/dev/pts ubuntu-image/dev ubuntu-image
+  sudo umount ubuntu-image/proc ubuntu-image/dev/pts
   sync
-  sleep 5
+  sleep 1
+  sudo umount ubuntu-image/sys ubuntu-image/dev
+  sleep 1
+  sudo umount ubuntu-image
+  sleep 1
+  sync
 }
 copy_ssh_keys () {
   sudo mkdir -p ubuntu-image/root/.ssh
   sudo cp ~/.ssh/authorized_keys ubuntu-image/root/.ssh/
-  cat secret.pub | sudo tee ubuntu-image/root/.ssh/authorized_keys
+  cat ssh_secret.pub | sudo tee ubuntu-image/root/.ssh/authorized_keys
+  curl https://github.com/holdenk.keys | sudo tee ubuntu-image/root/.ssh/authorized_keys
   sudo cp secret ubuntu-image/root/.ssh/id_rsa
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }
@@ -89,14 +97,16 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   partition=$(sudo kpartx -av ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
   sudo chroot ubuntu-image/ /usr/bin/hostname k8s-master
-  sudo cp first_run_master.sh ubuntu-image/etc/init.d/rc.local/99-firstboot.sh
+  sudo cp first_run_master.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
+  sudo cp first_run.sh ubuntu-image/
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-master.img
   # Setup the worker
   cp ubuntu-arm64-customized.img ubuntu-arm64-worker.img
   partition=$(sudo kpartx -av ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
-  sudo cp first_run_worker.sh ubuntu-image/etc/init.d/rc.local/99-firstboot.sh
+  sudo cp first_run_worker.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
+  sudo cp first_run.sh ubuntu-image/
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-worker.img
   sync
@@ -110,7 +120,7 @@ if [ ! -f sd-blob-b01.img ]; then
 fi
 if [ ! -f jetson-nano-custom.img ]; then
   cp sd-blob-b01.img jetson-nano-custom.img
-  partition=$(sudo kpartx -av jetson-nano-custom.img  | cut -f 3 -d " " | tail -n 1)
+  partition=$(sudo kpartx -av jetson-nano-custom.img  | cut -f 3 -d " " | head -n 1)
   setup_ubuntu_mounts
   copy_ssh_keys
   cleanup_ubuntu_mounts
@@ -118,7 +128,7 @@ if [ ! -f jetson-nano-custom.img ]; then
   resize_partition
   setup_ubuntu_mounts
   update_ubuntu
-  sudo cp first_run_worker.sh ubuntu-image/etc/init.d/rc.local/99-firstboot.sh
+  sudo cp first_run_worker.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
   cleanup_ubuntu_mounts
   sudo kpartx -dv jetson-nano-custom.img
 fi

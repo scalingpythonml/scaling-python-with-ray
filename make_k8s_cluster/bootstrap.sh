@@ -62,7 +62,7 @@ resize_partition () {
   local img_name=$1
   local partition_num=$2
   local target_size=$3
-  dd if=/dev/zero bs=1G count=$((${target_size}+2)) of=./ubuntu-arm64-customized.img conv=sparse,notrunc oflag=append
+  dd if=/dev/zero bs=1G count=$((${target_size}+2)) of=./$img_name conv=sparse,notrunc oflag=append
   sudo parted ${img_name} resizepart ${partition_num} ${target_size}g
   partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
   sudo e2fsck -f /dev/mapper/${partition}
@@ -98,15 +98,17 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   cp ubuntu-arm64-customized.img ubuntu-arm64-master.img
   partition=$(sudo kpartx -av ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
-  sudo chroot ubuntu-image/ /usr/bin/hostname k8s-master
-  sudo cp first_run_master.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
+  sudo cp masterhost ubuntu-image/etc/hostname
+  sudo cp first_run_master.sh ubuntu-image/etc/init.d/firstboot
+  sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-master.img
   # Setup the worker
   cp ubuntu-arm64-customized.img ubuntu-arm64-worker.img
   partition=$(sudo kpartx -av ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
-  sudo cp first_run_worker.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
+  sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
+  sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-worker.img
   sync
@@ -127,7 +129,8 @@ if [ ! -f jetson-nano-custom.img ]; then
   resize_partition jetson-nano-custom.img 1 ${JETSON_TARGET_SIZE}
   setup_ubuntu_mounts
   update_ubuntu
-  sudo cp first_run_worker.sh ubuntu-image/etc/rc5.d/S99-firstboot.sh
+  sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
+  sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
   sudo kpartx -dv jetson-nano-custom.img
 fi

@@ -8,7 +8,7 @@ command -v unxz || sudo apt-get install xz-utils
 command -v kpartx || sudo apt install kpartx
 command -v parted || sudo apt-get install parted
 # Setup qemu
-command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static qemu binfmt-support
+(command -v qemu-system-arm && qemu-aarch64-static) || sudo apt-get install qemu-system qemu-user-static qemu binfmt-support debootstrap
 # Cleanup existing loopbacks
 sudo losetup -D
 # Download the base images
@@ -53,13 +53,16 @@ copy_ssh_keys () {
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }
 update_ubuntu () {
-  sudo cp /usr/bin/qemu-arm-static ubuntu-image/usr/bin/
+  sudo cp /usr/bin/qemu-*-static ubuntu-image/usr/bin/
   sudo cp update_pi.sh ubuntu-image/
   sudo chroot ubuntu-image/ /update_pi.sh
   # This _should_ let the wifi work if configured, but mixed success.
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
   sudo cp setup_*.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/
+}
+cleanup_misc () {
+  rm ubuntu-image/bin/qemu-*-static
 }
 resize_partition () {
   local img_name=$1
@@ -104,6 +107,7 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   sudo cp masterhost ubuntu-image/etc/hostname
   sudo cp first_run_master.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
+  cleanup_misc
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-master.img
   # Setup the worker
@@ -112,6 +116,7 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   setup_ubuntu_mounts
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
+  cleanup_misc
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-worker.img
   sync
@@ -132,6 +137,7 @@ if [ ! -f jetson-nano-custom.img ]; then
   cat first_run.sh | sudo tee ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
+  cleanup_misc
   cleanup_ubuntu_mounts
   # TODO: Add an ext4 partition with JETSON_DATA_SIZE
   sudo kpartx -dv jetson-nano-custom.img

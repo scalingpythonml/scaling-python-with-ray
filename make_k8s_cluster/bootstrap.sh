@@ -40,10 +40,12 @@ setup_ubuntu_mounts () {
 }
 cleanup_ubuntu_mounts () {
   local -r cmd="$@"
-  for i in {1..5}; do
-    sync && sleep 1 && \
-      sudo umount ubuntu-image/proc ubuntu-image/dev/pts ubuntu-image/sys ubuntu-image/dev ubuntu-image && \
-      break || sleep 1;
+  paths=("ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image")
+  for unmount_please in ${paths[@]}; do
+    for i in {1..5}; do
+      sync && sleep 1 && \
+	sudo umount $unmount_please && break || sleep 1;
+    done
   done
 }
 copy_ssh_keys () {
@@ -60,6 +62,7 @@ update_ubuntu () {
   sudo cp update_pi.sh ubuntu-image/
   sudo chroot ubuntu-image/ /update_pi.sh
   # This _should_ let the wifi work if configured, but mixed success.
+  sudo mkdir -p ubuntu-image/etc/netplan
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
   sudo cp setup_*.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/

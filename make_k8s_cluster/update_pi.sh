@@ -11,7 +11,7 @@ if [ ! -f /updated_pi ]; then
   apt-get install -y ssh
   apt-get install -y jq
   # This helps us have working DNS magic
-  apt-get install -y avahi-daemon avahi-discover libnss-mdns
+  apt-get install -y avahi-daemon libnss-mdns
   # Necessary build magics
   # Note: QEMU means we're running a different kernel
   # than the one we use on the board

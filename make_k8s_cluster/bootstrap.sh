@@ -56,9 +56,12 @@ copy_ssh_keys () {
   sudo cp ssh_secret ubuntu-image/root/.ssh/id_rsa
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }
-update_ubuntu () {
+enable_chroot () {
   # Let us execute ARM binaries
   sudo cp /usr/bin/qemu-*-static ubuntu-image/usr/bin/
+}
+update_ubuntu () {
+  enable_chroot
   # This _should_ let the wifi work if configured, but mixed success.
   sudo mkdir -p ubuntu-image/etc/netplan
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
@@ -148,10 +151,10 @@ if [ ! -f jetson-nano-custom.img ]; then
   partition=$(sudo kpartx -av jetson-nano-custom.img  | cut -f 3 -d " " | head -n 1)
   setup_ubuntu_mounts
   copy_ssh_keys
-  cleanup_ubuntu_mounts
-  setup_ubuntu_mounts
   # We'd need to grow the FS for this to succeed.
   # update_ubuntu
+  # Instead we put that stuff in our first run steps
+  enable_chroot
   sudo cp update_pi.sh ubuntu-image/first_run.sh
   cat first_run.sh | sudo tee ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot

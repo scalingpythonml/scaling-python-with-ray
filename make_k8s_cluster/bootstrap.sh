@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
-# In gigabytes
-PI_TARGET_SIZE=${PI_TARGET_SIZE:-20}
+# In gigabytes. cloudinit cc_resizefs can control this
+PI_TARGET_SIZE=${PI_TARGET_SIZE:-18}
 #JETSON_DATA_SIZE
 # Set up dependencies
 command -v unxz || sudo apt-get install xz-utils
@@ -72,8 +72,7 @@ update_ubuntu () {
   sudo chroot ubuntu-image/ /update_pi.sh
 }
 cleanup_misc () {
-  echo "***********Asked to do cleanupp....."
-  #sudo rm ubuntu-image/bin/qemu-*-static
+  sudo rm ubuntu-image/bin/qemu-*-static
 }
 resize_partition () {
   local img_name=$1
@@ -82,9 +81,9 @@ resize_partition () {
   dd if=/dev/zero bs=1G count=$((${target_size} * 120/100)) of=./$img_name conv=sparse,notrunc oflag=append
   sudo parted ${img_name} resizepart ${partition_num} ${target_size}g
   sync
-  sudo kpartx -d ubuntu-arm64-customized.img
-  sudo kpartx -u ubuntu-arm64-customized.img
-  partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
+  sudo kpartx -d ${img_name}
+  sudo kpartx -u ${img_name}
+  partition=$(sudo kpartx -av ${img_name} | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
   sudo e2fsck -f /dev/mapper/${partition}
   sudo resize2fs /dev/mapper/${partition}
   sync

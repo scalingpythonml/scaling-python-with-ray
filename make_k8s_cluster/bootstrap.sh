@@ -38,13 +38,12 @@ setup_ubuntu_mounts () {
   sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
   sudo cp /etc/hosts ubuntu-image/etc/hosts
 }
+
 cleanup_ubuntu_mounts () {
-  local -r cmd="$@"
   paths=("ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image")
   for unmount_please in ${paths[@]}; do
     for i in {1..5}; do
-      sync && sleep 1 && \
-	sudo umount $unmount_please && break || sleep 1;
+      sync && sudo umount $unmount_please && break || sleep 1;
     done
   done
 }
@@ -58,17 +57,20 @@ copy_ssh_keys () {
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }
 update_ubuntu () {
+  # Let us execute ARM binaries
   sudo cp /usr/bin/qemu-*-static ubuntu-image/usr/bin/
-  sudo cp update_pi.sh ubuntu-image/
-  sudo chroot ubuntu-image/ /update_pi.sh
   # This _should_ let the wifi work if configured, but mixed success.
   sudo mkdir -p ubuntu-image/etc/netplan
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
   sudo cp setup_*.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/
+  # Do whatever updates and setup we can now inside the chroot
+  sudo cp update_pi.sh ubuntu-image/
+  sudo chroot ubuntu-image/ /update_pi.sh
 }
 cleanup_misc () {
-  sudo rm ubuntu-image/bin/qemu-*-static
+  echo "***********Asked to do cleanupp....."
+  #sudo rm ubuntu-image/bin/qemu-*-static
 }
 resize_partition () {
   local img_name=$1
@@ -77,6 +79,7 @@ resize_partition () {
   dd if=/dev/zero bs=1G count=$((${target_size} * 120/100)) of=./$img_name conv=sparse,notrunc oflag=append
   sudo parted ${img_name} resizepart ${partition_num} ${target_size}g
   sync
+  sudo kpartx -d ubuntu-arm64-customized.img
   sudo kpartx -u ubuntu-arm64-customized.img
   partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
   sudo e2fsck -f /dev/mapper/${partition}
@@ -87,6 +90,7 @@ resize_partition () {
 }
 if [ ! -f ubuntu-arm64-customized.img ]; then
   cp ubuntu-arm64.img ubuntu-arm64-customized.img
+  sudo kpartx -dv ubuntu-arm64-customized.img
   partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
   sudo mount  /dev/mapper/${partition} ubuntu-image
   sync
@@ -105,13 +109,16 @@ if [ ! -f ubuntu-arm64-customized.img ]; then
   update_ubuntu
   cleanup_ubuntu_mounts
   sudo kpartx -dv ubuntu-arm64-customized.img
+  sync
+  sleep 5
 fi
 echo "Baking master/worker images"
 # Setup K3s
 if [ ! -f ubuntu-arm64-master.img ]; then
   # Setup the master
   cp ubuntu-arm64-customized.img ubuntu-arm64-master.img
-  partition=$(sudo kpartx -av ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
+  sudo kpartx -d ubuntu-arm64-master.img
+  partition=$(sudo kpartx -uav ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
   sudo cp masterhost ubuntu-image/etc/hostname
   sudo cp first_run_master.sh ubuntu-image/etc/init.d/firstboot
@@ -121,6 +128,7 @@ if [ ! -f ubuntu-arm64-master.img ]; then
   sudo kpartx -dv ubuntu-arm64-master.img
   # Setup the worker
   cp ubuntu-arm64-customized.img ubuntu-arm64-worker.img
+  sudo kpartx -d ubuntu-arm64-worker.img
   partition=$(sudo kpartx -av ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
@@ -136,11 +144,13 @@ if [ ! -f sd-blob-b01.img ]; then
 fi
 if [ ! -f jetson-nano-custom.img ]; then
   cp sd-blob-b01.img jetson-nano-custom.img
+  sudo kpartx -d jetson-nano-custom.img
   partition=$(sudo kpartx -av jetson-nano-custom.img  | cut -f 3 -d " " | head -n 1)
   setup_ubuntu_mounts
   copy_ssh_keys
   cleanup_ubuntu_mounts
   setup_ubuntu_mounts
+  # We'd need to grow the FS for this to succeed.
   # update_ubuntu
   sudo cp update_pi.sh ubuntu-image/first_run.sh
   cat first_run.sh | sudo tee ubuntu-image/first_run.sh

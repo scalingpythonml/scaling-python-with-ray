@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 # In gigabytes. cloudinit cc_resizefs can control this
-PI_TARGET_SIZE=${PI_TARGET_SIZE:-18}
+PI_TARGET_SIZE=${PI_TARGET_SIZE:-19}
 #JETSON_DATA_SIZE
 # Set up dependencies
 command -v unxz || sudo apt-get install xz-utils
@@ -33,10 +33,6 @@ setup_ubuntu_mounts () {
   sudo mount --bind /sys ubuntu-image/sys/
   sudo mount --bind /proc ubuntu-image/proc/
   sudo mount --bind /dev/pts ubuntu-image/dev/pts
-  # Technicall not mounts but being able to resolve is necessary for a lot
-  sudo rm ubuntu-image/etc/resolv.conf
-  sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
-  sudo cp /etc/hosts ubuntu-image/etc/hosts
 }
 
 cleanup_ubuntu_mounts () {
@@ -60,15 +56,28 @@ enable_chroot () {
   # Let us execute ARM binaries
   sudo cp /usr/bin/qemu-*-static ubuntu-image/usr/bin/
 }
-update_ubuntu () {
-  enable_chroot
+config_system () {
   # This _should_ let the wifi work if configured, but mixed success.
   sudo mkdir -p ubuntu-image/etc/netplan
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
+  if [ -f cloud.cfg.custom ]; then
+    echo "Using custom cloud cfg..."
+    sudo cp ubuntu-image/etc/cloud/cloud.cfg ubuntu-image/etc/cloud/cloud.cfg.back || echo "No existing cloud config"
+    sudo cp cloud.cfg.custom ubuntu-image/etc/cloud/cloud.cfg
+    sudo diff ubuntu-image/etc/cloud/cloud.cfg ubuntu-image/etc/cloud/cloud.cfg.back || true
+  fi
   sudo cp setup_*.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/
-  # Do whatever updates and setup we can now inside the chroot
   sudo cp update_pi.sh ubuntu-image/
+  # Technicall not mounts but being able to resolve is necessary for a lot
+  sudo rm ubuntu-image/etc/resolv.conf
+  sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
+  sudo cp /etc/hosts ubuntu-image/etc/hosts
+}
+update_ubuntu () {
+  enable_chroot
+  config_system
+  # Do whatever updates and setup we can now inside the chroot
   sudo chroot ubuntu-image/ /update_pi.sh
 }
 cleanup_misc () {
@@ -154,6 +163,7 @@ if [ ! -f jetson-nano-custom.img ]; then
   # update_ubuntu
   # Instead we put that stuff in our first run steps
   enable_chroot
+  config_system
   sudo cp update_pi.sh ubuntu-image/first_run.sh
   cat first_run.sh | sudo tee ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot

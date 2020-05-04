@@ -61,10 +61,15 @@ config_system () {
   sudo mkdir -p ubuntu-image/etc/netplan
   sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
   if [ -f cloud.cfg.custom ]; then
-    echo "Using custom cloud cfg..."
-    sudo cp ubuntu-image/etc/cloud/cloud.cfg ubuntu-image/etc/cloud/cloud.cfg.back || echo "No existing cloud config"
-    sudo cp cloud.cfg.custom ubuntu-image/etc/cloud/cloud.cfg
-    sudo diff ubuntu-image/etc/cloud/cloud.cfg ubuntu-image/etc/cloud/cloud.cfg.back || true
+    echo "Custom cloud cfg specified"
+    if [ -f ubuntu-image/etc/cloud/cloud.cfg ]; then
+      echo "Overwritting existing cloud config"
+      sudo cp ubuntu-image/etc/cloud/cloud.cfg ubuntu-image/etc/cloud/cloud.cfg.back
+      sudo cp cloud.cfg.custom ubuntu-image/etc/cloud/cloud.cfg
+      sudo diff ubuntu-image/etc/cloud/cloud.cfg ubuntu-image/etc/cloud/cloud.cfg.back || true
+    else
+      echo "No existing cloud config, skipping."
+    fi
   fi
   sudo cp setup_*.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/

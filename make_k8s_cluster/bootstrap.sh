@@ -46,9 +46,9 @@ cleanup_ubuntu_mounts () {
 copy_ssh_keys () {
   sudo mkdir -p ubuntu-image/root/.ssh
   sudo cp ~/.ssh/authorized_keys ubuntu-image/root/.ssh/
-  cat ssh_secret.pub | sudo tee ubuntu-image/root/.ssh/authorized_keys
+  cat ssh_secret.pub | sudo tee -a ubuntu-image/root/.ssh/authorized_keys
   GH_USER=${GH_USER:-holdenk}
-  curl https://github.com/${GH_USER}.keys | sudo tee ubuntu-image/root/.ssh/authorized_keys
+  curl https://github.com/${GH_USER}.keys | sudo tee -a ubuntu-image/root/.ssh/authorized_keys
   sudo cp ssh_secret ubuntu-image/root/.ssh/id_rsa
   sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
 }
@@ -58,8 +58,17 @@ enable_chroot () {
 }
 config_system () {
   # This _should_ let the wifi work if configured, but mixed success.
-  sudo mkdir -p ubuntu-image/etc/netplan
-  sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml || echo "No custom network"
+  if [ -f 50-cloud-init.yaml.custom ]; then
+    sudo mkdir -p ubuntu-image/etc/netplan
+    sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/netplan/50-cloud-init.yaml
+    # Cloud config overwrites the network config on first boot if it's installed so
+    # copy our network config into cloud config if it's present.
+    # Also ask cloud config not to touch the network.
+    if [ -d ubuntu-image/etc/cloud/cloud.cfg.d ]; then
+      sudo cp 50-cloud-init.yaml.custom ubuntu-image/etc/cloud/cloud.cfg.d/custom-networking.cfg
+      echo "network: {config: disabled}" | sudo tee -a  ubuntu-image/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    fi
+  fi
   if [ -f cloud.cfg.custom ]; then
     echo "Custom cloud cfg specified"
     if [ -f ubuntu-image/etc/cloud/cloud.cfg ]; then
@@ -170,7 +179,7 @@ if [ ! -f jetson-nano-custom.img ]; then
   enable_chroot
   config_system
   sudo cp update_pi.sh ubuntu-image/first_run.sh
-  cat first_run.sh | sudo tee ubuntu-image/first_run.sh
+  cat first_run.sh | sudo tee -a ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_misc

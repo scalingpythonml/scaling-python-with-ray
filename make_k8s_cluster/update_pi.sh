@@ -19,9 +19,6 @@ if [ ! -f /updated_pi ]; then
   apt install -y cmake gcc clang
   # Install some build libraries we need
   apt install -y libyaml-cpp-dev libyaml-dev pkg-config libjq-dev
-  # For storage adventures
-  apt install -y xfsprogs glusterfs-server glusterfs-fuse
-  sudo systemctl enable glusterd
   # For K3s
   apt install -y systemd-sysv
   # I hate netplan

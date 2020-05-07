@@ -13,14 +13,15 @@ command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static 
 # Cleanup existing loopbacks
 sudo losetup -D
 # Download the base images
-if [ ! -f jetson-nano.zip ] && [ ! -f sd-blob-b01.img ]; then
-  axel https://developer.nvidia.com/jetson-nano-sd-card-image-r3231 -o jetson-nano.zip &
+mkdir -p images
+if [ ! -f images/jetson-nano.zip ] && [ ! -f images/sd-blob-b01.img ]; then
+  axel https://developer.nvidia.com/jetson-nano-sd-card-image-r3231 -o images/jetson-nano.zip &
 fi
-if [ ! -f ubuntu-arm64.img.xz ] &&  [ ! -f ubuntu-arm64.img ]; then
-  axel http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -o ubuntu-arm64.img.xz
+if [ ! -f images/ubuntu-arm64.img.xz ] &&  [ ! -f images/ubuntu-arm64.img ]; then
+  axel http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -o images/ubuntu-arm64.img.xz
 fi
-if [ ! -f ubuntu-arm64.img ]; then
-  unxz ubuntu-arm64.img.xz
+if [ ! -f images/ubuntu-arm64.img ]; then
+  pushd images; unxz images/ubuntu-arm64.img.xz; popd
 fi
 # Make an ssh key for everyone to be able to talk to eachother
 if [ ! -f ssh_secret ]; then
@@ -113,10 +114,10 @@ resize_partition () {
   sudo e2fsck -f /dev/mapper/${partition}
   sleep 5
 }
-if [ ! -f ubuntu-arm64-customized.img ]; then
-  cp ubuntu-arm64.img ubuntu-arm64-customized.img
-  sudo kpartx -dv ubuntu-arm64-customized.img
-  partition=$(sudo kpartx -av ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
+if [ ! -f images/ubuntu-arm64-customized.img ]; then
+  cp images/ubuntu-arm64.img images/ubuntu-arm64-customized.img
+  sudo kpartx -dv images/ubuntu-arm64-customized.img
+  partition=$(sudo kpartx -av images/ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
   sudo mount  /dev/mapper/${partition} ubuntu-image
   sync
   sleep 5
@@ -125,52 +126,52 @@ if [ ! -f ubuntu-arm64-customized.img ]; then
   sync
   sleep 1
   sudo e2fsck -f /dev/mapper/${partition}
-  sudo kpartx -dv ubuntu-arm64-customized.img
+  sudo kpartx -dv images/ubuntu-arm64-customized.img
   sync
   sleep 5
-  resize_partition ubuntu-arm64-customized.img 2 ${PI_TARGET_SIZE}
+  resize_partition images/ubuntu-arm64-customized.img 2 ${PI_TARGET_SIZE}
   setup_ubuntu_mounts
   copy_ssh_keys
   update_ubuntu
   cleanup_ubuntu_mounts
-  sudo kpartx -dv ubuntu-arm64-customized.img
+  sudo kpartx -dv images/ubuntu-arm64-customized.img
   sync
   sleep 5
 fi
 echo "Baking master/worker images"
 # Setup K3s
-if [ ! -f ubuntu-arm64-master.img ]; then
+if [ ! -f images/ubuntu-arm64-master.img ]; then
   # Setup the master
-  cp ubuntu-arm64-customized.img ubuntu-arm64-master.img
-  sudo kpartx -d ubuntu-arm64-master.img
-  partition=$(sudo kpartx -uav ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
+  cp images/ubuntu-arm64-customized.img images/ubuntu-arm64-master.img
+  sudo kpartx -d images/ubuntu-arm64-master.img
+  partition=$(sudo kpartx -uav images/ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
   sudo cp masterhost ubuntu-image/etc/hostname
   sudo cp first_run_master.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_misc
   cleanup_ubuntu_mounts
-  sudo kpartx -dv ubuntu-arm64-master.img
+  sudo kpartx -dv images/ubuntu-arm64-master.img
   # Setup the worker
-  cp ubuntu-arm64-customized.img ubuntu-arm64-worker.img
-  sudo kpartx -d ubuntu-arm64-worker.img
-  partition=$(sudo kpartx -av ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
+  cp images/ubuntu-arm64-customized.img images/ubuntu-arm64-worker.img
+  sudo kpartx -d images/ubuntu-arm64-worker.img
+  partition=$(sudo kpartx -av images/ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
   setup_ubuntu_mounts
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_misc
   cleanup_ubuntu_mounts
-  sudo kpartx -dv ubuntu-arm64-worker.img
+  sudo kpartx -dv images/ubuntu-arm64-worker.img
   sync
 fi
 echo "Baking jetson nano worker image"
-if [ ! -f sd-blob-b01.img ]; then
-  unzip jetson-nano.zip
+if [ ! -f images/sd-blob-b01.img ]; then
+  pushd images; unzip jetson-nano.zip; popd
 fi
-if [ ! -f jetson-nano-custom.img ]; then
-  cp sd-blob-b01.img jetson-nano-custom.img
-  sudo kpartx -d jetson-nano-custom.img
-  partition=$(sudo kpartx -av jetson-nano-custom.img  | cut -f 3 -d " " | head -n 1)
+if [ ! -f images/jetson-nano-custom.img ]; then
+  cp images/sd-blob-b01.img images/jetson-nano-custom.img
+  sudo kpartx -d images/jetson-nano-custom.img
+  partition=$(sudo kpartx -av images/jetson-nano-custom.img  | cut -f 3 -d " " | head -n 1)
   setup_ubuntu_mounts
   copy_ssh_keys
   # We'd need to grow the FS for this to succeed.
@@ -185,5 +186,5 @@ if [ ! -f jetson-nano-custom.img ]; then
   cleanup_misc
   cleanup_ubuntu_mounts
   # TODO: Add an ext4 partition with JETSON_DATA_SIZE
-  sudo kpartx -dv jetson-nano-custom.img
+  sudo kpartx -dv images/jetson-nano-custom.img
 fi

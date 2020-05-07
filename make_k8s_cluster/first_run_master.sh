@@ -15,6 +15,6 @@ if [ ! -f /first_run_done ]; then
   echo "Done sleeping" |& tee -a  /first_run.log
   /first_run.sh |& tee -a  /first_run.log
   /setup_k3s_master.sh |& tee -a  /first_run.log
-  /setup_gluster_master.sh |& tee -a  /first_run.log
+  /setup_storage_master.sh |& tee -a  /first_run.log
   touch /first_run_done
 fi

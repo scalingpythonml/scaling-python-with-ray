@@ -10,11 +10,11 @@
 ### END INIT INFO
 set -ex
 if [ ! -f /first_run_done ]; then
+  echo "Doing first run as $(whoami)" |& tee -a /first_run.log
   echo "Starting first_run with a good nap" |& tee -a  /first_run.log
   sleep 60
   echo "Done sleeping" |& tee -a  /first_run.log
-  # Add the masters ssh key automatically
-  ssh-keyscan k8s-master.local |tee -a ~/.ssh/known_hosts | tee -a /first_run.log
+  /setup_known_hosts.sh |& tee -a /first_run.log
   /first_run.sh |& tee -a  /first_run.log
   /setup_k3s_worker.sh |& tee -a  /first_run.log
   /setup_storage_worker.sh |& tee -a  /first_run.log

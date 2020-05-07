@@ -8,4 +8,4 @@ for device in ${devices[@]}; do
   storage_paths="${storage_paths}$(hostname):${device}\n"
 done
 echo "${gluster_paths}" > /storage_paths/$(hostname)
-#Later, once the workers come up...
+#Later, once the workers come up we can generate a config file from this

@@ -51,7 +51,7 @@ copy_ssh_keys () {
   GH_USER=${GH_USER:-holdenk}
   curl https://github.com/${GH_USER}.keys | sudo tee -a ubuntu-image/root/.ssh/authorized_keys
   sudo cp ssh_secret ubuntu-image/root/.ssh/id_rsa
-  sudo cp ~/.ssh/known_hosts ubuntu-image/root/.ssh/
+  cat ~/.ssh/known_hosts | grep -v k8s-master | sudo tee ubuntu-image/root/.ssh/known_hosts
 }
 enable_chroot () {
   # Let us execute ARM binaries

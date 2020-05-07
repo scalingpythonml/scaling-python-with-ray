@@ -28,9 +28,4 @@ parted ${target} resizepart 2 ${new_root_end_percent}%
 parted --align optimal ${target} mkpart primary xfs ${data_start_loc}% '100%'
 sync
 sleep 1
-partprobe ${target}
-sleep 1
-mkfs -t xfs ${target}3
-fsck -fy ${target}3
-sync
 eject ${target}

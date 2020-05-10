@@ -23,6 +23,13 @@ fi
 if [ ! -f images/ubuntu-arm64.img ]; then
   pushd images; unxz images/ubuntu-arm64.img.xz; popd
 fi
+# Download rook
+if [ -d rook ]; then
+  mkdir rook
+  pushd rook
+  git clone --single-branch --branch release-1.3 https://github.com/rook/rook.git
+  popd
+fi
 # Make an ssh key for everyone to be able to talk to eachother
 if [ ! -f ssh_secret ]; then
   ssh-keygen -f ssh_secret -N ""
@@ -34,10 +41,27 @@ setup_ubuntu_mounts () {
   sudo mount --bind /sys ubuntu-image/sys/
   sudo mount --bind /proc ubuntu-image/proc/
   sudo mount --bind /dev/pts ubuntu-image/dev/pts
+  if [ ! -z "${boot_partition}" ]; then
+    sudo mount /dev/mapper/${boot_partition} ubuntu-image/boot
+  else
+    echo "Skipping mounting boot partition"
+  fi
+  if [ ! -z "${firmware_boot_partition}" ]; then
+    sudo mount /dev/mapper/${firmware_boot_partition} ubuntu-image/boot/firmware
+  else
+    echo "Skipping mounting boot firmware partition"
+  fi
+}
+setup_ubuntu_server_img () {
+  local img_name=$1
+  sudo kpartx -d ${img_name}
+  sudo kpartx -u ${img_name}
+  firmware_boot_partition=$(sudo kpartx -av ${img_name} | cut -f 3 -d " " | head -n 1 | tail -n 1)
+  partition=$(sudo kpartx -av ${img_name} | cut -f 3 -d " " | head -n 2 | tail -n 1)
 }
 
 cleanup_ubuntu_mounts () {
-  paths=("ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image")
+  paths=("ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image/boot" "ubuntu-image/boot/firmware" "ubuntu-image")
   for unmount_please in ${paths[@]}; do
     for i in {1..5}; do
       sync && sudo umount $unmount_please && break || sleep 1;
@@ -51,7 +75,6 @@ copy_ssh_keys () {
   GH_USER=${GH_USER:-holdenk}
   curl https://github.com/${GH_USER}.keys | sudo tee -a ubuntu-image/root/.ssh/authorized_keys
   sudo cp ssh_secret ubuntu-image/root/.ssh/id_rsa
-  cat ~/.ssh/known_hosts | grep -v k8s-master | sudo tee ubuntu-image/root/.ssh/known_hosts
 }
 enable_chroot () {
   # Let us execute ARM binaries
@@ -82,12 +105,18 @@ config_system () {
     fi
   fi
   sudo cp setup_*.sh ubuntu-image/
+  sudo cp wait_for*.sh ubuntu-image/
+  sudo cp get_worker_id.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/
   sudo cp update_pi.sh ubuntu-image/
   # Technicall not mounts but being able to resolve is necessary for a lot
   sudo rm ubuntu-image/etc/resolv.conf
   sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
   sudo cp /etc/hosts ubuntu-image/etc/hosts
+  # On the rasberry pi enable cgroup memory
+  if [ -d ubuntu-image/boot/firmware ]; then
+    echo "cgroup_memory=1 cgroup_enable=memory cgroup_enable=cpuset $(cat ubuntu-image/boot/firmware/cmdline.txt || true)" | sudo tee ubuntu-image/boot/firmware/cmdline.txt
+  fi
 }
 update_ubuntu () {
   enable_chroot
@@ -116,13 +145,9 @@ resize_partition () {
 }
 if [ ! -f images/ubuntu-arm64-customized.img ]; then
   cp images/ubuntu-arm64.img images/ubuntu-arm64-customized.img
-  sudo kpartx -dv images/ubuntu-arm64-customized.img
-  partition=$(sudo kpartx -av images/ubuntu-arm64-customized.img  | cut -f 3 -d " " | tail -n 1)
-  sudo mount  /dev/mapper/${partition} ubuntu-image
-  sync
-  sleep 5
-  # Extend the image
-  sudo umount /dev/mapper/${partition}
+  setup_ubuntu_server_img images/ubuntu-arm64-customized.img
+  # Extend the image, first check the current FS
+  sudo umount /dev/mapper/${partition} || echo "not mounted :)"
   sync
   sleep 1
   sudo e2fsck -f /dev/mapper/${partition}
@@ -130,6 +155,7 @@ if [ ! -f images/ubuntu-arm64-customized.img ]; then
   sync
   sleep 5
   resize_partition images/ubuntu-arm64-customized.img 2 ${PI_TARGET_SIZE}
+  setup_ubuntu_server_img images/ubuntu-arm64-customized.img
   setup_ubuntu_mounts
   copy_ssh_keys
   update_ubuntu
@@ -143,19 +169,22 @@ echo "Baking master/worker images"
 if [ ! -f images/ubuntu-arm64-master.img ]; then
   # Setup the master
   cp images/ubuntu-arm64-customized.img images/ubuntu-arm64-master.img
-  sudo kpartx -d images/ubuntu-arm64-master.img
-  partition=$(sudo kpartx -uav images/ubuntu-arm64-master.img  | cut -f 3 -d " " | tail -n 1)
+  setup_ubuntu_server_img images/ubuntu-arm64-master.img
   setup_ubuntu_mounts
   sudo cp masterhost ubuntu-image/etc/hostname
   sudo cp first_run_master.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
+  # The master needs to have rook checked out
+  sudo cp -af rook ubuntu-image/
+  sudo cp rook_cluster.yaml ubuntu-image/rook/rook/cluster/examples/kubernetes/ceph/
+  # The master has a worker counter file
+  sudo cp worker_counter.txt ubuntu-image/
   cleanup_misc
   cleanup_ubuntu_mounts
   sudo kpartx -dv images/ubuntu-arm64-master.img
   # Setup the worker
   cp images/ubuntu-arm64-customized.img images/ubuntu-arm64-worker.img
-  sudo kpartx -d images/ubuntu-arm64-worker.img
-  partition=$(sudo kpartx -av images/ubuntu-arm64-worker.img  | cut -f 3 -d " " | tail -n 1)
+  setup_ubuntu_server_img images/ubuntu-arm64-worker.img
   setup_ubuntu_mounts
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
@@ -165,6 +194,7 @@ if [ ! -f images/ubuntu-arm64-master.img ]; then
   sync
 fi
 echo "Baking jetson nano worker image"
+unset firmware_boot_partition
 if [ ! -f images/sd-blob-b01.img ]; then
   pushd images; unzip jetson-nano.zip; popd
 fi
@@ -183,7 +213,6 @@ if [ ! -f images/jetson-nano-custom.img ]; then
   cat first_run.sh | sudo tee -a ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
-  cleanup_misc
   cleanup_ubuntu_mounts
   # TODO: Add an ext4 partition with JETSON_DATA_SIZE
   sudo kpartx -dv images/jetson-nano-custom.img

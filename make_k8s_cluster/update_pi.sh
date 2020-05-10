@@ -21,6 +21,8 @@ if [ ! -f /updated_pi ]; then
   apt install -y libyaml-cpp-dev libyaml-dev pkg-config libjq-dev
   # For K3s
   apt install -y systemd-sysv
+  # On the master we want to make our rook cluster after some time period
+  apt-get install at
   # I hate netplan
   netplan generate
   # Start installing falco

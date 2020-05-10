@@ -25,7 +25,7 @@ new_root_end=$(( ${free_start}+(${free_end}-${free_start})/2))
 new_root_end_percent=$(( (100*${new_root_end})/${total} ))
 data_start_loc=$(( (100*${new_root_end}+1)/${total}+1 ))
 parted ${target} resizepart 2 ${new_root_end_percent}%
-parted --align optimal ${target} mkpart primary xfs ${data_start_loc}% '100%'
+parted --align optimal ${target} mkpart primary ${data_start_loc}% '100%'
 sync
 sleep 1
 eject ${target}

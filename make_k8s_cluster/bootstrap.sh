@@ -24,7 +24,7 @@ if [ ! -f images/ubuntu-arm64.img ]; then
   pushd images; unxz images/ubuntu-arm64.img.xz; popd
 fi
 # Download rook
-if [ -d rook ]; then
+if [ ! -d rook ]; then
   mkdir rook
   pushd rook
   git clone --single-branch --branch release-1.3 https://github.com/rook/rook.git

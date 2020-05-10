@@ -23,6 +23,10 @@ if [ ! -f /updated_pi ]; then
   apt install -y systemd-sysv
   # On the master we want to make our rook cluster after some time period
   apt-get install at
+  # Lets try and install ZFS if we can
+  echo debconf zfs-dkms/note-incompatible-licenses select true | debconf-set-selections
+  echo debconf common/note-incompatible-licenses select true | debconf-set-selections
+  (apt install -y zfs-dkms && apt install -y zfsutils-linux) || echo "Install ZFS wasn't a party, we'll try again later don't worry."
   # I hate netplan
   netplan generate
   # Start installing falco

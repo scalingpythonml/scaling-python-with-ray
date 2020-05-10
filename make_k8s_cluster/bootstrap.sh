@@ -81,6 +81,9 @@ enable_chroot () {
   sudo cp /usr/bin/qemu-*-static ubuntu-image/usr/bin/
 }
 config_system () {
+  # Configure avahi to only be active on select interfaces
+  sudo mkdir -p ubuntu-image/etc/avahi/
+  sudo cp avahi-daemon.conf ubuntu-image/etc/avahi/avahi-daemon.conf
   # This _should_ let the wifi work if configured, but mixed success.
   if [ -f 50-cloud-init.yaml.custom ]; then
     sudo mkdir -p ubuntu-image/etc/netplan

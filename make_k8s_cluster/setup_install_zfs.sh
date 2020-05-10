@@ -14,4 +14,4 @@ mkdir -p /storage_paths
 for device in ${devices[@]}; do
   storage_devices="${storage_devics}/dev/${device} "
 done
-zpool create zfs-storage-pool ${storage_devices}
+zpool create zfs-storage-pool ${storage_devices} -f

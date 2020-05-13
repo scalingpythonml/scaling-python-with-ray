@@ -3,7 +3,8 @@ set -ex
 if [ ! -f /updated_pi ]; then
   DEBIAN_FRONTEND=noninteractive
   export DEBIAN_FRONTEND
-  apt-get update
+  # The Jetson repo is unsigned :/ & falky
+  apt-get update --allow-unauthenticated --allow-insecure-repositories || echo "couldn't update"
   apt-get upgrade -y
   # This makes debugging less work
   apt-get install -y emacs-nox nano
@@ -28,7 +29,33 @@ if [ ! -f /updated_pi ]; then
   echo debconf common/note-incompatible-licenses select true | debconf-set-selections
   (apt install -y zfs-dkms && apt install -y zfsutils-linux) || echo "Install ZFS wasn't a party, we'll try again later don't worry."
   # I hate netplan
-  netplan generate
+  netplan generate || echo "no netplan, huzzah"
+  # iptables needs to use legacy not nftables
+  sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+  sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+  # We need docker so we can have a party with the GPU later (k3s can use containerd too)
+  sudo apt-get remove -y docker docker-engine docker.io containerd runc || echo "k"
+  sudo apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+  # Add docker GPG key
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  # Add the docker repo
+  # Until focal is released we just use bionic
+#  add-apt-repository \
+#   "deb https://download.docker.com/linux/ubuntu \
+#   $(lsb_release -cs) \
+#   stable"
+  add-apt-repository \
+   "deb https://download.docker.com/linux/ubuntu \
+   bionic \
+   stable"
+  # The Jetson repo is unsigned :/ & falky
+  apt-get update --allow-unauthenticated --allow-insecure-repositories || echo "couldn't update"
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io
   # Start installing falco
   if [ ! -d falco ]; then
     git clone https://github.com/falcosecurity/falco.git

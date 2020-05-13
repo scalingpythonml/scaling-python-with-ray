@@ -1,13 +1,14 @@
 #!/bin/bash
 set -ex
-# In gigabytes. cloudinit cc_resizefs can control this
+# In gigabytes.
 PI_TARGET_SIZE=${PI_TARGET_SIZE:-19}
-#JETSON_DATA_SIZE
+JETSON_TARGET_SIZE=${JETSON_TARGET_SIZE:-24}
 # Set up dependencies
 command -v unxz || sudo apt-get install xz-utils
 command -v kpartx || sudo apt install kpartx
 command -v parted || sudo apt-get install parted
 command -v axel || sudo apt-get install axel
+command -v wget || sudo apt-get install wget
 # Setup qemu
 command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static qemu binfmt-support debootstrap
 # Cleanup existing loopbacks
@@ -15,7 +16,9 @@ sudo losetup -D
 # Download the base images
 mkdir -p images
 if [ ! -f images/jetson-nano.zip ] && [ ! -f images/sd-blob-b01.img ]; then
-  axel https://developer.nvidia.com/jetson-nano-sd-card-image-r3231 -o images/jetson-nano.zip &
+  # The redirects make axel not so happy here
+  wget https://developer.nvidia.com/jetson-nano-sd-card-image -O images/jetson-nano.zip
+  jpid=$!
 fi
 if [ ! -f images/ubuntu-arm64.img.xz ] &&  [ ! -f images/ubuntu-arm64.img ]; then
   axel http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -o images/ubuntu-arm64.img.xz
@@ -35,6 +38,21 @@ if [ ! -f ssh_secret ]; then
   ssh-keygen -f ssh_secret -N ""
 fi
 mkdir -p ubuntu-image
+
+cleanup_ubuntu_mounts () {
+  paths=("ubuntu-image/proc/sys/fs/binfmt_misc" "ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image/boot" "ubuntu-image/boot/firmware" "ubuntu-image")
+  for unmount_please in ${paths[@]}; do
+    if [ -e ${unmount_please} ]; then
+      mounted=$(mount |grep ${unmount_please} || true)
+      if [ ! -z "${mounted}" ]; then
+	for i in {1..4}; do
+	  sync && sudo umount $unmount_please && break || sleep 1;
+	done
+      fi
+    fi
+  done
+}
+
 setup_ubuntu_mounts () {
   sudo mount  /dev/mapper/${partition} ubuntu-image
   sudo mount --bind /dev ubuntu-image/dev/
@@ -52,6 +70,12 @@ setup_ubuntu_mounts () {
     echo "Skipping mounting boot firmware partition"
   fi
 }
+setup_jetson_img () {
+  local img_name=$1
+  sudo kpartx -d ${img_name}
+  sudo kpartx -u ${img_name}
+  partition=$(sudo kpartx -av ${img_name}  | cut -f 3 -d " " | head -n 1)
+}
 setup_ubuntu_server_img () {
   local img_name=$1
   sudo kpartx -d ${img_name}
@@ -60,14 +84,6 @@ setup_ubuntu_server_img () {
   partition=$(sudo kpartx -av ${img_name} | cut -f 3 -d " " | head -n 2 | tail -n 1)
 }
 
-cleanup_ubuntu_mounts () {
-  paths=("ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image/boot" "ubuntu-image/boot/firmware" "ubuntu-image")
-  for unmount_please in ${paths[@]}; do
-    for i in {1..5}; do
-      sync && sudo umount $unmount_please && break || sleep 1;
-    done
-  done
-}
 copy_ssh_keys () {
   sudo mkdir -p ubuntu-image/root/.ssh
   sudo cp ~/.ssh/authorized_keys ubuntu-image/root/.ssh/
@@ -135,8 +151,20 @@ resize_partition () {
   local partition_num=$2
   local target_size=$3
   dd if=/dev/zero bs=1G count=$((${target_size} * 120/100)) of=./$img_name conv=sparse,notrunc oflag=append
-  sudo parted ${img_name} resizepart ${partition_num} ${target_size}g
   sync
+  sleep 1
+  partprobe ${img_name}
+  sleep 1
+  # If we're in gpt land resize
+  part_info=$(fdisk -l ${img_name} |grep "type: gpt" || true)
+  if [ ! -z "${img_name}" ]; then
+    sgdisk ${img_name} -e
+  fi
+  sleep 5
+  sudo parted --script ${img_name} resizepart ${partition_num} ${target_size}g
+  sync
+  partprobe ${img_name}
+  sleep 5
   sudo kpartx -d ${img_name}
   sudo kpartx -u ${img_name}
   partition=$(sudo kpartx -av ${img_name} | cut -f 3 -d " " | head -n ${partition_num} | tail -n 1)
@@ -146,6 +174,7 @@ resize_partition () {
   sudo e2fsck -f /dev/mapper/${partition}
   sleep 5
 }
+cleanup_ubuntu_mounts
 if [ ! -f images/ubuntu-arm64-customized.img ]; then
   cp images/ubuntu-arm64.img images/ubuntu-arm64-customized.img
   setup_ubuntu_server_img images/ubuntu-arm64-customized.img
@@ -198,25 +227,26 @@ if [ ! -f images/ubuntu-arm64-master.img ]; then
 fi
 echo "Baking jetson nano worker image"
 unset firmware_boot_partition
+if [ -z "${jpid}" ]; then
+  wait ${jpid} || echo "dl done"
+fi
 if [ ! -f images/sd-blob-b01.img ]; then
   pushd images; unzip jetson-nano.zip; popd
 fi
 if [ ! -f images/jetson-nano-custom.img ]; then
   cp images/sd-blob-b01.img images/jetson-nano-custom.img
-  sudo kpartx -d images/jetson-nano-custom.img
-  partition=$(sudo kpartx -av images/jetson-nano-custom.img  | cut -f 3 -d " " | head -n 1)
+  setup_jetson_img images/jetson-nano-custom.img
   setup_ubuntu_mounts
   copy_ssh_keys
-  # We'd need to grow the FS for this to succeed.
-  # update_ubuntu
-  # Instead we put that stuff in our first run steps
-  enable_chroot
-  config_system
-  sudo cp update_pi.sh ubuntu-image/first_run.sh
+  cleanup_ubuntu_mounts
+  resize_partition images/jetson-nano-custom.img 1 ${JETSON_TARGET_SIZE}
+  setup_jetson_img images/jetson-nano-custom.img
+  setup_ubuntu_mounts
+  update_ubuntu
+  sudo cp jetson_docker_daemon.json ubuntu-image/etc/docker/daemon.json
   cat first_run.sh | sudo tee -a ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
-  # TODO: Add an ext4 partition with JETSON_DATA_SIZE
   sudo kpartx -dv images/jetson-nano-custom.img
 fi

@@ -13,6 +13,8 @@ if [ ! -f /updated_pi ]; then
   apt-get install -y jq
   # This helps us have working DNS magic
   apt-get install -y avahi-daemon libnss-mdns
+  # Stop avahi to keep it from locking anything
+  avahi-daemon -k || echo "avahi not started, k"
   # Necessary build magics
   # Note: QEMU means we're running a different kernel
   # than the one we use on the board
@@ -48,8 +50,9 @@ if [ ! -f /updated_pi ]; then
 #  add-apt-repository \
 #   "deb https://download.docker.com/linux/ubuntu \
 #   $(lsb_release -cs) \
-#   stable"
-  add-apt-repository \
+  #   stable"
+  # Jetson unsigned :/
+  add-apt-repository --allow-unauthenticated --allow-insecure-repositories  \
    "deb https://download.docker.com/linux/ubuntu \
    bionic \
    stable"

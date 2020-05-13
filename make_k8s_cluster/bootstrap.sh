@@ -46,7 +46,11 @@ cleanup_ubuntu_mounts () {
       mounted=$(mount |grep "${unmount_please} " || true)
       if [ ! -z "${mounted}" ]; then
 	for i in {1..5}; do
-	  sync && sudo umount $unmount_please && break || sleep ${i};
+	  if [ "{$i}" == "5" ]; then
+	    sync && sudo umount $unmount_please && break || sudo umount -lf ${unmount_please};
+	  else
+	    sync && sudo umount $unmount_please && break || sleep ${i};
+	  fi
 	done
       fi
     fi

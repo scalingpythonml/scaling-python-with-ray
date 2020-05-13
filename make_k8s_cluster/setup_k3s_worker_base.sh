@@ -8,12 +8,20 @@ done
 WORKER_ID=$(ssh root@k8s-master.local /get_worker_id.sh)
 echo "k8s-worker-${WORKER_ID}" > /etc/hostname
 hostname $(cat /etc/hostname)
-avahi-daemon  -r
-sleep 5
-avahi-daemon  -r
+sync
 sleep 1
+# Reload is not enough :/
+avahi-daemon -k || echo "avahi daemon not running"
+sleep 5
+avahi-daemon -D
+sleep 1
+# Wait for avahi to re-discover the master
+for i in {1..10}; do
+  sleep ${i}
+  ping -c 2 k8s-master.local && break
+done
 K3S_NODE_NAME=$(hostname)
 export K3S_NODE_NAME
 K3S_TOKEN=$(ssh root@k8s-master.local cat /var/lib/rancher/k3s/server/node-token)
-my_ip=$(nslookup ${k3S_NODE_NAME}.local | awk '/^Address: / { print $2 ; exit }')
+my_ip=$(nslookup ${K3S_NODE_NAME}.local | awk '/^Address: / { print $2 ; exit }')
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.17.5+k3s1 K3S_URL=https://k8s-master.local:6443 K3S_TOKEN=${K3S_TOKEN} sh -s - --kubelet-arg="feature-gates=DevicePlugins=true" --node-ip ${my_ip}

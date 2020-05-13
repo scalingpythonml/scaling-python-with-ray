@@ -12,6 +12,6 @@ devices=$(lsblk -i |grep -v loop |grep -v / |grep part | grep -vi swap  | cut -d
 storage_devices=""
 mkdir -p /storage_paths
 for device in ${devices[@]}; do
-  storage_devices="${storage_devics}/dev/${device} "
+  storage_devices="${storage_devices}/dev/${device} "
 done
 zpool create zfs-storage-pool ${storage_devices} -f

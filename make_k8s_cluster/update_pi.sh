@@ -31,8 +31,8 @@ if [ ! -f /updated_pi ]; then
   # I hate netplan
   netplan generate || echo "no netplan, huzzah"
   # iptables needs to use legacy not nftables
-  sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-  sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+  sudo update-alternatives --set iptables /usr/sbin/iptables-legacy || echo "no alt, using current, gl;hf"
+  sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy || echo "no alt, using current, gl;hf"
   # We need docker so we can have a party with the GPU later (k3s can use containerd too)
   sudo apt-get remove -y docker docker-engine docker.io containerd runc || echo "k"
   sudo apt-get install -y \

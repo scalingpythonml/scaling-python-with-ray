@@ -43,7 +43,7 @@ cleanup_ubuntu_mounts () {
   paths=("ubuntu-image/proc/sys/fs/binfmt_misc" "ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image/boot" "ubuntu-image/boot/firmware" "ubuntu-image")
   for unmount_please in ${paths[@]}; do
     if [ -e ${unmount_please} ]; then
-      mounted=$(mount |grep ${unmount_please} || true)
+      mounted=$(mount |grep "${unmount_please} " || true)
       if [ ! -z "${mounted}" ]; then
 	for i in {1..5}; do
 	  sync && sudo umount $unmount_please && break || sleep ${i};

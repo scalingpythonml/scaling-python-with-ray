@@ -1,2 +1,2 @@
 #!/bin/bash
-source setup_k3s_worker_base.sh
+source /setup_k3s_worker_base.sh

@@ -52,8 +52,7 @@ cleanup_ubuntu_mounts () {
     fi
   done
 }
-
-setup_ubuntu_mounts () {
+_ubuntu_mounts () {
   sudo mount  /dev/mapper/${partition} ubuntu-image
   sudo mount --bind /dev ubuntu-image/dev/
   sudo mount --bind /sys ubuntu-image/sys/
@@ -157,7 +156,7 @@ resize_partition () {
   sleep 1
   # If we're in gpt land resize
   part_info=$(fdisk -l ${img_name} |grep "type: gpt" || true)
-  if [ ! -z "${img_name}" ]; then
+  if [ ! -z "${part_info}" ]; then
     sgdisk ${img_name} -e
   fi
   sleep 5
@@ -246,6 +245,7 @@ if [ ! -f images/jetson-nano-custom.img ]; then
   sudo cp jetson_docker_daemon.json ubuntu-image/etc/docker/daemon.json
   cat first_run.sh | sudo tee -a ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
+  sudo cp setup_k3s_worker_gpu.sh ubuntu-image/setup_k3s_worker.sh
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
   sudo kpartx -dv images/jetson-nano-custom.img

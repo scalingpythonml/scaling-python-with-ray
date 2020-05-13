@@ -45,14 +45,14 @@ cleanup_ubuntu_mounts () {
     if [ -e ${unmount_please} ]; then
       mounted=$(mount |grep ${unmount_please} || true)
       if [ ! -z "${mounted}" ]; then
-	for i in {1..4}; do
-	  sync && sudo umount $unmount_please && break || sleep 1;
+	for i in {1..5}; do
+	  sync && sudo umount $unmount_please && break || sleep ${i};
 	done
       fi
     fi
   done
 }
-_ubuntu_mounts () {
+setup_ubuntu_mounts () {
   sudo mount  /dev/mapper/${partition} ubuntu-image
   sudo mount --bind /dev ubuntu-image/dev/
   sudo mount --bind /sys ubuntu-image/sys/

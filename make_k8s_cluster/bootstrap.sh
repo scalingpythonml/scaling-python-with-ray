@@ -211,7 +211,9 @@ if [ ! -f images/ubuntu-arm64-master.img ]; then
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   # The master needs to have rook checked out
   sudo cp -af rook ubuntu-image/
-  sudo cp rook_cluster.yaml ubuntu-image/rook/rook/cluster/examples/kubernetes/ceph/
+  sudo cp setup_*.sh ubuntu-image/
+  # Note operator.yaml change v2.1.1 to v2.1.1-arm64
+  sudo cp rook_*.yaml ubuntu-image/rook/rook/cluster/examples/kubernetes/ceph/
   # The master has a worker counter file
   sudo cp worker_counter.txt ubuntu-image/
   cleanup_misc

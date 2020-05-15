@@ -51,8 +51,8 @@ if [ ! -f /updated_pi ]; then
 #   "deb https://download.docker.com/linux/ubuntu \
 #   $(lsb_release -cs) \
   #   stable"
-  # Jetson unsigned :/
-  add-apt-repository --allow-unauthenticated --allow-insecure-repositories  \
+  # Jetson unsigned so we do the update seperately
+  add-apt-repository -n  \
    "deb https://download.docker.com/linux/ubuntu \
    bionic \
    stable"

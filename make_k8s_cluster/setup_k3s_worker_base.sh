@@ -7,6 +7,7 @@ for i in {1..10}; do
   ping -c 2 k8s-master.local && break
 done
 WORKER_ID=$(ssh root@k8s-master.local /get_worker_id.sh)
+K3S_EXTRA=${K3_EXTRA:-"--node-label role=storage-node"}
 echo "k8s-worker-${WORKER_ID}" > /etc/hostname
 hostname $(cat /etc/hostname)
 sync
@@ -28,4 +29,4 @@ my_ip=$(nslookup ${K3S_NODE_NAME}.local | awk '/^Address: / { print $2 ; exit }'
 # k3s doesn't route it's disco through avahi, so we resolve the master to /etc/hosts
 # relatedly the master IP needs to be pinned.
 getent hosts k8s-master.local >> /etc/hosts
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.17.5+k3s1 K3S_URL=https://k8s-master.local:6443 K3S_TOKEN=${K3S_TOKEN} sh -s - --kubelet-arg="feature-gates=DevicePlugins=true" --node-ip ${my_ip}
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.17.5+k3s1 K3S_URL=https://k8s-master.local:6443 K3S_TOKEN=${K3S_TOKEN} sh -s - --kubelet-arg="feature-gates=DevicePlugins=true" --node-ip ${my_ip} ${K3S_EXTRA}

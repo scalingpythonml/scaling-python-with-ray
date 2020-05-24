@@ -24,7 +24,7 @@ if [ ! -f images/ubuntu-arm64.img.xz ] &&  [ ! -f images/ubuntu-arm64.img ]; the
   axel http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -o images/ubuntu-arm64.img.xz
 fi
 if [ ! -f images/ubuntu-arm64.img ]; then
-  pushd images; unxz images/ubuntu-arm64.img.xz; popd
+  pushd images; unxz ubuntu-arm64.img.xz; popd
 fi
 # Download rook
 if [ ! -d rook ]; then
@@ -95,14 +95,27 @@ copy_ssh_keys () {
   curl https://github.com/${GH_USER}.keys | sudo tee -a ubuntu-image/root/.ssh/authorized_keys
   sudo cp ssh_secret ubuntu-image/root/.ssh/id_rsa
 }
+setup_internet () {
+  # Technicall not mounts but being able to resolve is necessary for a lot
+  sudo rm ubuntu-image/etc/resolv.conf
+  sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
+  sudo cp /etc/hosts ubuntu-image/etc/hosts
+}
+
 enable_chroot () {
   # Let us execute ARM binaries
+  setup_internet
   sudo cp /usr/bin/qemu-*-static ubuntu-image/usr/bin/
 }
 config_system () {
+  copy_ssh_keys
   # Configure avahi to only be active on select interfaces
   sudo mkdir -p ubuntu-image/etc/avahi/
   sudo cp avahi-daemon.conf ubuntu-image/etc/avahi/avahi-daemon.conf
+  # Copy any extra env settings
+  if [ -f myenv.custom ]; then
+    cat myenv.custom | sudo tee -a /etc/environment
+  fi
   # This _should_ let the wifi work if configured, but mixed success.
   if [ -f 50-cloud-init.yaml.custom ]; then
     sudo mkdir -p ubuntu-image/etc/netplan
@@ -131,10 +144,6 @@ config_system () {
   sudo cp get_worker_id.sh ubuntu-image/
   sudo cp first_run.sh ubuntu-image/
   sudo cp update_pi.sh ubuntu-image/
-  # Technicall not mounts but being able to resolve is necessary for a lot
-  sudo rm ubuntu-image/etc/resolv.conf
-  sudo cp /etc/resolv.conf ubuntu-image/etc/resolv.conf
-  sudo cp /etc/hosts ubuntu-image/etc/hosts
   # On the rasberry pi enable cgroup memory
   if [ -d ubuntu-image/boot/firmware ]; then
     echo "cgroup_memory=1 cgroup_enable=memory cgroup_enable=cpuset $(cat ubuntu-image/boot/firmware/cmdline.txt || true)" | sudo tee ubuntu-image/boot/firmware/cmdline.txt
@@ -142,8 +151,8 @@ config_system () {
 }
 update_ubuntu () {
   enable_chroot
-  config_system
   # Do whatever updates and setup we can now inside the chroot
+  sudo cp update_pi.sh ubuntu-image/
   sudo chroot ubuntu-image/ /update_pi.sh
 }
 cleanup_misc () {
@@ -192,7 +201,6 @@ if [ ! -f images/ubuntu-arm64-customized.img ]; then
   resize_partition images/ubuntu-arm64-customized.img 2 ${PI_TARGET_SIZE}
   setup_ubuntu_server_img images/ubuntu-arm64-customized.img
   setup_ubuntu_mounts
-  copy_ssh_keys
   update_ubuntu
   cleanup_ubuntu_mounts
   sudo kpartx -dv images/ubuntu-arm64-customized.img
@@ -206,6 +214,7 @@ if [ ! -f images/ubuntu-arm64-master.img ]; then
   cp images/ubuntu-arm64-customized.img images/ubuntu-arm64-master.img
   setup_ubuntu_server_img images/ubuntu-arm64-master.img
   setup_ubuntu_mounts
+  config_system
   sudo cp masterhost ubuntu-image/etc/hostname
   sudo cp first_run_master.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
@@ -223,6 +232,7 @@ if [ ! -f images/ubuntu-arm64-master.img ]; then
   cp images/ubuntu-arm64-customized.img images/ubuntu-arm64-worker.img
   setup_ubuntu_server_img images/ubuntu-arm64-worker.img
   setup_ubuntu_mounts
+  config_system
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_misc
@@ -242,17 +252,29 @@ if [ ! -f images/jetson-nano-custom.img ]; then
   cp images/sd-blob-b01.img images/jetson-nano-custom.img
   setup_jetson_img images/jetson-nano-custom.img
   setup_ubuntu_mounts
-  copy_ssh_keys
   cleanup_ubuntu_mounts
   resize_partition images/jetson-nano-custom.img 1 ${JETSON_TARGET_SIZE}
   setup_jetson_img images/jetson-nano-custom.img
   setup_ubuntu_mounts
   update_ubuntu
-  sudo cp jetson_docker_daemon.json ubuntu-image/etc/docker/daemon.json
+  if [ -f jetson_docker_daemon.json.custom ]; then
+    sudo cp jetson_docker_daemon.json.custom ubuntu-image/etc/docker/daemon.json
+  else
+    sudo cp jetson_docker_daemon.json ubuntu-image/etc/docker/daemon.json
+  fi
   cat first_run.sh | sudo tee -a ubuntu-image/first_run.sh
   sudo cp first_run_worker.sh ubuntu-image/etc/init.d/firstboot
   sudo cp setup_k3s_worker_gpu.sh ubuntu-image/setup_k3s_worker.sh
   sudo chroot ubuntu-image/ update-rc.d  firstboot defaults
   cleanup_ubuntu_mounts
   sudo kpartx -dv images/jetson-nano-custom.img
+fi
+if [ ! -f images/jetson-nano-configed.img ]; then
+  cp -af images/jetson-nano-custom.img images/jetson-nano-configed.img
+  setup_jetson_img images/jetson-nano-configed.img
+  setup_ubuntu_mounts
+  config_system
+  cleanup_misc
+  cleanup_ubuntu_mounts
+  sudo kpartx -dv images/jetson-nano-configed.img
 fi

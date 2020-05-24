@@ -1,18 +1,26 @@
 #!/bin/bash
 set -ex
 if [ ! -f /updated_pi ]; then
+  source /etc/environment || echo "no env!"
   DEBIAN_FRONTEND=noninteractive
   export DEBIAN_FRONTEND
+  # I have two internet connections I lb over at home so this lets them party
+  # I have a 95/5 split, long story
+  echo debconf apt-fast/maxdownloads string 25 | debconf-set-selections
+  echo debconf apt-fast/dlflag boolean true | debconf-set-selections
+  echo debconf apt-fast/aptmanager string apt-get | debconf-set-selections
+  add-apt-repository -n ppa:apt-fast/stable -y
   # The Jetson repo is unsigned :/ & falky
   apt-get update --allow-unauthenticated --allow-insecure-repositories || echo "couldn't update"
+  apt-get -y install apt-fast aria2 axel
   apt-get upgrade -y
   # This makes debugging less work
-  apt-get install -y emacs-nox nano
-  apt-get install -y tmate net-tools nmap wireless-tools
-  apt-get install -y ssh
-  apt-get install -y jq
+  apt-fast install -y emacs-nox nano
+  apt-fast install -y tmate net-tools nmap wireless-tools
+  apt-fast install -y ssh
+  apt-fast install -y jq
   # This helps us have working DNS magic
-  apt-get install -y avahi-daemon libnss-mdns
+  apt-fast install -y avahi-daemon libnss-mdns
   # Stop avahi to keep it from locking anything
   avahi-daemon -k || echo "avahi not started, k"
   # Necessary build magics
@@ -37,7 +45,7 @@ if [ ! -f /updated_pi ]; then
   sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy || echo "no alt, using current, gl;hf"
   # We need docker so we can have a party with the GPU later (k3s can use containerd too)
   sudo apt-get remove -y docker docker-engine docker.io containerd runc || echo "k"
-  sudo apt-get install -y \
+  sudo apt-fast install -y \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -55,10 +63,10 @@ if [ ! -f /updated_pi ]; then
   add-apt-repository -n  \
    "deb https://download.docker.com/linux/ubuntu \
    bionic \
-   stable"
+   stable" -y
   # The Jetson repo is unsigned :/ & falky
   apt-get update --allow-unauthenticated --allow-insecure-repositories || echo "couldn't update"
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+  sudo apt-fast install -y docker-ce docker-ce-cli containerd.io
   # Start installing falco
   if [ ! -d falco ]; then
     git clone https://github.com/falcosecurity/falco.git

@@ -15,6 +15,7 @@ if [ ! -f /first_run_done ]; then
   sleep 180
   echo "Done sleeping" |& tee -a  /first_run.log
   /wait_for_cloud_init.sh |& tee -a /first_run.log
+  /setup_reboot.sh |& tee -a /first_run.log
   /setup_known_hosts.sh |& tee -a /first_run.log
   /first_run.sh |& tee -a  /first_run.log
   /setup_k3s_worker.sh |& tee -a  /first_run.log

@@ -11,13 +11,11 @@ command -v axel || sudo apt-get install axel
 command -v wget || sudo apt-get install wget
 # Setup qemu
 command -v qemu-system-arm || sudo apt-get install qemu-system qemu-user-static qemu binfmt-support debootstrap
-# Cleanup existing loopbacks
-sudo losetup -D
 # Download the base images
 mkdir -p images
 if [ ! -f images/jetson-nano.zip ] && [ ! -f images/sd-blob-b01.img ]; then
   # The redirects make axel not so happy here
-  wget https://developer.nvidia.com/jetson-nano-sd-card-image -O images/jetson-nano.zip
+  wget https://developer.nvidia.com/jetson-nano-sd-card-image -O images/jetson-nano.zip &
   jpid=$!
 fi
 if [ ! -f images/ubuntu-arm64.img.xz ] &&  [ ! -f images/ubuntu-arm64.img ]; then
@@ -37,8 +35,8 @@ fi
 if [ ! -f ssh_secret ]; then
   ssh-keygen -f ssh_secret -N ""
 fi
-mkdir -p ubuntu-image
 
+# Cleanup existing loopbacks
 cleanup_ubuntu_mounts () {
   paths=("ubuntu-image/proc/sys/fs/binfmt_misc" "ubuntu-image/proc" "ubuntu-image/dev/pts" "ubuntu-image/sys" "ubuntu-image/dev" "ubuntu-image/boot" "ubuntu-image/boot/firmware" "ubuntu-image")
   for unmount_please in ${paths[@]}; do
@@ -56,6 +54,12 @@ cleanup_ubuntu_mounts () {
     fi
   done
 }
+cleanup_ubuntu_mounts
+sleep 5 # losetup -D
+
+
+mkdir -p ubuntu-image
+
 setup_ubuntu_mounts () {
   sudo mount  /dev/mapper/${partition} ubuntu-image
   sudo mount --bind /dev ubuntu-image/dev/
@@ -114,7 +118,7 @@ config_system () {
   sudo cp avahi-daemon.conf ubuntu-image/etc/avahi/avahi-daemon.conf
   # Copy any extra env settings
   if [ -f myenv.custom ]; then
-    cat myenv.custom | sudo tee -a /etc/environment
+    cat myenv.custom | sudo tee -a ubuntu-image/etc/environment
   fi
   # This _should_ let the wifi work if configured, but mixed success.
   if [ -f 50-cloud-init.yaml.custom ]; then

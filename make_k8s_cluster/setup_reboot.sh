@@ -1,0 +1,3 @@
+#!/bin/bash
+# If we're blocked on shutdown needed...
+ps aux |grep unattended-upgrade-shutdown |grep python && shutdown -r now

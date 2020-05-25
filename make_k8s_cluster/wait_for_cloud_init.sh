@@ -6,7 +6,7 @@ if [ -d /var/lib/cloud ]; then
   for i in {1..100}; do
     echo "Waiting ${i} before checking again"
     sleep ${i}
-    cat /var/lib/cloud/instance/boot-finished && break || echo "Waiting for floud init.."
+    cat /var/lib/cloud/instance/boot-finished && break || echo "Waiting for cloud init to write boot-finished"
   done
 else
   echo "No /var/lib/cloud, party"

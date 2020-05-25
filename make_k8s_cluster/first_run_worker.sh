@@ -8,7 +8,8 @@
 # Default-Stop:
 # Short-Description:    Do a first run
 ### END INIT INFO
-set -ex
+
+set -x
 if [ ! -f /first_run_done ]; then
   echo "Doing first run as $(whoami)" |& tee -a /first_run.log
   echo "Starting first_run with a good nap" |& tee -a  /first_run.log

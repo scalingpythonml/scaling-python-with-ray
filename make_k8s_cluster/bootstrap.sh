@@ -278,7 +278,6 @@ if [ ! -f images/jetson-nano-configed.img ]; then
   setup_jetson_img images/jetson-nano-configed.img
   setup_ubuntu_mounts
   config_system
-  cleanup_misc
   cleanup_ubuntu_mounts
   sudo kpartx -dv images/jetson-nano-configed.img
 fi

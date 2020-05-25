@@ -9,6 +9,7 @@
 # Short-Description:    Do a first run
 ### END INIT INFO
 
+set -x
 if [ ! -f /first_run_done ]; then
   echo "Starting first_run with a good nap" |& tee -a  /first_run.log
   sleep 60

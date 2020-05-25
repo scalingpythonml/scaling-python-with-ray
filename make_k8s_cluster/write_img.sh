@@ -8,7 +8,7 @@ img=$1
 target=$2
 root_partition=${root_partition:-2}
 umount ${target}* || echo "Didn't need to umount target"
-dd if=${img} of=${target} bs=1M  conv=sparse
+dd if=${img} of=${target} bs=1M  # conv=sparse
 sync
 sleep 1
 # Rescan the disk

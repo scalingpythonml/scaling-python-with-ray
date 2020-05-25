@@ -11,3 +11,6 @@ if [ -d /var/lib/cloud ]; then
 else
   echo "No /var/lib/cloud, party"
 fi
+
+# Wait for apt daily upgrades
+systemd-run --property="After=apt-daily.service apt-daily-upgrade.service" --wait /bin/true || echo "No waiting, yay!"

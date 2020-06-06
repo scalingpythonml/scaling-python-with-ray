@@ -4,6 +4,8 @@ if [ ! -f /updated_pi ]; then
   source /etc/environment || echo "no env!"
   DEBIAN_FRONTEND=noninteractive
   export DEBIAN_FRONTEND
+  # Fix up any unfinished configs
+  dpkg --configure -a
   # I have two internet connections I lb over at home so this lets them party
   # I have a 95/5 split, long story
   echo debconf apt-fast/maxdownloads string 25 | debconf-set-selections

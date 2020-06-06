@@ -12,10 +12,13 @@ source bootstrap-funcs.sh
 
 # Boot strap key based ssh access to user and root
 
-# copy_ssh_keys_remote
+copy_ssh_keys_remote
 
 DEST="root@$TARGET_IP:"
 RUN_DEST_CMD="ssh root@${TARGET_IP}"
 
 update_ubuntu
 config_system
+${COPY_COMMAND} first_run_worker_remote.sh ${DEST}/etc/init.d/firstboot
+${RUN_DEST_CMD} update-rc.d  firstboot defaults
+${RUN_DEST_CMD} reboot

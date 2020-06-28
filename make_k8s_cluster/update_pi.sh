@@ -55,6 +55,8 @@ if [ ! -f /updated_pi ]; then
     software-properties-common
   # Add docker GPG key
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  # We need an ssh server
+  sudo apt-get install openssh-server
   # Add the docker repo
   # Until focal is released we just use bionic
 #  add-apt-repository \

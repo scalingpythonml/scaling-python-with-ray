@@ -19,6 +19,13 @@ RUN_DEST_CMD="ssh root@${TARGET_IP}"
 
 update_ubuntu
 config_system
-${COPY_COMMAND} first_run_worker_remote.sh ${DEST}/etc/init.d/firstboot
+
+${COPY_COMMAND} firstboot.sh ${DEST}/etc/init.d/firstboot
+${COPY_COMMAND} first_run_worker.sh ${DEST}/do_firstboot.sh
+${COPY_COMMAND} setup_k3s_worker_gpu.sh ${DEST}/setup_k3s_worker.sh
+${RUN_DEST_CMD} chmod a+x /setup*.sh
+${RUN_DEST_CMD} chmod a+x /etc/init.d/firstboot
 ${RUN_DEST_CMD} update-rc.d  firstboot defaults
+# Don't do ZFS on these nodes by default
+${RUN_DEST_CMD} echo "" > setup_install_zfs.sh
 ${RUN_DEST_CMD} reboot

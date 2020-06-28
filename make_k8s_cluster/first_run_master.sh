@@ -9,11 +9,12 @@
 # Short-Description:    Do a first run
 ### END INIT INFO
 
+set +e
 set -x
 if [ ! -f /first_run_done ]; then
   echo "Doing first run as $(whoami)" |& tee -a /first_run.log
   echo "Starting first_run with a good 15 minute nap" |& tee -a  /first_run.log
-  sleep 900
+  (sleep 900 || echo "Sleep failed?") |& tee -a /first_run.log
   echo "Done sleeping" |& tee -a  /first_run.log
   /wait_for_cloud_init.sh |& tee -a /first_run.log
   /setup_reboot.sh |& tee -a /first_run.log

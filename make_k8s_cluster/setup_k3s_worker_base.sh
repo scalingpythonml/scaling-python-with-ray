@@ -29,4 +29,4 @@ my_ip=$(nslookup ${K3S_NODE_NAME}.local | awk '/^Address: / { print $2 ; exit }'
 # k3s doesn't route it's disco through avahi, so we resolve the leader to /etc/hosts
 # relatedly the leader IP needs to be pinned.
 getent hosts k8s-leader.local >> /etc/hosts
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.18.3+k3s1 K3S_URL=https://k8s-leader.local:6443 K3S_TOKEN=${K3S_TOKEN} sh -s - --kubelet-arg="feature-gates=DevicePlugins=true" --node-ip ${my_ip} ${K3S_EXTRA}
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.18.8+k3s1 K3S_URL=https://k8s-leader.local:6443 K3S_TOKEN=${K3S_TOKEN} sh -s - --kubelet-arg="feature-gates=DevicePlugins=true" --node-ip ${my_ip} ${K3S_EXTRA}

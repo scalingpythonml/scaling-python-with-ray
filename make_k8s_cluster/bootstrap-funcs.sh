@@ -24,7 +24,7 @@ if [ ! -f images/jetson-nano.zip ] && [ ! -f images/sd-blob-b01.img ]; then
   jpid=$!
 fi
 if [ ! -f images/ubuntu-arm64.img.xz ] &&  [ ! -f images/ubuntu-arm64.img ]; then
-  axel http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-preinstalled-server-arm64+raspi.img.xz?_ga=2.44224356.1107789398.1588456160-1469204870.1587264737 -o images/ubuntu-arm64.img.xz
+  axel https://cdimage.ubuntu.com/releases/20.04.1/release/ubuntu-20.04.1-preinstalled-server-arm64+raspi.img.xz?_ga=2.269187633.1533046301.1598224230-102581225.1598224230 -o images/ubuntu-arm64.img.xz
 fi
 if [ ! -f images/ubuntu-arm64.img ]; then
   pushd images; unxz ubuntu-arm64.img.xz; popd
@@ -99,7 +99,7 @@ setup_ubuntu_server_img () {
 
 # We normally are logging in as a special user
 copy_ssh_keys_remote () {
-  ${RUN_DEST_CMD} mkdir -p ~/.ssh  
+  ${RUN_DEST_CMD} mkdir -p ~/.ssh
   ${COPY_COMMAND} ~/.ssh/authorized_keys ${DEST}~/.ssh/authorized_keys
   cat ssh_secret.pub | ${RUN_DEST_CMD} tee -a ~/.ssh/authorized_keys
   GH_USER=${GH_USER:-holdenk}

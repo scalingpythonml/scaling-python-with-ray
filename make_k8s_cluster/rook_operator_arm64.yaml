@@ -47,7 +47,7 @@ data:
   # of the CSI driver to something other than what is officially supported, change
   # these images to the desired release of the CSI driver.
   # This is an official release
-  ROOK_CSI_CEPH_IMAGE: "quay.io/cephcsi/cephcsi:v3.1"
+  ROOK_CSI_CEPH_IMAGE: "quay.io/cephcsi/cephcsi:v3.1.0"
   # I found these searching on dockerhub #notproduction...yet
   ROOK_CSI_REGISTRAR_IMAGE: "boky/csi-node-driver-registrar"
   ROOK_CSI_RESIZER_IMAGE: "teanan/csi-resizer:v0.4.0"

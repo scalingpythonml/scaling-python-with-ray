@@ -105,7 +105,7 @@ copy_ssh_keys_remote () {
   GH_USER=${GH_USER:-holdenk}
   curl https://github.com/${GH_USER}.keys | ${RUN_DEST_CMD} tee -a ~/authorized_keys
   ${COPY_COMMAND} ssh_secret ${DEST}~/.ssh/id_rsa
-  ${RUN_DEST_CMD} "sudo -S sh -c \"cp -af ~${REMOTE_USER}/.ssh /root/.ssh && chown -R root /root/.ssh && chgrp -R root /root/.ssh\""
+  ${RUN_DEST_CMD} "sudo -S sh -c \"mkdir -p /root/.ssh && cp -af ~${REMOTE_USER}/.ssh/* /root/.ssh/ && chown -R root /root/.ssh && chgrp -R root /root/.ssh\""
 }
 
 copy_ssh_keys () {

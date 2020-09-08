@@ -22,7 +22,7 @@ if [ ! -f /updated_pi ]; then
   apt-fast install -y ssh
   apt-fast install -y jq
   # This helps us have working DNS magic
-  apt-fast install -y avahi-daemon libnss-mdns
+  apt-fast install -y avahi-daemon libnss-mdns dnsutils
   # Stop avahi to keep it from locking anything
   avahi-daemon -k || echo "avahi not started, k"
   # Necessary build magics

@@ -6,7 +6,7 @@ for i in {1..10}; do
   sleep ${i}
   ping -c 2 k8s-leader.local && break
 done
-WORKER_ID=$(ssh root@k8s-leader.local /get_worker_id.sh)
+WORKER_ID=${WORKER_ID:-$(ssh root@k8s-leader.local /get_worker_id.sh)}
 K3S_EXTRA=${K3_EXTRA:-"--node-label role=storage-node"}
 echo "k8s-worker-${WORKER_ID}" > /etc/hostname
 hostname $(cat /etc/hostname)

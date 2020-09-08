@@ -49,11 +49,11 @@ data:
   # This is an official release
   ROOK_CSI_CEPH_IMAGE: "quay.io/cephcsi/cephcsi:v3.1.0"
   # Pulled from https://github.com/raspbernetes/multi-arch-images
-  ROOK_CSI_REGISTRAR_IMAGE: "raspbernetes/csi-node-driver-registrar"
-  ROOK_CSI_RESIZER_IMAGE: "raspbernetes/csi-external-resizer"
-  ROOK_CSI_PROVISIONER_IMAGE: "raspbernetes/csi-external-provisioner"
-  ROOK_CSI_SNAPSHOTTER_IMAGE: "raspbernetes/csi-external-snapshotter"
-  ROOK_CSI_ATTACHER_IMAGE: "raspbernetes/csi-external-attacher"
+  ROOK_CSI_REGISTRAR_IMAGE: "raspbernetes/csi-node-driver-registrar:v1.3.0"
+  ROOK_CSI_RESIZER_IMAGE: "raspbernetes/csi-external-resizer:v0.5.0"
+  ROOK_CSI_PROVISIONER_IMAGE: "raspbernetes/csi-external-provisioner:v1.6.0"
+  ROOK_CSI_SNAPSHOTTER_IMAGE: "raspbernetes/csi-external-snapshotter:v2.1.1"
+  ROOK_CSI_ATTACHER_IMAGE: "raspbernetes/csi-external-attacher:v2.2.0"
 
   # (Optional) set user created priorityclassName for csi plugin pods.
   # CSI_PLUGIN_PRIORITY_CLASSNAME="system-node-critical"

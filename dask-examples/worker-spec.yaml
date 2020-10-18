@@ -1,0 +1,29 @@
+# worker-spec.yml
+
+kind: Pod
+metadata:
+  namespace: dask
+  labels:
+    foo: bar5
+spec:
+  restartPolicy: Never
+# Added by holden
+  serviceAccountName: dask
+  automountServiceAccountToken: true
+# End added by Holden
+  containers:
+# Configure for aarm64
+  - image: holdenk/dask:v0.5
+    imagePullPolicy: IfNotPresent
+    args: [dask-worker, --nthreads, '2', --no-dashboard, --memory-limit, 6GB, --death-timeout, '60']
+    name: dask
+    #env:
+    #  - name: EXTRA_PIP_PACKAGES
+    #    value: git+https://github.com/dask/distributed
+    resources:
+      limits:
+        cpu: "2"
+        memory: 6G
+      requests:
+        cpu: "2"
+        memory: 6G

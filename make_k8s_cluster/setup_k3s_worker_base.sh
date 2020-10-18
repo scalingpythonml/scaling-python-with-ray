@@ -7,7 +7,7 @@ for i in {1..10}; do
   ping -c 2 k8s-leader.local && break
 done
 WORKER_ID=${WORKER_ID:-$(ssh root@k8s-leader.local /get_worker_id.sh)}
-K3S_EXTRA=${K3_EXTRA:-"--node-label role=storage-node"}
+K3S_EXTRA=${K3S_EXTRA:-"--node-label role=storage-node"}
 echo "k8s-worker-${WORKER_ID}" > /etc/hostname
 hostname $(cat /etc/hostname)
 sync

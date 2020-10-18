@@ -15,7 +15,7 @@ source bootstrap-funcs.sh
 
 # Boot strap key based ssh access to user and root
 
-copy_ssh_keys_remote
+# copy_ssh_keys_remote
 
 DEST="root@$TARGET_IP:"
 RUN_DEST_CMD="ssh root@${TARGET_IP}"

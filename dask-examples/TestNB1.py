@@ -7,13 +7,13 @@
 from dask_kubernetes import KubeCluster
 
 
-# In[4]:
+# In[ ]:
 
 
 # Initial attempt at creation (also failed do to networking)
-#tag::create_in_namespace[]
+#tag::create_in_default[]
 cluster = KubeCluster.from_yaml('worker-spec.yaml')
-#end::create_in_namespace[]
+#end::create_in_default[]
 
 
 # In[5]:

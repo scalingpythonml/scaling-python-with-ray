@@ -136,3 +136,6 @@ ubuntu-image
 jetson-nano.zip
 # emacs
 *~
+
+#venv
+venv_dask

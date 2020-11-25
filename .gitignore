@@ -139,3 +139,8 @@ jetson-nano.zip
 
 #venv
 venv_dask
+
+# tgz files
+*.tgz
+# Spark extracted
+spark-*-bin-hadoop*

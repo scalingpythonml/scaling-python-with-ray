@@ -3,6 +3,7 @@ FROM  holdenk/jupyter-hub-magicsingleuser-sample:0.10.2
 # Switch to root to install stuff
 USER root
 
+# Use multiple cores to compile the C code :)
 ENV MAKEFLAGS -j 4
 
 

@@ -141,7 +141,7 @@ COPY licenses /opt/spark/licenses
 
 ENV SPARK_HOME /opt/spark
 
-WORKDIR /opt/spark/work-dir
+# Note: don't change the workdir since then your Jupyter notebooks won't persist.
 RUN chmod g+w /opt/spark/work-dir
 # Wildcard so it covers decom.sh present (3.1+) and not present (pre-3.1)
 RUN chmod a+x /opt/decom.sh* || echo "No decom script present, assuming pre-3.1"

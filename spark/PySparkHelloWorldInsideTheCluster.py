@@ -27,8 +27,12 @@ conf = (SparkConf().setMaster("k8s://https://kubernetes.default")
     .set("spark.driver.host", "driver-service.jhub.svc.cluster.local") # Needs to match svc
     .set("spark.driver.bindAddress", "0.0.0.0") #  Otherwise tries to bind to svc IP, will fail
 #end::configureService[]
+#tag::configureNamespace[]
     .set("spark.kubernetes.namespace", "spark")
+#end::configureNamespace[]
+#tag::configureSparkAppName[]
     .set("spark.app.name", "PySparkHelloWorldInsideTheCluster")
+#end::configureSparkAppName[]
     )
 
 

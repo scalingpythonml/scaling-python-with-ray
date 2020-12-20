@@ -16,7 +16,7 @@ from pyspark.conf import *
 
 #tag::makeSparkConf[]
 conf = (SparkConf().setMaster("k8s://https://kubernetes.default")
-#end::markMakeSparkConf[]
+#end::makeSparkConf[]
     .set("spark.executor.instances", "2")
 #tag::configureContainer[]
     .set("spark.kubernetes.container.image", "holdenk/spark-py:v3.0.1.2")

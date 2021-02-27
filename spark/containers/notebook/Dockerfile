@@ -1,4 +1,4 @@
-FROM  holdenk/jupyter-hub-magicsingleuser-sample:0.10.2
+FROM holdenk/jupyter-hub-magicsingleuser-sample:0.10.2-n412.h25a21283
 
 # Switch to root to install stuff
 USER root

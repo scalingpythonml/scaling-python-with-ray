@@ -17,13 +17,11 @@ fi
 SPARK_HOME=`pwd`/spark-3.1.2-SNAPSHOT-bin-3.2.0
 cp ./notebook/* ${SPARK_HOME}
 cp ./python-executor/Dockerfile ${SPARK_HOME}/PyDockerfile
-# Fixed to do buildx push
-cp ./docker-image-*.sh ${SPARK_HOME}/bin/
 #tag::build_exec_containers[]
 # Copy over python setup script so we can have matching pythons
 SPARK_VERSION=3.1.1.1-preview
 cp pysetup.sh ${SPARK_HOME}/bin/
-pushd spark-3.0.1-bin-hadoop3.2
+pushd ${SPARK_HOME}
 SPARK_ROOT="$SPARK_HOME"
 ./bin/docker-image-tool.sh  -r holdenk -t v${SPARK_VERSION} -X -b java_image_tag=11-jre-slim -p PyDockerfile Dockerfile build
 #end::build_exec_containers[]

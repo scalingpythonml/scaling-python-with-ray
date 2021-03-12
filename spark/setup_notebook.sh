@@ -11,5 +11,5 @@ kubectl create rolebinding spark-role-to-dask-acc --clusterrole=edit --serviceac
 #end::setupsa[]
 # Create a service for the executors to connect back to the driver on the notebook
 #tag::setup_service[]
-kubectl create service -n jhub driver-service.yaml
+kubectl apply -n jhub -f driver-service.yaml
 #end::setup_service[]

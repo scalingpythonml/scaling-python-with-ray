@@ -41,6 +41,26 @@ RUN conda install -c conda-forge --yes mamba && \
     mamba install --yes numpy==1.19.2 pandas cytoolz numba lz4 scikit-build python-blosc=1.9.2 && \
     (mamba install --yes pyarrow ||  pip install -vvv pyarrow)
 
+# s3a support
+#tag::s3a[]
+ADD https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar ${SPARK_HOME}/jars/
+ADD https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.563/aws-java-sdk-bundle-1.11.563.jar ${SPARK_HOME}/jars/
+#end::s3a[]
+
+#tag::iceberg[]
+ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark3-runtime/0.11.0/iceberg-spark3-runtime-0.11.0.jar ${SPARK_HOME}/jars/
+ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark3-extensions/0.11.0/iceberg-spark3-extensions-0.11.0.jar ${SPARK_HOME}/jars/
+ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark3/0.11.0/iceberg-spark3-0.11.0.jar ${SPARK_HOME}/jars/
+#ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-parquet/0.11.0/iceberg-parquet-0.11.0.jar ${SPARK_HOME}/jars/
+#ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-core/0.11.0/iceberg-core-0.11.0.jar ${SPARK_HOME}/jars/
+#ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-arrow/0.11.0/iceberg-arrow-0.11.0.jar ${SPARK_HOME}/jars/
+#ADD https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-data/0.11.0/iceberg-data-0.11.0.jar ${SPARK_HOME}/jars/
+#end::iceberg[]
+
+#tag::perms[]
+RUN chmod a+rx ${SPARK_HOME}/jars/*.jar
+#end::perms[]
+
 
 COPY python/pyspark ${SPARK_HOME}/python/pyspark
 COPY python/lib ${SPARK_HOME}/python/lib

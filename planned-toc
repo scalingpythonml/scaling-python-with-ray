@@ -9,6 +9,7 @@ Chapter 1: What is Ray & where can it be used & how it compares in the ecosystem
 ○	The different paradigms of programming in ray & how to choose
 ○	Execution model
 ○	Fault tolerance overview & implications
+○	Handling Dependencies
 ●	Chapter 4: Stateless* Serverless
 ○	Remote functions & tasks
 ○	General APIs
@@ -20,8 +21,8 @@ Chapter 1: What is Ray & where can it be used & how it compares in the ecosystem
 ●	Chapter 6: Actors (going beyond stateless)
 ○	Basics
 ○	Actors for ML
-Scaling your actors
-Where to store your state & implications for fault tolerance
+○	Scaling your actors
+○	Where to store your state & implications for fault tolerance
 ●	Chapter 7: Streaming
 ○	Sources & sinks
 ○	Stateful streaming with Ray

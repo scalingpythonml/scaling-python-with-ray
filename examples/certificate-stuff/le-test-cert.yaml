@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: k3s-mooo
+  namespace: default
+spec:
+  secretName: k3s-mooo-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: holdenkarau.mooo.com
+  dnsNames:
+  - holdenkarau.mooo.com

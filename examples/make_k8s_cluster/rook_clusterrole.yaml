@@ -1,0 +1,14 @@
+# privilegedPSP grants access to use the privileged PSP.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp:rook
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  resourceNames:
+  - privileged
+  verbs:
+  - use

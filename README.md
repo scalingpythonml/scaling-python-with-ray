@@ -1,2 +1,7 @@
 # serverless-python-with-ray-book
-Serverless Python with Ray
+
+Work in Progress Serverless Python with Ray
+
+## Technology
+
+Built with asciidoctor (yay)

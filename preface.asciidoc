@@ -1,0 +1,4 @@
+[preface]
+== Preface
+
+We wrote this book for developers and data scientist looking to build "serverless" applications in Python. Serverless is a bit buzz-word, and despite it's name does in fact contain servers, but the idea is you don't have to worry about the servers. For many developers and data scientists the promise of having things magically scale without having to worry about the details of the servers if quite appealing. On the other hand, if you really enjoy getting into the nitty gritty of your servers, deployment mechanisms, load-balancers, etc. this is probably not the book for you -- but hopefully you recommend this to your users.

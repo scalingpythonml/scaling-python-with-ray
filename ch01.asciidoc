@@ -1,4 +1,61 @@
+// DOC OF RECORD IS IN GDOCS at - https://docs.google.com/document/d/1I4SBHYaU8iMKwuNnJSRKEWIFLx-tCGOiTahq3rJRmuU/edit?usp=sharing
 [[what_is_ray]]
 == What is Ray, why do we need it, and where does it fit?
 
-Great questions my friend!
+Ray is a Python footnote:[Like many Python applications, under the good there is a lot C++ & some fortran] built tool for "Fast and Simple Distributed Computing."
+The past decade has seen distributed computing reach the mainstream through the concept of "big data", but it is so much more than just "big data."
+Ray's lineage traces back to University of California Berkley in the same footenote:[not exactly the same, but like the subsequent iteration of] lab which created the intial software that eventually became Apache Spark.
+
+=== Why do we need it?
+
+
+
+- Scheduling is _hard_
+- Distributed scheduling is harder
+- Managing servers is hard
+- Even managing clouds or K8s is hard
+- More and more data (or requests or complexity or ...)
+- Fault tolerance is super super painful (leslie lamport quote about a distributed system)
+
+
+
+=== Where does it fit in the ecosystem?
+
+Ray sits at a unique intersection of problem spaces.
+The first is that of scale, which serves to make all of the other problems more fun (e.g. the "big" in "big data").
+The scheduler is general purpose enough to exist in the space of workflow schedling.
+Ray's actor system exists in the space of "Reactive Systems".
+Ray integrates with data and machine learning libraries to exist in the traditional "big data" space.
+
+==== "Big" Data / Apache Spark
+
+It is tempting to compare Ray with Apache Spark, and in some ways they are very similar.
+
+The core design difference comes to the handling of state & scheduling.
+
+While Apache Spark requires that all distributed operations are stateless, Ray relaxes this restriction and provides the ability to recover that state.
+Spark also requires a central scheduler, only allowing tasks to be started from the "head" node.
+
+When it comes PySpark, the task overheads in Spark can be quite high because of its dependency on the JVM and the need to copy data.
+
+The lower Python task overhead combined with distributed state make Ray especially appealing for Machine Learning tasks.
+
+On the other hand Spark is more closely integrated into the Hadoop ecosystem and has a very intelligent query planner, which allows it to interact with a wider variety of data sources. For analytical use cases, especially in existing big data deployments, Spark may be a better choice.
+
+====
+
+==== Workflow Scheduling
+
+Workflow scheduling is one of these areas which, at first glance, can seem really simple. It's "just" a graph of work that needs to be done. However, all of our programs can be expressed as "just" a graph of work that needs to be done.
+Ray is unqiue in the workflow scheduling of having the ability for tasks to schedule other tasks without having to call back to a central node. This allows for greater flexibility and thoroughput.
+
+==== Reactive Programming & Streaming
+
+- v.s. Akka v.s. Kafka Transform
+
+
+==== What is Ray *not*
+
+While Ray is a general purpose distributed system, it's important to note there are some things Ray is not (although of course you could probably make it be, but might not want to). Ray is not designed to be a "real-time" system, so if your controlling says trains, airplanes, or cars please go somewhere else. While Ray does have some built in value/state storage, it is not designed to be used as a database (there are many fine alternatives out there).
+
+=== Conclusion

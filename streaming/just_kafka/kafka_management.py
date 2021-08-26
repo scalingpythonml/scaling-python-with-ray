@@ -1,4 +1,5 @@
 from confluent_kafka.admin import AdminClient, NewTopic
+from time import sleep
 
 admin = AdminClient({'bootstrap.servers': 'localhost:9092'})
 
@@ -12,6 +13,8 @@ for topic, f in fs.items():
         print("Topic ", topic, " is deleted")
     except Exception as e:
         print("Failed to delete topic ", topic, " error ", e)
+
+sleep(2)
 
 # Call create_topics to asynchronously create topics.
 fs = admin.create_topics([NewTopic('test', num_partitions=10, replication_factor=1)])

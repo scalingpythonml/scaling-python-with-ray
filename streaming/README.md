@@ -63,3 +63,6 @@ consumers based on the queue depth, A Ray approach is different. Instead of tryi
 Ray based application starts the amount of Kafka listeners (actors) and manages the amount of Ray nodes, moving
 actors (transparently) to a new node, as the load on the actors increases.
 
+## Kafka with Ray streaming
+
+Based on the example [here](https://github.com/ray-project/ray/blob/master/streaming/python/examples/wordcount.py)

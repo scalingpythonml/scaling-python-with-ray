@@ -23,22 +23,23 @@ model_two.deploy()
 
 # max_concurrent_queries is optional. By default, if you pass in an async
 # function, Ray Serve sets the limit to a high number.
-@serve.deployment(max_concurrent_queries=10, route_prefix="/model")
+@serve.deployment(route_prefix="/model")
 class Canary:
-    def __init__(self):
+    def __init__(self, canary_percent):
         from random import random
         self.model_one = model_one.get_handle()
         self.model_two = model_two.get_handle()
+        self.canary_percent = canary_percent
 
     # This method can be called concurrently!
-    async def __call__(self, starlette_request):
-        data = await starlette_request.body()
-        if(random() < .3):
+    async def __call__(self, request):
+        data = await request.body()
+        if(random() < self.canary_percent):
             return await self.model_one.remote(data=data)
         else:
             return await self.model_two.remote(data=data)
 
-Canary.deploy()
+Canary.deploy(.3)
 
 for _ in range(10):
     resp = requests.get("http://127.0.0.1:8000/model", data="hey!")

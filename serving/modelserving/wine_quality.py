@@ -1,4 +1,3 @@
-# Adopted from https://towardsdatascience.com/predicting-wine-quality-with-several-classification-techniques-179038ea6434
 import pandas as pd
 import os
 

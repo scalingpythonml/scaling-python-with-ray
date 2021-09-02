@@ -4,8 +4,7 @@ import requests
 import os
 import pickle
 import numpy as np
-import json
-import asyncio
+
 
 # Models locations
 RANDOM_FOREST_MODEL_PATH = os.path.join("wine-quality_random_forest.pkl")

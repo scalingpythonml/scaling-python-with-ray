@@ -3,9 +3,10 @@ from ray import serve
 import requests
 import os
 import pickle
+import numpy as np
 
 # Models locations
-RANDOM_FOREST_MODEL_PATH = os.path.join("wine-quality_random_forest.pkl")
+XGBOOST_MODEL_PATH = os.path.join("wine-quality_xgboost.pkl")
 
 # Start Ray
 ray.init()
@@ -13,17 +14,18 @@ ray.init()
 # Start Serve
 serve.start()
 #define deployment
-@serve.deployment(route_prefix="/randomforest")
-class RandomForestModel:
+@serve.deployment(route_prefix="/xgboost")
+class XGBoostModel:
     def __init__(self, path):
         with open(path, "rb") as f:
             self.model = pickle.load(f)
+
     async def __call__(self, request):
         payload = await request.json()
         return self.serve(payload)
 
     def serve(self, request):
-        input_vector = [
+        input_vector = np.array([
             request["fixed acidity"],
             request["volatile acidity"],
             request["citric acid"],
@@ -35,11 +37,11 @@ class RandomForestModel:
             request["pH"],
             request["sulphates"],
             request["alcohol"],
-        ]
-        prediction = self.model.predict([input_vector])[0]
+        ])
+        prediction = self.model.predict(input_vector.reshape(1,11))[0]
         return {"result": str(prediction)}
 
-RandomForestModel.deploy(RANDOM_FOREST_MODEL_PATH)
+XGBoostModel.deploy(XGBOOST_MODEL_PATH)
 # list current deploymente
 print(serve.list_deployments())
 
@@ -57,4 +59,4 @@ sample_request_input = {
     "alcohol":  0.26002813,
 }
 
-print(requests.get("http://localhost:8000/randomforest", json=sample_request_input).text)
+print(requests.get("http://localhost:8000/xgboost", json=sample_request_input).text)

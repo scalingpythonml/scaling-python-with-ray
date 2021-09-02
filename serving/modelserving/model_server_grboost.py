@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 
 # Models locations
-XGBOOST_MODEL_PATH = os.path.join("wine-quality_xgboost.pkl")
+GRBOOST_MODEL_PATH = os.path.join("wine-quality_grboost.pkl")
 
 # Start Ray
 ray.init()
@@ -41,7 +41,7 @@ class GRBoostModel:
         prediction = self.model.predict(input_vector.reshape(1,11))[0]
         return {"result": str(prediction)}
 
-GRBoostModel.deploy(XGBOOST_MODEL_PATH)
+GRBoostModel.deploy(GRBOOST_MODEL_PATH)
 # list current deploymente
 print(serve.list_deployments())
 

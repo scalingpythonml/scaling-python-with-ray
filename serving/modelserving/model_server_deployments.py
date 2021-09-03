@@ -105,7 +105,6 @@ GRBoostModel.deploy(GRBOOST_MODEL_PATH)
 @serve.deployment(route_prefix="/speculative")
 class Speculative:
     def __init__(self):
-        from random import random
         self.rfhandle = RandomForestModel.get_handle(sync=False)
         self.xgboosthandle = XGBoostModel.get_handle(sync=False)
         self.grboosthandle = GRBoostModel.get_handle(sync=False)

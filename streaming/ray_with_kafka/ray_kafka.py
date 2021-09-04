@@ -3,36 +3,7 @@ import json
 from time import sleep
 from random import seed
 from random import randint
-
-def setup_topics(server: str = 'localhost:9092', topics: [] = ['test'], partitions: int = 10, replication: int = 1):
-    # Recreate topic
-    from confluent_kafka.admin import AdminClient, NewTopic
-    admin = AdminClient({'bootstrap.servers': server})
-
-    # Delete topics
-    fs = admin.delete_topics(topics)
-
-    # Wait for each operation to finish.
-    for topic, f in fs.items():
-        try:
-            f.result()  # The result itself is None
-            print("Topic ", topic, " is deleted")
-        except Exception as e:
-            print("Failed to delete topic ", topic, " error ", e)
-
-    # Wait to make sure topic is deleted
-    sleep(3)
-    # Call create_topics to asynchronously create topics.
-    new_topics = [NewTopic(topic, num_partitions=partitions, replication_factor=replication) for topic in topics]
-    fs = admin.create_topics(new_topics)
-
-    # Wait for each operation to finish.
-    for topic, f in fs.items():
-        try:
-            f.result()  # The result itself is None
-            print("Topic ", topic, " is created")
-        except Exception as e:
-            print("Failed to create topic ", topic, " error ", e)
+from streaming.shared.kafka_support import setup_topics
 
 @ray.remote
 class KafkaProducer:
@@ -45,9 +16,9 @@ class KafkaProducer:
 
         def delivery_callback(err, msg):
             if err:
-                print('Message failed delivery: ', err)
+                print(f'Message failed delivery: {err}')
             else:
-                print('Message delivered to topic ', msg.topic(), ' partition ', msg.partition(), ' offset', msg.offset())
+                print(f'Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}')
 
         binary_key = None
         if key is not None:
@@ -60,7 +31,7 @@ class KafkaProducer:
 
 @ray.remote
 class KafkaConsumer:
-    def __init__(self, group: str = 'ray', server: str = 'localhost:9092', topic: str = 'test', restart: str = 'latest'):
+    def __init__(self, callback, group: str = 'ray', server: str = 'localhost:9092', topic: str = 'test', restart: str = 'latest'):
         from confluent_kafka import Consumer
         from uuid import uuid4
         # Configuration
@@ -72,13 +43,14 @@ class KafkaConsumer:
         # Create Consumer instance
         self.consumer = Consumer(consumer_conf)
         self.topic = topic
+        self.callback = callback
         self.id = str(uuid4())
 
     def start(self):
         self.run = True
         def print_assignment(consumer, partitions):
-            print('Consumer ', self.id)
-            print('Assignment:', partitions)
+            print(f'Consumer: {self.id}')
+            print(f'Assignment: {partitions}')
 
         # Subscribe to topics
         self.consumer.subscribe([self.topic], on_assign = print_assignment)
@@ -87,13 +59,11 @@ class KafkaConsumer:
             if msg is None:
                 continue
             if msg.error():
-                print("Consumer error: ", msg.error())
+                print(f'Consumer error: {msg.error()}')
                 continue
             else:
                 # Proper message
-                print("Consumer ", self.id, "new message: topic=", msg.topic(), ' partition=', msg.partition(),
-                      ' offset=', msg.offset(), ' key=', msg.key().decode('UTF8'))
-                print(json.loads(msg.value().decode('UTF8')))
+                self.callback(self.id, msg)
 
     def stop(self):
         self.run = False
@@ -101,8 +71,14 @@ class KafkaConsumer:
     def destroy(self):
         self.consumer.close()
 
+# Simple callback function to print topics
+def print_message(consumer_id: str, msg):
+    print(f"Consumer {consumer_id} new message: topic={msg.topic()}  partition= {msg.partition()}  "
+          f"offset={msg.offset()} key={msg.key().decode('UTF8')}")
+    print(json.loads(msg.value().decode('UTF8')))
+
 # Setup topics
-setup_topics()
+setup_topics(topics=['test'])
 
 # Setup rundom number generator
 seed(1)
@@ -112,7 +88,7 @@ ray.init()
 
 # Start consumers and producers
 n_consumers = 5     # Number of consumers
-consumers = [KafkaConsumer.remote() for _ in range(n_consumers)]
+consumers = [KafkaConsumer.remote(print_message) for _ in range(n_consumers)]
 producer = KafkaProducer.remote()
 refs = [c.start.remote() for c in consumers]
 

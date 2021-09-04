@@ -12,7 +12,7 @@ consumer_conf = {'bootstrap.servers': 'localhost:9092',   # bootstrap server
 consumer = Consumer(consumer_conf)
 
 def print_assignment(consumer, partitions):
-    print('Assignment:', partitions)
+    print(f'Assignment: {partitions}')
 
 # Subscribe to topics
 consumer.subscribe(['test'], on_assign=print_assignment)
@@ -28,7 +28,8 @@ try:
             raise KafkaException(msg.error())
         else:
             # Proper message
-            print("New message: topic=", msg.topic(), ' partition=', msg.partition(), ' offset=', msg.offset(), ' key=', msg.key().decode('UTF8'))
+            print(f"New message: topic={msg.topic()} partition={msg.partition()} offset={msg.offset()} "
+                  f"key={msg.key().decode('UTF8')}")
             print(json.loads(msg.value().decode('UTF8')))
 
 except KeyboardInterrupt:

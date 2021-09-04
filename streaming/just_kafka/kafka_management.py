@@ -1,18 +1,21 @@
 from confluent_kafka.admin import AdminClient, NewTopic
 from time import sleep
 
+def wait_for_operation_completion(futures: dict, success: str, failure: str):
+    for topic, f in futures.items():
+        try:
+            f.result()  # The result itself is None
+            print(f'Topic {topic} {success}')
+        except Exception as e:
+            print(f'{failure} {topic} error {e}')
+
 admin = AdminClient({'bootstrap.servers': 'localhost:9092'})
 
 # Delete topics
 fs = admin.delete_topics(['test'])
 
 # Wait for each operation to finish.
-for topic, f in fs.items():
-    try:
-        f.result()  # The result itself is None
-        print("Topic ", topic, " is deleted")
-    except Exception as e:
-        print("Failed to delete topic ", topic, " error ", e)
+wait_for_operation_completion(fs, " is deleted", "Failed to delete topic ")
 
 sleep(2)
 
@@ -20,9 +23,4 @@ sleep(2)
 fs = admin.create_topics([NewTopic('test', num_partitions=10, replication_factor=1)])
 
 # Wait for each operation to finish.
-for topic, f in fs.items():
-    try:
-        f.result()  # The result itself is None
-        print("Topic ", topic, " is created")
-    except Exception as e:
-        print("Failed to create topic ", topic, " error ", e)
+wait_for_operation_completion(fs, " is created", "Failed to create topic ")

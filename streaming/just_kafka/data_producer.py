@@ -34,7 +34,7 @@ for user_favorite_number in range(100):
         producer.produce(topic='test', value=data, key=key, callback=delivery_callback)
 
     except BufferError:
-        print('Local producer queue is full ',  len(producer), ' messages awaiting delivery: try again\n')
+        print(f'Local producer queue is full {len(producer)} messages awaiting delivery: try again\n')
 
     # Serve delivery callback queue.
     # NOTE: Since produce() is an asynchronous API this poll() call

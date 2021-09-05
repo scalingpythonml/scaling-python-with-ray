@@ -63,7 +63,10 @@ class BaseKafkaConsumer:
                     print(f'key={key}')
                 value = json.loads(msg.value().decode("UTF8"))
                 print(f'value = {value}')
-                self.callback(key, value)
+                if self.callback == None:
+                    print('Mo callback defined, skipping message')
+                else:
+                    self.callback(key, value)
 
     def stop(self):
         self.run = False

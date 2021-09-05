@@ -52,9 +52,9 @@ class KafkaProducer:
                 print(f'Message failed delivery: {err}')
             else:
                 print(f'Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}')
-        if key == None:
-            kkey = None
-        else:
+
+        kkey = None
+        if key != None:
             kkey = key.encode('UTF8')
 
         self.producer.produce(topic=topic, value=json.dumps(data).encode('UTF8'),  key=kkey, callback=delivery_callback)
@@ -97,9 +97,10 @@ class KafkaConsumer(Thread):
                 continue
             else:
                 # Proper message
-                print(f"New message: topic={msg.topic()}  partition= {msg.partition()}  "
-                      f"offset={msg.offset()} key={msg.key().decode('UTF8')}")
-                print(json.loads(msg.value().decode('UTF8')))
+                print(f"New message: topic={msg.topic()}  partition= {msg.partition()} offset={msg.offset()}")
+                if msg.key() != None:
+                    print(f'key={msg.key().decode("UTF8")}')
+                print(f'value = {json.loads(msg.value().decode("UTF8"))}')
                 self.callback(msg)
 
     def stop(self):

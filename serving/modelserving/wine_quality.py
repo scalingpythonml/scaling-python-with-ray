@@ -3,7 +3,7 @@ import os
 
 # Get data
 df = pd.read_csv("winequality-red.csv", delimiter=";")
-print("Rows, columns: " + str(df.shape))
+print(f"Rows, columns: {str(df.shape)}")
 print(df.head)
 print(df.isna().sum())
 
@@ -24,7 +24,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.25, random_
 for row, row_index in enumerate(X_test):
     print(row_index, row)
 
-print("Row 70", X_test[70])
+print(f"Row 70 {X_test[70]}")
 
 # Decision tree
 from sklearn.metrics import classification_report

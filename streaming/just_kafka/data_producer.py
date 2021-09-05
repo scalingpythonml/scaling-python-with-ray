@@ -7,9 +7,9 @@ import json
 # failed delivery (after retries).
 def delivery_callback(err, msg):
     if err:
-        print('Message failed delivery: ', err)
+        print(f'Message failed delivery: {err}')
     else:
-        print('Message delivered to topic ', msg.topic(), ' partition ', msg.partition(), ' offset', msg.offset())
+        print(f'Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}')
 
 # Producer configuration
 # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md

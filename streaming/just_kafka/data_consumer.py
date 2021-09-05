@@ -30,7 +30,7 @@ try:
             # Proper message
             print(f"New message: topic={msg.topic()} partition={msg.partition()} offset={msg.offset()} "
                   f"key={msg.key().decode('UTF8')}")
-            print(json.loads(msg.value().decode('UTF8')))
+            print(f"Value {json.loads(msg.value().decode('UTF8'))}")
 
 except KeyboardInterrupt:
     print('Aborted by user\n')

@@ -23,7 +23,7 @@ class TemperatureControllerManager:
 
     def process_controller_message(self, key: str, request: dict):
         if not key in self.controllers:   # create a new controller
-            print('Creating a new controller ', key)
+            print(f'Creating a new controller {key}')
             controller = TemperatureController(producer=self.producer, id=key)
             self.controllers[key] = controller
         self.controllers[key].process_new_message(request)

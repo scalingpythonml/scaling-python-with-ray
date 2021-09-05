@@ -25,7 +25,7 @@ class TemperatureControllerManager:
     def process_controller_message(self, key: str, value: dict):
         controller_id = value['id']
         if not controller_id in self.controllers:   # create a new controller
-            print('Creating a new controller ', controller_id)
+            print(f'Creating a new controller {controller_id}')
             controller = TemperatureController.remote(producer=self.producer, id=controller_id)
             self.controllers[controller_id] = controller
         self.controllers[controller_id].process_new_message.remote(value)

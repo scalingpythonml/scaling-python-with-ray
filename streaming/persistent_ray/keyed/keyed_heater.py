@@ -46,7 +46,7 @@ class Heater(BaseHeater):
     # update desired temperature
     def submit_desired(self):
         data = {'temperature' : self.desired, 'up_delta' : self.upDelta, 'down_delta': self.downDelta}
-        print('Submitting desired temperature ', data, ' with key ', self.id)
+        print(f'Submitting desired temperature {data} with key {self.id}')
         self.producer.produce(topic=self.temptopic, data=data, key=self.id)
         self.desired = self.desired + randint(0, 10) - 5.0
 

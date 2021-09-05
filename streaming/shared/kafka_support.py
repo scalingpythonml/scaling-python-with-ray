@@ -93,7 +93,7 @@ class KafkaConsumer(Thread):
             if msg is None:
                 continue
             if msg.error():
-                print("Consumer error: ", msg.error())
+                print(f'Consumer error: {msg.error()}')
                 continue
             else:
                 # Proper message

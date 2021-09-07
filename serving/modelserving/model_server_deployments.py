@@ -4,6 +4,7 @@ import requests
 import os
 import pickle
 import numpy as np
+import asyncio
 
 
 # Models locations
@@ -110,12 +111,12 @@ class Speculative:
         self.grboosthandle = GRBoostModel.get_handle(sync=False)
     async def __call__(self, request):
         payload = await request.json()
-        f1 = self.rfhandle.serve.remote(payload)
-        f2 = self.xgboosthandle.serve.remote(payload)
-        f3 = self.grboosthandle.serve.remote(payload)
-        rfresurlt = ray.get(await f1)['result']
-        xgresurlt = ray.get(await f2)['result']
-        grresult = ray.get(await f3)['result']
+        f1, f2, f3 = await asyncio.gather(self.rfhandle.serve.remote(payload),
+                self.xgboosthandle.serve.remote(payload), self.grboosthandle.serve.remote(payload))
+
+        rfresurlt = ray.get(f1)['result']
+        xgresurlt = ray.get(f2)['result']
+        grresult = ray.get(f3)['result']
         ones = []
         zeros = []
         if rfresurlt == "1":

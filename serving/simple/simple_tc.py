@@ -12,9 +12,11 @@ serve.start()
 class Converter:
     def __call__(self, request):
         if request.query_params["type"] == 'CF' :
-            return {"Fahrenheit temperature": 9.0/5.0 * float(request.query_params["temp"]) + 32.0}
+            return {"Fahrenheit temperature":
+                        9.0/5.0 * float(request.query_params["temp"]) + 32.0}
         elif request.query_params["type"] == 'FC' :
-            return {"Celsius temperature": (float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
+            return {"Celsius temperature":
+                        (float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
         else:
             return {"Unknown conversion code" : request.query_params["type"]}
     def celcius_fahrenheit(self, temp):

@@ -15,9 +15,11 @@ class Converter:
         self.id = str(uuid4())
     def __call__(self, request):
         if request.query_params["type"] == 'CF' :
-            return {"Deployment": self.id, "Fahrenheit temperature": 9.0/5.0 * float(request.query_params["temp"]) + 32.0}
+            return {"Deployment": self.id, "Fahrenheit temperature":
+                9.0/5.0 * float(request.query_params["temp"]) + 32.0}
         elif request.query_params["type"] == 'FC' :
-            return {"Deployment": self.id, "Celsius temperature": (float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
+            return {"Deployment": self.id, "Celsius temperature":
+                (float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
         else:
             return {"Deployment": self.id, "Unknown conversion code" : request.query_params["type"]}
     def celcius_fahrenheit(self, temp):

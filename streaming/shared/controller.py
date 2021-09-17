@@ -16,7 +16,8 @@ class BaseTemperatureController:
         desired = setting['temperature']
         updelta = setting['up_delta']
         downdelta = setting['down_delta']
-        print(f'Controller {self.id} new temperature setting {desired} up delta {updelta} down delta {downdelta}')
+        print(f'Controller {self.id} new temperature setting {desired} up delta {updelta} '
+              f'down delta {downdelta}')
         self.currentSetting = desired
         self.upDelta = updelta
         self.downDelta = downdelta

@@ -1,0 +1,7 @@
+ports:
+- port: 8050
+  onOpen: open-preview
+- port: 8888
+  onOpen: open-browser
+image:
+  file: DemoDockerfile

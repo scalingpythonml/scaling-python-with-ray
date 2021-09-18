@@ -1,13 +1,13 @@
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: k3s-mooo
+  name: k3s-jupyter-tls
   namespace: jhub
 spec:
-  secretName: k3s-mooo-tls
+  secretName: k3s-jupyter-tls
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
-  commonName: holdenkarau.mooo.com
+  commonName: jupyter.pigscanfly.ca
   dnsNames:
-  - holdenkarau.mooo.com
+  - jupyter.pigscanfly.ca

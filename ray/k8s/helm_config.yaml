@@ -1,0 +1,10 @@
+imagePullSecrets: []
+image: holdenk/ray-ray:nightly
+operatorImage: holdenk/ray-ray:nightly
+podsTypes:
+  rayWorkerType:
+    memory: 10Gi
+    maxWorkers: 3
+    GPU: 1
+    CPU: 2
+

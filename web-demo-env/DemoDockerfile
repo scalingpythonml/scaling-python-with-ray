@@ -8,7 +8,7 @@ FROM jupyter/datascience-notebook:python-3.8.8
 # is in a group with the same name (in this case jovyan).  So we must first make that so.
 ADD https://raw.githubusercontent.com/microsoft/vscode-dev-containers/main/script-library/common-debian.sh /tmp/library-scripts/
 # gitpods layer
-ADD https://github.com/gitpod-io/gitpod/blob/master/components/image-builder/workspace-image-layer/gitpod-layer/debian/gitpod/layer.sh /tmp/library-scripts/
+ADD https://raw.githubusercontent.com/gitpod-io/gitpod/master/components/image-builder/workspace-image-layer/gitpod-layer/debian/gitpod/layer.sh /tmp/library-scripts/
 USER root
 RUN apt-get update \
  && groupadd jovyan \

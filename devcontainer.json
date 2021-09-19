@@ -1,5 +1,6 @@
 {
-    "build": { "dockerfile": "web-demo-env/DemoDockerfile" },
+    //    "build": { "dockerfile": "web-demo-env/DemoDockerfile" },
+    "image": "holdenk/scalingpythonexamples",
     "overrideCommand": false,
 
     // Forward Jupyter port locally, mark required

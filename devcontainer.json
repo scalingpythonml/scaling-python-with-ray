@@ -1,5 +1,5 @@
 {
-    "build": { "dockerfile": "DemoDockerfile" },
+    "build": { "dockerfile": "web-demo-env/DemoDockerfile" },
     "overrideCommand": false,
 
     // Forward Jupyter port locally, mark required

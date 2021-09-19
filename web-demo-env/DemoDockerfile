@@ -19,7 +19,7 @@ RUN apt-get update \
  && apt-get -y install --no-install-recommends openjdk-11-jdk-headless g++
 RUN echo hi
 RUN conda update -n base conda
-RUN conda install --yes nomkl cytoolz cmake cytoolz \
+RUN conda install --yes cytoolz cmake cytoolz \
     dask>=2021.7.0 \
     lz4 \
     numpy>=1.21.1 \

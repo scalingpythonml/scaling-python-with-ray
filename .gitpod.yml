@@ -3,5 +3,10 @@ ports:
   onOpen: open-preview
 - port: 8888
   onOpen: open-browser
-image:
-  file: web-demo-env/DemoDockerfile
+image: holdenk/scalingpythonexamples
+#Takes too long to build
+#image:
+#  file: web-demo-env/DemoDockerfile
+tasks:
+  - name: Start jupyter
+    command: /usr/local/bin/start-notebook.sh

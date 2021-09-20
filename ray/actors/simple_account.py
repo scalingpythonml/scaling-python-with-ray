@@ -28,7 +28,8 @@ class Account(object):
         return balance
 
 Account = ray.remote(Account)
-account_actor = Account.options(name='Account').remote(balance = 100.,minimal_balance=20.)
+account_actor = Account.options(name='Account')\
+    .remote(balance = 100.,minimal_balance=20.)
 
 
 print(f"Current balance {ray.get(account_actor.balance.remote())}")

@@ -9,4 +9,4 @@ image: holdenk/scalingpythonexamples
 #  file: web-demo-env/DemoDockerfile
 tasks:
   - name: Start jupyter
-    command: sudo -u joyvan /usr/local/bin/start-notebook.sh
+    command: /usr/local/bin/start-notebook.sh

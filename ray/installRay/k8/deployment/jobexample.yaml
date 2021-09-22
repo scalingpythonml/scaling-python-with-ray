@@ -1,0 +1,27 @@
+# Job to run a Ray program in its own pod. Assumes that a Ray cluster is already
+# running.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: ray-test-job-
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ray
+          image: rayproject/ray:880797-py37-cpu
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "-c", "--" ]
+          args:
+            - "wget https://raw.githubusercontent.com/ray-project/ray/master/doc/kubernetes/example_scripts/job_example.py &&
+              python job_example.py"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+          env:
+            - name: EXAMPLE_CLUSTER_RAY_HEAD_SERVICE_HOST
+              value: ray-ray-head
+            - name: EXAMPLE_CLUSTER_RAY_HEAD_SERVICE_PORT
+              value: "10001"

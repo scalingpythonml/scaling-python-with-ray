@@ -54,6 +54,6 @@ def main():
 if __name__ == "__main__":
     service = os.environ['EXAMPLE_CLUSTER_RAY_HEAD_SERVICE_HOST']
     port = os.environ['EXAMPLE_CLUSTER_RAY_HEAD_SERVICE_PORT']
-    print(f'Connecting to Ray at service {host}, port {port}')
-    ray.util.connect(f"{host}:{port}")
+    print(f'Connecting to Ray at service {service}, port {port}')
+    ray.util.connect(f"{service}:{port}")
     main()

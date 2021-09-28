@@ -2,8 +2,6 @@
     //    "build": { "dockerfile": "web-demo-env/DemoDockerfile" },
     "image": "holdenk/scalingpythonexamples",
     "overrideCommand": false,
-    "workspaceFolder": "/home/jovyan",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/home/jovyan,type=bind,consistency=cached",
 
     // Forward Jupyter port locally, mark required
     "forwardPorts": [8888],

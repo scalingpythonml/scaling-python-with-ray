@@ -44,10 +44,10 @@ items:
             resources:
               limits:
                 cpu: 1
-                memory: 512Mi
+                memory: 5Gi
               requests:
                 cpu: 1
-                memory: 512Mi
+                memory: 5Gi
             volumeMounts:
             - mountPath: /dev/shm
               name: dshm

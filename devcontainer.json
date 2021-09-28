@@ -1,5 +1,5 @@
 {
-    "image": "holdenk/scalingpythonexamples",
+    "dockerFile": "web-demo-env/WrapperDockerfile",
     "overrideCommand": false,
 
     "forwardPorts": [8888],

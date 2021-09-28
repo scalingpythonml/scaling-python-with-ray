@@ -1,0 +1,111 @@
+apiVersion: v1
+items:
+- apiVersion: cluster.ray.io/v1
+  kind: RayCluster
+  metadata:
+    name: gpu-cluster
+    namespace: ray
+  spec:
+    headPodType: rayHeadType
+    headStartRayCommands:
+    - ray stop
+    - ulimit -n 65536; ray start --head --no-monitor --dashboard-host 0.0.0.0 &> /tmp/raylogs
+    idleTimeoutMinutes: 5
+    maxWorkers: 5
+    podTypes:
+    - maxWorkers: 0
+      minWorkers: 0
+      name: rayHeadType
+      podConfig:
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          generateName: ray-head-type-
+        spec:
+          containers:
+          - args:
+            - 'trap : TERM INT; touch /tmp/raylogs; tail -f /tmp/raylogs; sleep infinity & wait;'
+            command:
+            - /bin/bash
+            - -c
+            - --
+            image: holdenk/ray-ray:nightly
+            imagePullPolicy: Always
+            name: ray-node
+            ports:
+            - containerPort: 6379
+              protocol: TCP
+            - containerPort: 10001
+              protocol: TCP
+            - containerPort: 8265
+              protocol: TCP
+            - containerPort: 8000
+              protocol: TCP
+            resources:
+              limits:
+                cpu: 1
+                memory: 5Gi
+              requests:
+                cpu: 1
+                memory: 5Gi
+            volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+          restartPolicy: Never
+          volumes:
+          - emptyDir:
+              medium: Memory
+            name: dshm
+    - maxWorkers: 5
+      minWorkers: 2
+      name: rayWorkerType
+      podConfig:
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          generateName: ray-worker-type-
+        spec:
+          containers:
+          - args:
+            - 'trap : TERM INT; touch /tmp/raylogs; tail -f /tmp/raylogs; sleep infinity & wait;'
+            command:
+            - /bin/bash
+            - -c
+            - --
+            image: holdenk/ray-ray:nightly
+            imagePullPolicy: Always
+            name: ray-node
+            ports:
+            - containerPort: 6379
+              protocol: TCP
+            - containerPort: 10001
+              protocol: TCP
+            - containerPort: 8265
+              protocol: TCP
+            - containerPort: 8000
+              protocol: TCP
+            resources:
+              limits:
+                cpu: 1
+                memory: 10Gi
+              requests:
+                cpu: 1
+                memory: 10Gi
+            volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+          nodeSelector:
+            node.kubernetes.io/gpu: gpu
+          restartPolicy: Never
+          volumes:
+          - emptyDir:
+              medium: Memory
+            name: dshm
+    upscalingSpeed: 1
+    workerStartRayCommands:
+    - ray stop
+    - ulimit -n 65536; ray start --address=$RAY_HEAD_IP:6379 &> /tmp/raylogs
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

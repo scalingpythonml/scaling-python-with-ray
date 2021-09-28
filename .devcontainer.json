@@ -2,6 +2,8 @@
     //    "build": { "dockerfile": "web-demo-env/DemoDockerfile" },
     "image": "holdenk/scalingpythonexamples",
     "overrideCommand": false,
+    "workspaceFolder": "/home/jovyan",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/jovyan,type=bind,consistency=cached",
 
     // Forward Jupyter port locally, mark required
     "forwardPorts": [8888],
@@ -9,13 +11,15 @@
 	"8888": {
 	    "label": "Jupyter",
 	    "requireLocalPort": true,
-	    "onAutoForward": "ignore"
+	    "onAutoForward": "notify"
 	}
     },
 
     // Set *default* container specific settings.json values on container create.
     "settings": {
-        "python.pythonPath": "/opt/conda/bin/python"
+        "python.pythonPath": "/opt/conda/bin/python",
+	"condaPath": "/opt/conda/bin/conda",
+	"terminal.integrated.inheritEnv": false
     },
 
     // Add the IDs of extensions you want installed when the container is created.

@@ -1,7 +1,11 @@
 {
     //    "build": { "dockerfile": "web-demo-env/DemoDockerfile" },
     "image": "holdenk/scalingpythonexamples",
-    "overrideCommand": false,
+    // The scalingpythonexamples container launches a notebok as the entrypoint
+    // however, so that the user can see (and we can also be in the right working directory)
+    // we could also change workspaceMount and have them run jupyter list.
+    "overrideCommand": true,
+    "onCreateCommand": "cd ${CODESPACE_VSCODE_FOLDER}; start-notebook.sh &",
 
     // Forward Jupyter port locally, mark required
     "forwardPorts": [8888],

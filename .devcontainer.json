@@ -5,7 +5,7 @@
     // however, so that the user can see (and we can also be in the right working directory)
     // we could also change workspaceMount and have them run jupyter list.
     "overrideCommand": true,
-    "onCreateCommand": "cd ${CODESPACE_VSCODE_FOLDER}; start-notebook.sh &",
+    "postAttachCommand": "cd ${CODESPACE_VSCODE_FOLDER}; start-notebook.sh &",
 
     // Forward Jupyter port locally, mark required
     "forwardPorts": [8888],
@@ -20,7 +20,8 @@
     // Set *default* container specific settings.json values on container create.
     "settings": {
         "python.pythonPath": "/opt/conda/bin/python",
-	"condaPath": "/opt/conda/bin/conda"
+	"condaPath": "/opt/conda/bin/conda",
+	"terminal.integrated.inheritEnv": false
     },
 
     // Add the IDs of extensions you want installed when the container is created.

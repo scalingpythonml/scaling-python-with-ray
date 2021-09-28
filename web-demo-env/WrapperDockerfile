@@ -1,4 +1,0 @@
-# This just wraps the prebuilt container because codespaces isn't listening to our image directive.
-FROM holdenk/scalingpythonexamples
-
-RUN echo "Hi!" > /hi

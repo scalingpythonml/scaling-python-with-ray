@@ -1,5 +1,3 @@
-# from https://github.com/ray-project/ray/blob/master/python/ray/autoscaler/kubernetes/defaults.yaml
-
 # A unique identifier for the head node and workers of this cluster.
 cluster_name: ray
 

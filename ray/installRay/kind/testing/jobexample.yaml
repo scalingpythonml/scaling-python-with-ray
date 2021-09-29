@@ -14,7 +14,7 @@ spec:
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]
           args:
-            - "wget https://raw.githubusercontent.com/scalingpythonml/scalingpythonml/master/ray/installRay/k8/testing/servicePython.py &&
+            - "wget https://raw.githubusercontent.com/scalingpythonml/scalingpythonml/d8d6aa39c9fd74dddec41accebdca08585360baa/ray/installRay/kind/testing/servicePython.py &&
               python servicePython.py"
           resources:
             requests:

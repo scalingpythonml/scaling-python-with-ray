@@ -1,0 +1,5 @@
+FROM holdenk/scalingpythonexamples
+# In CodeSpaces we want to switch to the right working directory
+COPY entrypoint.sh /
+RUN chmod a+x entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]

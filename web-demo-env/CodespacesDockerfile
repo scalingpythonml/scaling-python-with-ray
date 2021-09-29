@@ -2,4 +2,6 @@ FROM holdenk/scalingpythonexamples
 # In CodeSpaces we want to switch to the right working directory
 COPY entrypoint.sh /
 RUN chmod a+x /entrypoint.sh
+RUN mkdir -p ~jovyan; echo "jupyter notebook list; echo \"ctrl-click on the above link to access your notebook.\"" >> ~jovyan/.bashrc
+RUN chown -R jovyan ~jovyan
 ENTRYPOINT ["entrypoint.sh"]

@@ -9,8 +9,6 @@ the relevant Kubernetes head service e.g.
 kubectl -n ray port-forward service/example-cluster-ray-head 10001:10001.
 Set the constant LOCAL_PORT below to the local port being forwarded.
 """
-LOCAL_PORT = 10001
-
 
 @ray.remote
 def gethostname(x):
@@ -52,5 +50,6 @@ def main():
 
 
 if __name__ == "__main__":
-    ray.util.connect(f"127.0.0.1:{LOCAL_PORT}")
+    print(f'Using Ray version {ray.__version__}')
+    ray.init("ray://localhost:10001")
     main()

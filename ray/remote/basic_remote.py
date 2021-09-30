@@ -28,8 +28,8 @@ for n in range(4):
 print(f'Execution result {result} in {time.time() - start}')
 
 # invoking remote function
-result = []
+results = []
 start = time.time()
 for n in range(4):
-    result.append(remote_function.remote(n))
-print(f'Execution result {sum(ray.get(result))} in {time.time() - start}')
+    results.append(remote_function.remote(n))
+print(f'Execution result {sum(ray.get(results))} in {time.time() - start}')

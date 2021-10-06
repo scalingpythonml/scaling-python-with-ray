@@ -39,7 +39,7 @@ class Account(object):
     def __init__(self, balance: float, minimal_balance: float, account_key: str, persistence: ActorPool):
         self.persistence = persistence
         self.key = account_key
-        while(persistence.has_next()):
+        while persistence.has_next():
             pass
         persistence.submit(lambda a, v: a.exists.remote(v), account_key)
         if persistence.get_next():

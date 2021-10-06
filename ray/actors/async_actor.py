@@ -4,7 +4,7 @@ import asyncio
 ray.init()
 
 @ray.remote
-class AsyncActor(object):
+class AsyncActor:
     async def computation(self, num):
         print(f'Actor waiting for {num} sec')
         for x in range(num):

@@ -14,7 +14,6 @@ def generate_number(s: int, limit: int) -> int :
 
 @ray.remote
 def remote_objrefs():
-    # Call f 4 times and return the resulting object IDs.
     results = []
     for n in range(4):
         results.append(generate_number.remote(n, 10*n))
@@ -22,8 +21,6 @@ def remote_objrefs():
 
 @ray.remote
 def remote_values():
-    # Call f 4 times, block until those 4 tasks finish,
-    # retrieve the results, and return the values.
     results = []
     for n in range(4):
         results.append(generate_number.remote(n, 10*n))

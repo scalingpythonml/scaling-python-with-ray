@@ -4,7 +4,7 @@ from time import sleep
 ray.init()
 
 @ray.remote
-class ThreadedActor(object):
+class ThreadedActor:
     def computation(self, num):
         print(f'Actor waiting for {num} sec')
         for x in range(num):

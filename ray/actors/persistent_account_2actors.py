@@ -33,7 +33,7 @@ class FilePersistence(BasePersitence):
 persistence_actor = FilePersistence.remote()
 
 @ray.remote
-class Account(object):
+class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str, persistence):
         self.persistence = persistence
         self.key = account_key

@@ -7,7 +7,7 @@ from ray.util import ActorPool
 ray.init()
 
 @ray.remote
-class PoolActor(object):
+class PoolActor:
     def __init__(self):
         self.id = str(uuid4())
 

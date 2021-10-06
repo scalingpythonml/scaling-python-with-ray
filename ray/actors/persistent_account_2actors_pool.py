@@ -35,7 +35,7 @@ class FilePersistence(BasePersitence):
 pool = ActorPool([FilePersistence.remote(), FilePersistence.remote(), FilePersistence.remote()])
 
 @ray.remote
-class Account(object):
+class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str, persistence: ActorPool):
         self.persistence = persistence
         self.key = account_key

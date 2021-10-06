@@ -5,7 +5,7 @@ from os.path import exists
 ray.init()
 
 @ray.remote
-class Account(object):
+class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str, basedir: str = '.'):
         self.basedir = basedir
         self.key = account_key

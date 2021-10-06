@@ -4,7 +4,7 @@ import ray
 ray.init()
 
 #@ray.remote
-class Account(object):
+class Account:
     def __init__(self, balance: float, minimal_balance: float):
         if balance < minimal_balance:
             print(f"Balance {balance} is less then minimal balance {minimal_balance}")

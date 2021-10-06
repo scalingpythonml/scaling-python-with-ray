@@ -30,7 +30,7 @@ class FilePersistence(BasePersitence):
         return ray.cloudpickle.loads(bytes)
 
 @ray.remote
-class Account(object):
+class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str,
                  persistence: BasePersitence):
         self.persistence = persistence

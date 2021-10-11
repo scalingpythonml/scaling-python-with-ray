@@ -25,10 +25,10 @@ cd ray
 # Build the ray UI
 pushd python/ray/new_dashboard/client; npm install && npm ci && npm run build; popd
 # Specify a specific bazel version as newer ones sometimes break.
-export USE_BAZEL_VERSION=3.7.2
-# This part takes an hour on a modern ARM machine :(
-./build.sh
+export USE_BAZEL_VERSION=4.2.1
 cd python
+# MAC ARM USERS ONLY: cleanup the vendored files
+rm -rf ./thirdparty_files
 # Install in edit mode or build a wheel
 pip install -e .
 # python setup.py bdist_wheel

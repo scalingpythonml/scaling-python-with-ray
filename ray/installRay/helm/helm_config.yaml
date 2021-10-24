@@ -1,7 +1,7 @@
 imagePullSecrets: []
 image: holdenk/ray-ray:nightly
 operatorImage: holdenk/ray-ray:nightly
-podsTypes:
+podTypes:
   rayWorkerType:
     memory: 10Gi
     maxWorkers: 3

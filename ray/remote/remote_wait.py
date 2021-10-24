@@ -27,12 +27,10 @@ id = remote_function.remote(3)
 functions[id] = 'func5'
 ids.append(id)
 
-while True:
+while len(ids) > 0:
     ready, not_ready = ray.wait(ids)
     print(f'Ready length {len(ready)}; not ready length {len(not_ready)}')
     for id in ready:
         print(f'completed function {functions[id]}, result {ray.get(id)}')
         # Ready results processing goes here
     ids = not_ready
-    if not ids:
-        break

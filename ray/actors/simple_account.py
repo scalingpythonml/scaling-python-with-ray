@@ -16,6 +16,9 @@ class Account:
         return self.balance
 
     def deposit(self, amount: float) -> float:
+        if amount < 0:
+            print(f"Can not deposit negative amount {amount} ")
+            raise Exception("Can not deposit negative amount")
         self.balance = self.balance + amount
         return self.balance
 

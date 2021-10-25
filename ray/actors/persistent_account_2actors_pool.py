@@ -93,5 +93,10 @@ print(f"Current balance {ray.get(account_actor.balance.remote())}")
 print(f"New balance {ray.get(account_actor.withdraw.remote(40.))}")
 print(f"New balance {ray.get(account_actor.deposit.remote(70.))}")
 
+ray.kill(account_actor)
+
+account_actor = Account.options(name='Account').remote(balance=100.,minimal_balance=20.,
+                                                       account_key='1234567', persistence=pool)
+
 print(f"Current balance {ray.get(account_actor.balance.remote())}")
 

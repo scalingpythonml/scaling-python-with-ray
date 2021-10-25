@@ -39,13 +39,7 @@ class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str, persistence: ActorPool):
         self.persistence = persistence
         self.key = account_key
-        while persistence.has_next():
-            pass
-        persistence.submit(lambda a, v: a.exists.remote(v), account_key)
-        if persistence.get_next():
-            # We have a state to restore
-            self.restorestate()
-        else:
+        if not self.restorestate():
             if balance < minimal_balance:
                 print(f"Balance {balance} is less then minimal balance {minimal_balance}")
                 raise Exception("Starting balance is less then minimal balance")
@@ -70,13 +64,19 @@ class Account:
         self.storestate()
         return balance
 
-    def restorestate(self):
+    def restorestate(self) -> bool:
         while(self.persistence.has_next()):
             pass
-        self.persistence.submit(lambda a, v: a.restore.remote(v), self.key)
-        state = self.persistence.get_next()
-        self.balance = state['balance']
-        self.minimal = state['minimal']
+        self.persistence.submit(lambda a, v: a.exists.remote(v), self.key)
+        if self.persistence.get_next():
+            # We have a state to restore
+            self.persistence.submit(lambda a, v: a.restore.remote(v), self.key)
+            state = self.persistence.get_next()
+            self.balance = state['balance']
+            self.minimal = state['minimal']
+            return True
+        else:
+            return False
 
     def storestate(self):
         self.persistence.submit(lambda a, v: a.save.remote(v), (self.key,

@@ -28,9 +28,12 @@ class FilePersistence(BasePersitence):
             f.write(bytes)
 
     def restore(self, key:str) -> dict:
-        with open(self.basedir + '/' + key, "rb") as f:
-            bytes = f.read()
-        return ray.cloudpickle.loads(bytes)
+        if self.exists(key):
+            with open(self.basedir + '/' + key, "rb") as f:
+                bytes = f.read()
+            return ray.cloudpickle.loads(bytes)
+        else:
+            return None
 
 pool = ActorPool([FilePersistence.remote(), FilePersistence.remote(), FilePersistence.remote()])
 
@@ -67,11 +70,10 @@ class Account:
     def restorestate(self) -> bool:
         while(self.persistence.has_next()):
             pass
-        self.persistence.submit(lambda a, v: a.exists.remote(v), self.key)
-        if self.persistence.get_next():
-            # We have a state to restore
-            self.persistence.submit(lambda a, v: a.restore.remote(v), self.key)
-            state = self.persistence.get_next()
+        self.persistence.submit(lambda a, v: a.restore.remote(v), self.key)
+        state = self.persistence.get_next()
+        if state != None:
+            print(f'Restoring state {state}')
             self.balance = state['balance']
             self.minimal = state['minimal']
             return True
@@ -90,13 +92,6 @@ account_actor = Account.options(name='Account').remote(balance=100.,minimal_bala
 print(f"Current balance {ray.get(account_actor.balance.remote())}")
 print(f"New balance {ray.get(account_actor.withdraw.remote(40.))}")
 print(f"New balance {ray.get(account_actor.deposit.remote(70.))}")
-
-print(ray.get_actor('Account'))
-
-ray.kill(account_actor)
-
-account_actor = Account.options(name='Account') .remote(balance=100.,minimal_balance=20.,
-                                    account_key='1234567', persistence=pool)
 
 print(f"Current balance {ray.get(account_actor.balance.remote())}")
 

@@ -25,9 +25,12 @@ class FilePersistence(BasePersitence):
             f.write(bytes)
 
     def restore(self, key:str) -> dict:
-        with open(self.basedir + '/' + key, "rb") as f:
-            bytes = f.read()
-        return ray.cloudpickle.loads(bytes)
+        if not self.exists(key):
+            return None
+        else:
+            with open(self.basedir + '/' + key, "rb") as f:
+                bytes = f.read()
+            return ray.cloudpickle.loads(bytes)
 
 @ray.remote
 class Account:
@@ -35,10 +38,7 @@ class Account:
                  persistence: BasePersitence):
         self.persistence = persistence
         self.key = account_key
-        if persistence.exists(account_key):
-            # We have a state to restore
-            self.restorestate()
-        else:
+        if not self.restorestate():
             if balance < minimal_balance:
                 print(f"Balance {balance} is less then minimal balance {minimal_balance}")
                 raise Exception("Starting balance is less then minimal balance")
@@ -63,10 +63,14 @@ class Account:
         self.storestate()
         return balance
 
-    def restorestate(self):
+    def restorestate(self) -> bool:
         state = self.persistence.restore(self.key)
-        self.balance = state['balance']
-        self.minimal = state['minimal']
+        if state != None:
+            self.balance = state['balance']
+            self.minimal = state['minimal']
+            return True
+        else:
+            return False
 
     def storestate(self):
         self.persistence.save(self.key,

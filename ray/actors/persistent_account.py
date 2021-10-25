@@ -9,10 +9,7 @@ class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str, basedir: str = '.'):
         self.basedir = basedir
         self.key = account_key
-        if exists(basedir + '/' + account_key):
-            # We have a state to restore
-            self.restorestate()
-        else:
+        if not self.restorestate():
             if balance < minimal_balance:
                 print(f"Balance {balance} is less then minimal balance {minimal_balance}")
                 raise Exception("Starting balance is less then minimal balance")
@@ -37,12 +34,16 @@ class Account:
         self.storestate()
         return balance
 
-    def restorestate(self):
-        with open(self.basedir + '/' + self.key, "rb") as f:
-            bytes = f.read()
-        state = ray.cloudpickle.loads(bytes)
-        self.balance = state['balance']
-        self.minimal = state['minimal']
+    def restorestate(self) -> bool:
+        if exists(self.basedir + '/' + self.key):
+            with open(self.basedir + '/' + self.key, "rb") as f:
+                bytes = f.read()
+            state = ray.cloudpickle.loads(bytes)
+            self.balance = state['balance']
+            self.minimal = state['minimal']
+            return True
+        else:
+            return False
 
     def storestate(self):
         bytes = ray.cloudpickle.dumps({'balance' : self.balance, 'minimal' : self.minimal})

@@ -10,7 +10,8 @@ controlInterval = 600       # sec
 class BaseHeater:
 
     # initialize heater
-    def __init__(self, id: str, current: float = 42.0, desired: float = 45.0, upDelta: float = 1.0, downDelta: float = 1.0):
+    def __init__(self, id: str, current: float = 42.0, desired: float = 45.0,
+                 upDelta: float = 1.0, downDelta: float = 1.0):
 
         self.id = id
 

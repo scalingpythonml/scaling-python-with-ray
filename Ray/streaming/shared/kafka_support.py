@@ -53,13 +53,15 @@ class KafkaProducer:
             if err:
                 print(f'Message failed delivery: {err}')
             else:
-                print(f'Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}')
+                print(f'Message delivered to topic {msg.topic()} partition '
+                      f'{msg.partition()} offset {msg.offset()}')
 
         kkey = None
         if key != None:
             kkey = key.encode('UTF8')
 
-        self.producer.produce(topic=topic, value=json.dumps(data).encode('UTF8'),  key=kkey, callback=delivery_callback)
+        self.producer.produce(topic=topic, value=json.dumps(data).encode('UTF8'),
+                              key=kkey, callback=delivery_callback)
         self.producer.poll(0)
 
     # Destroy producer
@@ -69,7 +71,8 @@ class KafkaProducer:
 # Threaded Kafka consumer class
 class KafkaConsumer(Thread):
     # Initialize consumer
-    def __init__(self, topic: str, callback, group: str, server: str = 'localhost:9092', restart: str = 'latest'):
+    def __init__(self, topic: str, callback, group: str, server: str = 'localhost:9092',
+                 restart: str = 'latest'):
         # Call the Thread class's init function
         Thread.__init__(self)
         # Configuration
@@ -99,7 +102,8 @@ class KafkaConsumer(Thread):
                 continue
             else:
                 # Proper message
-                print(f"New message: topic={msg.topic()}  partition= {msg.partition()} offset={msg.offset()}")
+                print(f"New message: topic={msg.topic()}  partition= {msg.partition()} "
+                      f"offset={msg.offset()}")
                 if msg.key() != None:
                     print(f'key={msg.key().decode("UTF8")}')
                 print(f'value = {json.loads(msg.value().decode("UTF8"))}')

@@ -15,19 +15,22 @@ class KafkaProducer:
             if err:
                 print(f'Message failed delivery: {err}')
             else:
-                print(F'Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}')
+                print(F'Message delivered to topic {msg.topic()} partition {msg.partition()}'
+                      F' offset {msg.offset()}')
 
         kkey = None
         if key != None:
             kkey = key.encode('UTF8')
-        self.producer.produce(topic=self.topic, value=json.dumps(data).encode('UTF8'), key=kkey, callback=delivery_callback)
+        self.producer.produce(topic=self.topic, value=json.dumps(data).encode('UTF8'),
+                              key=kkey, callback=delivery_callback)
         self.producer.poll(0)
 
     def destroy(self):
         self.producer.flush(30)
 
 class BaseKafkaConsumer:
-    def __init__(self, group: str = 'ray', server: str = 'localhost:9092', topic: str = 'sensor', restart: str = 'earliest'):
+    def __init__(self, group: str = 'ray', server: str = 'localhost:9092', topic: str = 'sensor',
+                 restart: str = 'earliest'):
         from confluent_kafka import Consumer
         # Configuration
         consumer_conf = {'bootstrap.servers': server,   # bootstrap server
@@ -56,7 +59,8 @@ class BaseKafkaConsumer:
                 continue
             else:
                 # Proper message
-                print(f"New message: topic={msg.topic()}  partition= {msg.partition()} offset={msg.offset()}")
+                print(f"New message: topic={msg.topic()}  partition= {msg.partition()} "
+                      f"offset={msg.offset()}")
                 key = None
                 if msg.key() != None:
                     key = msg.key().decode("UTF8")

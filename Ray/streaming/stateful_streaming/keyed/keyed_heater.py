@@ -27,8 +27,8 @@ print(f"Sensor publish interval: {tempInterval} control change interval: {contro
 # Heater class
 class Heater(BaseHeater):
     # initialize heater
-    def __init__(self, id: str, producer: KafkaProducer, current: float = 42.0, desired: float = 45.0, upDelta: float = 1.0, downDelta: float = 1.0,
-                 temptopic: str = heateroutputtopic):
+    def __init__(self, id: str, producer: KafkaProducer, current: float = 42.0, desired: float = 45.0,
+                 upDelta: float = 1.0, downDelta: float = 1.0, temptopic: str = heateroutputtopic):
 
         super().__init__(id=id, current=current, desired=desired, upDelta=upDelta, downDelta=downDelta)
         self.temptopic = temptopic

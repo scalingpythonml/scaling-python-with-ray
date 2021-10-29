@@ -1,9 +1,8 @@
 import ray
-import json
 
-from streaming.shared.kafka_actors import KafkaProducer
-from streaming.shared.kafka_actors import BaseKafkaConsumer
-from streaming.shared.controller import BaseTemperatureController
+from Ray.shared.kafka_actors import KafkaProducer
+from Ray.streaming.shared.kafka_actors import BaseKafkaConsumer
+from Ray.streaming.shared.controller import BaseTemperatureController
 
 class TemperatureController(BaseTemperatureController):
     def __init__(self, producer: KafkaProducer, id: str):

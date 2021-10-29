@@ -6,7 +6,8 @@ import json
 from threading import Thread
 
 
-def setup_topics(server: str = 'localhost:9092', topics: [] = ['test'], partitions: int = 10, replication: int = 1):
+def setup_topics(server: str = 'localhost:9092', topics: [] = ['test'],
+                 partitions: int = 10, replication: int = 1):
     # Recreate topic
     # Wait for operation completion method
     def wait_for_operation_completion(futures: dict, success: str, failure: str):
@@ -28,7 +29,8 @@ def setup_topics(server: str = 'localhost:9092', topics: [] = ['test'], partitio
     # Wait to make sure topic is deleted
     sleep(3)
     # Call create_topics to asynchronously create topics.
-    new_topics = [NewTopic(topic, num_partitions=partitions, replication_factor=replication) for topic in topics]
+    new_topics = [NewTopic(topic, num_partitions=partitions,
+                           replication_factor=replication) for topic in topics]
     fs = admin.create_topics(new_topics)
 
     # Wait for each operation to finish.

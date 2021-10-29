@@ -1,8 +1,8 @@
 import ray
 
-from streaming.shared.kafka_actors import KafkaProducer
-from streaming.shared.kafka_actors import BaseKafkaConsumer
-from streaming.shared.controller import BaseTemperatureController
+from Ray.streaming.shared.kafka_actors import KafkaProducer
+from Ray.streaming.shared.kafka_actors import BaseKafkaConsumer
+from Ray.streaming.shared.controller import BaseTemperatureController
 
 @ray.remote
 class TemperatureController(BaseTemperatureController):
@@ -32,8 +32,8 @@ class TemperatureControllerManager:
 
 @ray.remote
 class KafkaConsumer(BaseKafkaConsumer):
-    def __init__(self, callback, group: str = 'ray', server: str = 'localhost:9092', topic: str = 'sensor',
-                 restart: str = 'earliest'):
+    def __init__(self, callback, group: str = 'ray', server: str = 'localhost:9092',
+                 topic: str = 'sensor', restart: str = 'earliest'):
         super().__init__(group=group, server = server, topic = topic, restart = restart)
         self.callback = callback
 

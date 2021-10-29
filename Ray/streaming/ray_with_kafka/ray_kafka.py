@@ -3,7 +3,8 @@ import json
 from time import sleep
 from random import seed
 from random import randint
-from streaming.shared.kafka_support import setup_topics
+
+from Ray.streaming.shared.kafka_support import setup_topics
 
 @ray.remote
 class KafkaProducer:
@@ -18,12 +19,14 @@ class KafkaProducer:
             if err:
                 print(f'Message failed delivery: {err}')
             else:
-                print(f'Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}')
+                print(f'Message delivered to topic {msg.topic()} partition '
+                      f'{msg.partition()} offset {msg.offset()}')
 
         binary_key = None
         if key is not None:
             binary_key = key.encode('UTF8')
-        self.producer.produce(topic=topic, value=json.dumps(data).encode('UTF8'), key=binary_key, callback=delivery_callback)
+        self.producer.produce(topic=topic, value=json.dumps(data).encode('UTF8'),
+                              key=binary_key, callback=delivery_callback)
         self.producer.poll(0)
 
     def destroy(self):
@@ -31,7 +34,8 @@ class KafkaProducer:
 
 @ray.remote
 class KafkaConsumer:
-    def __init__(self, callback, group: str = 'ray', server: str = 'localhost:9092', topic: str = 'test', restart: str = 'latest'):
+    def __init__(self, callback, group: str = 'ray', server: str = 'localhost:9092',
+                 topic: str = 'test', restart: str = 'latest'):
         from confluent_kafka import Consumer
         from uuid import uuid4
         # Configuration

@@ -4,7 +4,7 @@ from time import sleep
 from random import seed
 from random import randint
 
-from Ray.streaming.shared.kafka_support import setup_topics
+from ray_examples.streaming.shared.kafka_support import setup_topics
 
 @ray.remote
 class KafkaProducer:

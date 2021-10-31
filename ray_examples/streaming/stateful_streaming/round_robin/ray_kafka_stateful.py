@@ -1,8 +1,8 @@
 import ray
 
-from Ray.streaming.shared.kafka_actors import KafkaProducer
-from Ray.streaming.shared.kafka_actors import BaseKafkaConsumer
-from Ray.streaming.shared.controller import BaseTemperatureController
+from ray_examples.streaming.shared.kafka_actors import KafkaProducer
+from ray_examples.streaming.shared.kafka_actors import BaseKafkaConsumer
+from ray_examples.streaming.shared.controller import BaseTemperatureController
 
 @ray.remote
 class TemperatureController(BaseTemperatureController):

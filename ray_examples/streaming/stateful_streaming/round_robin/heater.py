@@ -3,14 +3,14 @@
 from time import sleep
 from random import randint
 
-from Ray.streaming.shared.kafka_support import setup_topics
-from Ray.streaming.shared.kafka_support import KafkaProducer
-from Ray.streaming.shared.kafka_support import KafkaConsumer
-from Ray.streaming.shared.heater_implementation import BaseHeater
-from Ray.streaming.shared.heater_implementation import temperatureUpRate
-from Ray.streaming.shared.heater_implementation import temperatureDownRate
-from Ray.streaming.shared.heater_implementation import tempInterval
-from Ray.streaming.shared.heater_implementation import controlInterval
+from ray_examples.streaming.shared.kafka_support import setup_topics
+from ray_examples.streaming.shared.kafka_support import KafkaProducer
+from ray_examples.streaming.shared.kafka_support import KafkaConsumer
+from ray_examples.streaming.shared.heater_implementation import BaseHeater
+from ray_examples.streaming.shared.heater_implementation import temperatureUpRate
+from ray_examples.streaming.shared.heater_implementation import temperatureDownRate
+from ray_examples.streaming.shared.heater_implementation import tempInterval
+from ray_examples.streaming.shared.heater_implementation import controlInterval
 
 server = 'localhost:9092'
 

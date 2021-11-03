@@ -44,7 +44,6 @@ class Account:
         self.key = account_key
         if not self.restorestate():
             if balance < minimal_balance:
-                print(f"Balance {balance} is less then minimal balance {minimal_balance}")
                 raise Exception("Starting balance is less then minimal balance")
             self.balance = balance
             self.minimal = minimal_balance
@@ -54,14 +53,17 @@ class Account:
         return self.balance
 
     def deposit(self, amount: float) -> float:
+        if amount < 0:
+            raise Exception("Can not deposit negative amount")
         self.balance = self.balance + amount
         self.storestate()
         return self.balance
 
     def withdraw(self, amount: float) -> float:
+        if amount < 0:
+            raise Exception("Can not withdraw negative amount")
         balance = self.balance - amount
         if balance < self.minimal:
-            print(f"Withdraw amount {amount} is too large for a current balance {self.balance}")
             raise Exception("Withdraw is not supported by current balance")
         self.balance = balance
         self.storestate()
@@ -91,6 +93,12 @@ account_actor = Account.options(name='Account').remote(balance=100.,minimal_bala
 
 print(f"Current balance {ray.get(account_actor.balance.remote())}")
 print(f"New balance {ray.get(account_actor.withdraw.remote(40.))}")
+
+try:
+    print(f"New balance {ray.get(account_actor.withdraw.remote(-40.))}")
+except Exception as e:
+    print(f"Oops! {e} occurred.")
+
 print(f"New balance {ray.get(account_actor.deposit.remote(70.))}")
 
 ray.kill(account_actor)

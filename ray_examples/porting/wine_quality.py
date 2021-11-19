@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 import time
 
 from sklearn.preprocessing import StandardScaler

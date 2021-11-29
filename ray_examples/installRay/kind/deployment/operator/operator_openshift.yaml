@@ -45,6 +45,8 @@ spec:
         cluster.ray.io/component: operator
     spec:
       serviceAccountName: ray-operator-serviceaccount
+      securityContext:
+        runAsUser: 1000
       containers:
         - name: ray
           imagePullPolicy: Always

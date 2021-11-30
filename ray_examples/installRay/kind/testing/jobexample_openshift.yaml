@@ -8,6 +8,9 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      serviceAccountName: ray-node-serviceaccount
+      securityContext:
+        runAsUser: 1000
       containers:
         - name: ray
           image: rayproject/ray:1.8.0-py38-cpu

@@ -71,7 +71,7 @@ class Account:
 
     def restorestate(self) -> bool:
         while(self.persistence.has_next()):
-            pass
+            self.persistence.get_next()
         self.persistence.submit(lambda a, v: a.restore.remote(v), self.key)
         state = self.persistence.get_next()
         if state != None:

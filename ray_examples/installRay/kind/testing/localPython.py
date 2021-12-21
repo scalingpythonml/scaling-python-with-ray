@@ -51,6 +51,5 @@ def main():
 
 if __name__ == "__main__":
     print(f'Using Ray version {ray.__version__}')
-    ray.util.connect("ray.127.0.0.1.nip.io:80")
-#    ray.init("ray://localhost:10001")
+    ray.init("ray://localhost:10001")
     main()

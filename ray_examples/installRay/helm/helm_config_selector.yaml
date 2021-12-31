@@ -1,4 +1,7 @@
 imagePullSecrets: []
+# In practice you probably want an official Ray image
+# but I run a bleeding edge mixed arch cluster so I roll
+# my own.
 image: holdenk/ray-ray:nightly
 operatorImage: holdenk/ray-ray:nightly
 podTypes:

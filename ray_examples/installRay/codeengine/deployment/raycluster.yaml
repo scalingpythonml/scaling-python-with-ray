@@ -1,19 +1,15 @@
 # A unique identifier for the head node and workers of this cluster.
 cluster_name: ray
-
 # The maximum number of workers nodes to launch in addition to the head
 # node.
-max_workers: 3
-
+max_workers: 10
 # The autoscaler will scale up the cluster faster with higher upscaling speed.
 # E.g., if the task requires adding more nodes then autoscaler will gradually
 # scale up the cluster in chunks of upscaling_speed*currently_running_nodes.
 # This number should be > 0.
-upscaling_speed: 1.0
-
+upscaling_speed: 50
 # If a node is idle for this many minutes, it will be removed.
 idle_timeout_minutes: 5
-
 # Kubernetes resources that need to be configured for the autoscaler to be
 # able to manage the Ray cluster. If any of the provided resources don't
 # exist, the autoscaler will attempt to create them. If this fails, you may
@@ -21,51 +17,10 @@ idle_timeout_minutes: 5
 # created by your cluster administrator.
 provider:
   type: kubernetes
-
   # Exposing external IP addresses for ray pods isn't currently supported.
   use_internal_ips: true
-
   # Namespace to use for all resources created.
-  namespace: ray
-
-  # ServiceAccount created by the autoscaler for the head node pod that it
-  # runs in. If this field isn't provided, the head pod config below must
-  # contain a user-created service account with the proper permissions.
-  autoscaler_service_account:
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: autoscaler
-
-  # Role created by the autoscaler for the head node pod that it runs in.
-  # If this field isn't provided, the role referenced in
-  # autoscaler_role_binding must exist and have at least these permissions.
-  autoscaler_role:
-    kind: Role
-    apiVersion: rbac.authorization.k8s.io/v1
-    metadata:
-      name: autoscaler
-    rules:
-      - apiGroups: [""]
-        resources: ["pods", "pods/status", "pods/exec"]
-        verbs: ["get", "watch", "list", "create", "delete", "patch"]
-
-  # RoleBinding created by the autoscaler for the head node pod that it runs
-  # in. If this field isn't provided, the head pod config below must contain
-  # a user-created service account with the proper permissions.
-  autoscaler_role_binding:
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      name: autoscaler
-    subjects:
-      - kind: ServiceAccount
-        name: autoscaler
-    roleRef:
-      kind: Role
-      name: autoscaler
-      apiGroup: rbac.authorization.k8s.io
-
+  namespace: iwnx3k5nnsj
   services:
     # Service that maps to the head node of the Ray cluster.
     - apiVersion: v1
@@ -74,11 +29,11 @@ provider:
         # NOTE: If you're running multiple Ray clusters with services
         # on one Kubernetes cluster, they must have unique service
         # names.
-        name: ray-ray-head
+        name:  ray-ray-head
       spec:
         # This selector must match the head node pod's selector below.
         selector:
-          component: ray-ray-head
+          component:  ray-ray-head
         ports:
           - name: client
             protocol: TCP
@@ -92,19 +47,17 @@ provider:
             protocol: TCP
             port: 8000
             targetPort: 8000
-
 # Specify the pod type for the ray head node (as configured below).
 head_node_type: head_node
 # Specify the allowed pod types for this ray cluster and the resources they provide.
 available_node_types:
   worker_node:
     # Minimum number of Ray workers of this Pod type.
-    min_workers: 2
+    min_workers: 5
     # Maximum number of Ray workers of this Pod type. Takes precedence over min_workers.
-    max_workers: 3
+    max_workers: 10
     # User-specified custom resources for use by Ray. Object with string keys and integer values.
     # (Ray detects CPU and GPU from pod spec resource requests and limits, so no need to fill those here.)
-    #resources: {"foo": 1, "bar": 2}
     node_config:
       apiVersion: v1
       kind: Pod
@@ -131,9 +84,11 @@ available_node_types:
                 name: dshm
             resources:
               requests:
-                cpu: 1000m
-                memory: 1G
+                cpu: 2
+                memory: 4G
+                ephemeral-storage: 2G
               limits:
+                cpu: 2
                 # The maximum memory that this pod is allowed to use. The
                 # limit will be detected by ray and split to use 10% for
                 # redis, 30% for the shared memory object store, and the
@@ -141,7 +96,8 @@ available_node_types:
                 # the object store size is not set manually, ray will
                 # allocate a very large object store in each pod that may
                 # cause problems for other pods.
-                memory: 1G
+                ephemeral-storage: 2G
+                memory: 4G
   head_node:
     node_config:
       apiVersion: v1
@@ -156,10 +112,8 @@ available_node_types:
       spec:
         # Change this if you altered the autoscaler_service_account above
         # or want to provide your own.
-        serviceAccountName: autoscaler
-
+        serviceAccountName: iwnx3k5nnsj-writer
         restartPolicy: Never
-
         # This volume allocates shared memory for Ray to use for its plasma
         # object store. If you do not provide this, Ray will fall back to
         # /tmp which cause slowdowns if is not a shared memory volume.
@@ -179,7 +133,6 @@ available_node_types:
               - containerPort: 6379  # Redis port
               - containerPort: 10001  # Used by Ray Client
               - containerPort: 8265  # Used by Ray Dashboard
-
             # This volume allocates shared memory for Ray to use for its plasma
             # object store. If you do not provide this, Ray will fall back to
             # /tmp which cause slowdowns if is not a shared memory volume.
@@ -188,9 +141,11 @@ available_node_types:
                 name: dshm
             resources:
               requests:
-                cpu: 1000m
-                memory: 1G
+                cpu: 2
+                memory: 4G
+                ephemeral-storage: 2G
               limits:
+                cpu: 2
                 # The maximum memory that this pod is allowed to use. The
                 # limit will be detected by ray and split to use 10% for
                 # redis, 30% for the shared memory object store, and the
@@ -198,18 +153,12 @@ available_node_types:
                 # the object store size is not set manually, ray will
                 # allocate a very large object store in each pod that may
                 # cause problems for other pods.
-                memory: 1G
-
-# Command to start ray on the head node. You don't need to change this.
-# Note dashboard-host is set to 0.0.0.0 so that kubernetes can port forward.
+                memory: 4G
+                ephemeral-storage: 2G
 head_start_ray_commands:
   - ray stop
   - ulimit -n 65536; ray start --head --autoscaling-config=~/ray_bootstrap_config.yaml --dashboard-host 0.0.0.0
-
 # Command to start ray on worker nodes. You don't need to change this.
 worker_start_ray_commands:
   - ray stop
   - ulimit -n 65536; ray start --address=$RAY_HEAD_IP:6379
-
-#head_setup_commands: ["pip install qiskit "]
-#worker_setup_commands: ["pip install qiskit "]

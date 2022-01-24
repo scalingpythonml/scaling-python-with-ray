@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
-from lightgbm_ray import RayLGBMClassifier
+from lightgbm_ray import RayLGBMClassifier, RayParams
 
 # Get data
 df = pd.read_csv("winequality-red.csv", delimiter=";")
@@ -26,11 +26,11 @@ X = StandardScaler().fit_transform(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.25, random_state=0)
 
 model = RayLGBMClassifier(
-    n_jobs=4,               # In LightGBM-Ray, n_jobs sets the number of actors
+#    n_jobs=4,               # In LightGBM-Ray, n_jobs sets the number of actors
     random_state=42)
 
 start = time.time()
-model.fit(X_train, y_train)
+model.fit(X=X_train, y=y_train, ray_params=RayParams(num_actors=3))
 print(f"executed LightGBM in {time.time() - start}")
 y_pred = model.predict(X_test)
 #converting probabilities into 0 or 1

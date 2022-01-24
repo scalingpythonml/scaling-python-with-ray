@@ -31,7 +31,7 @@ model = RayXGBClassifier(
     random_state=1
 )
 
-model.fit(X=X_train, Y=y_train, ray_params=RayParams(num_actors=3))
+model.fit(X=X_train, y=y_train, ray_params=RayParams(num_actors=3))
 print(f"executed XGBoost in {time.time() - start}")
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))

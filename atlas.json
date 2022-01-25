@@ -5,9 +5,7 @@
     "titlepage.html",
     "copyright.html",
     "toc.html",
-    "preface.html",
     "chapter.html",
-    "appendix.html",
     "ix.html"
   ],
   "formats": {

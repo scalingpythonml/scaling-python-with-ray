@@ -20,7 +20,7 @@
     },
     "epub": {
       "toc": true,
-      "index": true,
+      "index": false,
       "syntaxhighlighting": true,
       "epubcheck": true,
       "show_comments": false,

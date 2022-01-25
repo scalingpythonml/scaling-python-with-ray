@@ -12,7 +12,7 @@ Unlike multiprocessing, Ray's remote functions satisfy the above requirements. I
 
 In this chapter, you will learn how to create remote functions, wait for their completion, and fetch results. Once you've got the basics down, you will learn to compose remote functions together to create more complex operations. Before you go too far, let's start with understanding some of what we glossed over in the previous chapter.
 
-== Understanding Essentials of Ray Remote Functions
+=== Understanding Essentials of Ray Remote Functions
 
 In the previous chapter, you learned how to create a basic Ray remote function, <<sleepy_task>>. 
 
@@ -129,7 +129,7 @@ Another minor point that we skipped in the previous chapter is that while the ex
 
 Fault tolerance is an important consideration for those running in a distributed environment. If the worker executing the task dies unexpectedly,footnote:[Either because the process crashed or because the machine failed.] Ray will rerun the task (after a delay) until either the task succeeds or the maximum number of retries is exceeded. We cover fault tolerance more in <<ray_details_fault_tolerance>>.
 
-== Composition of Remote Ray Functions
+=== Composition of Remote Ray Functions
 
 You can make your remote functions even more powerful by composing them. The two most common methods of composition with remote functions in Ray are pipelining and nested parallelism. You can compose your functions with nested parallelism to express recursive functions. Ray also allows you to express sequential dependencies without having to block/collect the result in the driver, known as "pipelining."
 
@@ -180,7 +180,7 @@ As you can see from this example, nested parallelism allows for two different ap
 
 Returning all of the ObjectRefs allows for more flexibility with non-sequential consumption, as described back in `ray.await`, but it is not suitable for many recursive algorithms. With many recursive algorithms (e.g., quicksort, factorial, etc.) we have many levels of a combination step that need to be performed, requiring that the results be combined at each level of recursion.
 
-== Ray Remote Best Practices
+=== Ray Remote Best Practices
 
 When you are using remote functions, keep in mind that you don't want to make them too small. If the tasks are very small, using Ray can take longer than if you used Python without Ray. The reason for this is that every task invocation has a non-trivial overhead (e.g., scheduling, data passing, inter-process communication, updating the system state). To get the real advantage from the parallel execution, you need to make sure that this overhead is negligible compared to the execution time of the function itself.footnote:[As an exercise you can remove sleep from function in <<sleepy_task>> and you will see that execution of remote functions on Ray takes several times longer compared to regular functions invocation. Overhead is not constant, but rather depends on your network, size of the invocation parameters, etc. For example, if you have only small bits of data to transfer the overhead will be lower than if you are transferring say the entire text of wikipedia as a parameter.]
 
@@ -192,7 +192,7 @@ As we will show in Chapter 5, remote function invocation is done by Raylet compo
 
 Every time you define a remote function using  @ray.remote decorator Ray exports these definitions to all Ray workers, which takes time (especially if you have a lot of nodes). To reduce the number of function exports, a good practice is to define as many of the remote tasks on the top level outside of the loops and local functions using them.
 
-== Bringing It Together with an Example
+=== Bringing It Together with an Example
 
 Machine learning models composed of other models, e.g., ensemble models, are well suited to evaluation with Ray. <<ensemble_example>> shows what it looks like to use Ray's function composition for a hypothetical spam model for web links.
 
@@ -207,7 +207,7 @@ include::examples/ray/remote/Ray-Remote.ipynb[tags=bring_it_together_with_ensemb
 
 By using Ray instead of taking the summation of the time to evaluate all of the models, you instead only need to wait for the slowest model and all other models that finish faster are "free." For example, if the models took equal lengths of time to run evaluating these models serially, without Ray, would take almost three times as long.
 
-== Conclusion
+=== Conclusion
 
 In this chapter, you learned about a fundamental Ray feature--remote functions' invocation and their usage for the creation of parallel asynchronous execution of Python across multiple cores and machines. You also learned multiple approaches for waiting for remote functions execution completion and how to use `ray.wait` to prevent deadlocks in your code. 
 Finally, you have learned about remote functions composition and how you can use it for rudimentary execution control (mini workflows). You have also learned how to implement nested parallelism, where you can invoke several functions in parallel with each of these functions in turn, invoking more parallel functions. In the next chapter, you will learn how to manage the state in Ray using actors.

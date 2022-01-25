@@ -1,0 +1,53 @@
+{
+  "branch": "master",
+  "files": [
+    "cover.html",
+    "titlepage.html",
+    "copyright.html",
+    "toc.html",
+    "preface.html",
+    "chapter.html",
+    "appendix.html",
+    "ix.html"
+  ],
+  "formats": {
+    "pdf": {
+      "version": "web",
+      "toc": true,
+      "index": false,
+      "syntaxhighlighting": true,
+      "show_comments": false,
+      "antennahouse_version": "AHFormatterV62_64-MR4",
+      "color_count": false,
+      "trim_size": "7inx9.1875in"
+    },
+    "epub": {
+      "toc": true,
+      "index": true,
+      "syntaxhighlighting": true,
+      "epubcheck": true,
+      "show_comments": false,
+      "mathmlreplace": false,
+      "downsample_images": false
+    },
+    "mobi": {
+      "toc": true,
+      "index": true,
+      "syntaxhighlighting": true,
+      "show_comments": false
+    },
+    "html": {
+      "toc": true,
+      "index": true,
+      "syntaxhighlighting": true,
+      "show_comments": false,
+      "consolidated": false
+    }
+  },
+  "theme": "oreillymedia/animal_theme_sass",
+  "title": "Scaling Python with Ray",
+  "templating": false,
+  "print_isbn13": "9781098118808",
+  "lang": "en",
+  "accent_color": ""
+}

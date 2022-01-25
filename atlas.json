@@ -5,8 +5,7 @@
     "titlepage.html",
     "copyright.html",
     "toc.html",
-    "chapter.html",
-    "ix.html"
+    "chapter.html"
   ],
   "formats": {
     "pdf": {

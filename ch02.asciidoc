@@ -30,9 +30,9 @@ include::examples/ray/installRay/ray_setup_on_x86.sh[tags=install]
 ====
 
 
-==== Install (from Source) for ARM
+==== Installing (from Source) for ARM
 
-For ARM users or any users with a system architecture that does not have a pre built wheel available, you will need to build Ray from the source.
+For ARM users or any users with a system architecture that does not have a prebuilt wheel available, you will need to build Ray from the source.
 
 On our ARM Ubuntu system, we need to install some additional packages, as shown in <<debian_ray_arms_pkgs>>.
 
@@ -73,7 +73,7 @@ The slowest part of the build is compiling the C++ code, which can easily take u
 
 Now that you have Ray installed, it's time to learn about some of the Ray APIs. We'll cover these APIs in more detail later, so don't get too hung up on the details for now.
 
-==== Ray Remote (Task/Futures)Hello World
+==== Ray Remote (Task/Futures) Hello World
 
 One of the core building blocks of Ray is that of "remote" functions/futures. The term "remote" here refers to remote to our main process, and can be on the same or a different machine.
 
@@ -83,7 +83,7 @@ To understand this better, you can write a function that returns where it is run
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=local_fun]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=local_fun]
 ----
 ====
 
@@ -93,7 +93,7 @@ You can use the `ray.remote` decorator to create a remote function. Calling remo
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=remote_fun]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=remote_fun]
 ----
 ====
 
@@ -107,7 +107,7 @@ While artificial, an easy way to understand how remote futures can help is by ma
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=sleepy_task_hello_world]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=sleepy_task_hello_world]
 ----
 ====
 
@@ -122,7 +122,7 @@ One of the more straightforward examples using nested tasks is a web crawler. In
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=mini_crawl_task]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=mini_crawl_task]
 ----
 ====
 
@@ -139,7 +139,7 @@ Ray only recently added keyed aggregations on datasets with version 1.9. The mos
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=ds]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=ds]
 ----
 ====
 
@@ -150,7 +150,7 @@ Ray 1.9 added `GroupedDataset` for supporting different kinds of aggregations. B
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=ray_wordcount_on_ds]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=ray_wordcount_on_ds]
 ----
 ====
 
@@ -183,7 +183,7 @@ Ray actors are created and called similarly to remote functions, but using Pytho
 ====
 [source, python]
 ----
-include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.ipynb[tags=actor]
+include::examples/ray/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=actor]
 ----
 ====
 

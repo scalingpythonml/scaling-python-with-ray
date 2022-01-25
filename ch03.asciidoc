@@ -57,7 +57,7 @@ In our examples so far, using `ray.get` was fine because the futures all had the
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=variable_sleep_task]
+include::examples/ray/remote/Ray-Remote.py[tags=variable_sleep_task]
 ----
 ====
 
@@ -73,7 +73,7 @@ The first option, not using `ray.wait`, is a bit simpler and cleaner to read, as
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=get_only]
+include::examples/ray/remote/Ray-Remote.py[tags=get_only]
 ----
 ====
 
@@ -84,7 +84,7 @@ The second option is a bit more complex, as shown in <<as_available>>. This work
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=as_available]
+include::examples/ray/remote/Ray-Remote.py[tags=as_available]
 ----
 ====
 
@@ -116,7 +116,7 @@ If you have a task that does not finish in a reasonable time (e.g., a straggler)
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=handle_bad_futures]
+include::examples/ray/remote/Ray-Remote.py[tags=handle_bad_futures]
 ----
 ====
 
@@ -140,7 +140,7 @@ You can build a pipelined function by using ObjectRefs from an earlier `ray.remo
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=ray_remote_seq]
+include::examples/ray/remote/Ray-Remote.py[tags=ray_remote_seq]
 ----
 ====
 
@@ -153,7 +153,7 @@ You _cannot_ use Python structures (for example, lists, dictionaries, or classes
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=broken_ray_remote_seq]
+include::examples/ray/remote/Ray-Remote.py[tags=broken_ray_remote_seq]
 ----
 ====
 
@@ -166,7 +166,7 @@ The other composition approach is nested parallelism where your remote function 
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=nested_par]
+include::examples/ray/remote/Ray-Remote.py[tags=nested_par]
 ----
 ====
 
@@ -201,7 +201,7 @@ Machine learning models composed of other models, e.g., ensemble models, are wel
 ====
 [source, python]
 ----
-include::examples/ray/remote/Ray-Remote.ipynb[tags=bring_it_together_with_ensemble]
+include::examples/ray/remote/Ray-Remote.py[tags=bring_it_together_with_ensemble]
 ----
 ====
 

@@ -32,14 +32,14 @@ Ray can be deployed in a variety of environments ranging from your laptop to the
 
 .Ray Cluster
 ****
-A Ray cluster consists of a head node and a set of worker nodes.
+A Ray cluster consists of a head node and a set of worker nodes:
 
 image::images/ch01/ch01_image01_inline.png[]
 
-As you can see from the preceding figure, a head node, in addition to supporting all the functionality of the worker node has two additional components:
+As you can see from the preceding figure, a head node, in addition to supporting all the functionality of the worker node, has two additional components:
 
-* Global control store containing https://medium.com/coinmonks/ray-a-cluster-computing-ml-framework-for-emerging-applications-9dfa14934749[cluster-wide information] including object table, task table, function table, events log, etc. The content of this store is used for web UI, error diagnostics, debugging, and profiling tools.
-* Autoscaler attempts to launch/terminate worker nodes to ensure that workloads have sufficient resources to run while minimizing the idle resources.
+Global control store:: Contains https://medium.com/coinmonks/ray-a-cluster-computing-ml-framework-for-emerging-applications-9dfa14934749[cluster-wide information] including object table, task table, function table, events log, etc. The content of this store is used for web UI, error diagnostics, debugging, and profiling tools.
+Autoscaler:: Attempts to launch/terminate worker nodes to ensure that workloads have sufficient resources to run while minimizing the idle resources.
 
 The head node is effectively a master (singletonfootnote:[Unfortunately a head node is also a single point of failure. If you lose a head node, you will use the cluster and need to recreate it. Moreover if you lose a head node, existing worker nodes can be come orphans and will have to be removed “manually.”]) which manages a complete cluster (via autoscaler).
 Each of the Ray’s nodes contains a Raylet, that consists of two main components:
@@ -52,11 +52,11 @@ When we are talking about nodes in a Ray cluster we are not talking about physic
 
 `ray up`, which is included as part of Ray, allows you to create clusters and it will:
 
-* Provision a new instance/machine (if running on the cloudfootnote:[Ray currently supports AWS, Azure, and GCP.] or cluster manager) using the provider's SDK or accessing machines, if running directly on physical machines.
-* Execute shell commands to set up Ray with the desired options.
-* Run any custom, user defined setup commands, for example, setting environment variables and installing packages.
-* Initialize the Ray cluster.
-* Deploy an autoscaler if required.
+* Provision a new instance/machine (if running on the cloudfootnote:[Ray currently supports AWS, Azure, and GCP.] or cluster manager) using the provider's SDK or accessing machines, if running directly on physical machines
+* Execute shell commands to set up Ray with the desired options
+* Run any custom, user defined setup commands, for example, setting environment variables and installing packages
+* Initialize the Ray cluster
+* Deploy an autoscaler if required
 
 In addition to `ray up`, if running on kubernetes you can use Ray kubernetes operator. Although `ray up` or kubernetes operator are preferred ways of Ray cluster creation, if you have a set of existing machines (either physical or VMs) you can set up the Ray cluster manually.
 
@@ -80,15 +80,15 @@ Ray's actor system gives you a simple way of handling resilient distributed exec
 In addition to the scalable building blocks, Ray has higher-level libraries such as Serve, Data, Tune, RLlib, Train and Workflows that exist in the machine learning problem space. 
 Overall Ray ecosystem is presented in <<fig_ray_ecosystem>>.
 
-[fig_ray_ecosystem]
+[[fig_ray_ecosystem]]
 .The Ray ecosystem
-image:images/ch01/ch01_image01.png[] 
+image::images/ch01/ch01_image01.png[]
 
 Let's take a look at some of the different problem spaces and see how Ray fits in and compares with existing tools. 
 
 <<table_comparing_ray>> compares Ray to several related system categories.
 
-[table_comparing_ray]
+[[table_comparing_ray]]
 .Comparing Ray to related systems
 [cols="1,1"]
 |===
@@ -136,7 +136,7 @@ Ray and Spark are complementary and can be used together. A common pattern is da
 
 Ray has multiple machine learning libraries, and for the most part, they serve to delegate much of the fancy parts to existing tools like PyTorch, Scikit-Learn, and Tensorflow while using Ray’s distributed computing facilities to scale. Ray Tune implements hyper-parameter tuning, using Ray's ability to train many local Python-based models in parallel across a distributed set of machines. Ray Train implements distributed training with PyTorch or Tensorflow. Ray's RLlib interface offers reinforcement learning with a number of core algorithms.
 
-Part of what allows Ray to stand out from pure data-parallel systems for machine learning is its actor model, which allows easier tracking of “state” - like parameters and inter-worker communication. You can use this to implement your own custom algorithms that are not a part of Ray core.
+Part of what allows Ray to stand out from pure data-parallel systems for machine learning is its actor model, which allows easier tracking of “state”-like parameters and inter-worker communication. You can use this to implement your own custom algorithms that are not a part of Ray core.
 
 
 ==== Workflow Scheduling

@@ -14,7 +14,7 @@ In this chapter, you will learn how to create remote functions, wait for their c
 
 === Understanding Essentials of Ray Remote Functions
 
-In the previous chapter, you learned how to create a basic Ray remote function, <<sleepy_task>>. 
+In the previous chapter, you learned how to create a basic Ray remote function (<<sleepy_task>>). 
 
 When you call a remote function, it immediately returns an ObjectRef (a future), which is a reference to a remote object. Ray creates and executes a task itself in the background on a separate worker process and writes the result when finished into the original reference. You can then call `ray.get` on the ObjectRef to obtain the value. Note that `ray.get` is a blocking method waiting for task execution completion before returning the result.
 

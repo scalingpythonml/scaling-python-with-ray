@@ -66,8 +66,8 @@ Regardless of which deployment approach you take, the same Ray code should work 
 
 Ray is more than just a library you import; it is also a cluster management tool. In addition to importing the library you need to "connect" to a Ray cluster. You have three options for how to connect your code to a Ray cluster:
 
-Calling `ray.init()` with no arguments.:: This launches an embedded, single-node Ray instance that is immediately available to the application.
-Using the https://docs.ray.io/en/latest/cluster/ray-client.html[Ray client `ray.init("ray://<head_node_host>:10001")`] to connect to a Ray cluster.:: By default, each Ray cluster launches with a Ray client server running on the head node that can receive remote client connections. Note however that when the client is located remotely, some operations run directly from the client may be slower due to WAN latencies. Ray is not resilient to network failures between the head node and the client.
+Calling `ray.init()` with no arguments:: This launches an embedded, single-node Ray instance that is immediately available to the application.
+Using the https://docs.ray.io/en/latest/cluster/ray-client.html[Ray client `ray.init("ray://<head_node_host>:10001")`] to connect to a Ray cluster:: By default, each Ray cluster launches with a Ray client server running on the head node that can receive remote client connections. Note however that when the client is located remotely, some operations run directly from the client may be slower due to WAN latencies. Ray is not resilient to network failures between the head node and the client.
 Using the Ray command-line API:: You can use the `ray submit` command to execute Python scripts on clusters. This will copy the designated file onto the head node cluster and execute it with the given arguments.  Note that if you are passing the parameters, your code should use the Python `sys` module that provides access to any command-line arguments via the `sys.argv`. This removes the potential networking point of failure when using the ray client.
 
 

@@ -5,7 +5,9 @@
     "titlepage.html",
     "copyright.html",
     "toc.html",
-    "chapter.html"
+    "ch01.asciidoc",
+    "ch02.asciidoc",
+    "ch03.asciidoc"
   ],
   "formats": {
     "pdf": {

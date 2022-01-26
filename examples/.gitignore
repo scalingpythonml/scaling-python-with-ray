@@ -143,4 +143,9 @@ venv_dask
 # tgz files
 *.tgz
 # Spark extracted
-spark-*-bin-hadoop*
+spark-*-bin-hadoop*scratch
+scratch-backup/
+make_k8s_cluster/
+scratch
+
+spark/containers/spark-*bin*

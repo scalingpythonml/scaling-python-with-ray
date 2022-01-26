@@ -21,3 +21,14 @@ find /opt/conda/ -follow -type f -name '*.js.map' -delete
 /opt/conda/bin/conda install --yes nomkl cytoolz cmake tini
 /opt/conda/bin/conda init bash
 /opt/conda/bin/conda install --yes mamba
+apt-get update
+apt-get install -yq graphviz git build-essential cmake telnet && \
+ln -s /lib /lib64 || echo "No need"
+apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps ca-certificates p11-kit wget bzip2 git mercurial subversion dirmngr gnupg
+mamba install --yes python==${PYTHON_VERSION}
+pip install --upgrade pip setuptools
+mamba install --yes numpy==1.19.2 pandas cytoolz numba lz4 scikit-build python-blosc=1.9.2
+(mamba install --yes pyarrow ||  pip install -vvv pyarrow)
+apt-get clean
+rm -rf /var/cache/apt/*
+rm -rf /var/lib/apt/lists/*

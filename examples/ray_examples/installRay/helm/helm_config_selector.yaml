@@ -1,0 +1,29 @@
+imagePullSecrets: []
+# In practice you probably want an official Ray image
+# but I run a bleeding edge mixed arch cluster so I roll
+# my own.
+image: holdenk/ray-ray:nightly
+operatorImage: holdenk/ray-ray:nightly
+podTypes:
+  rayGPUWorkerType:
+    memory: 10Gi
+    maxWorkers: 4
+    minWorkers: 0
+# Normally you'd ask for a GPU but NV auto labeler is... funky on ARM
+    CPU: 1
+    rayResources:
+      CPU: 1
+      GPU: 1
+      memory: 1000000000
+    nodeSelector:
+      node.kubernetes.io/gpu: gpu
+  rayWorkerType:
+    memory: 10Gi
+    maxWorkers: 4
+    minWorkers: 1
+    CPU: 1
+  rayHeadType:
+    memory: 3Gi
+    CPU: 1
+    
+

@@ -20,6 +20,8 @@ ARG base_img
 FROM $base_img
 WORKDIR /
 
+ARG PYTHON_VERSION=3.8.6
+
 # Reset to root to run installation tasks
 USER 0
 
@@ -27,19 +29,18 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN mkdir ${SPARK_HOME}/python
 
-RUN apt-get update --fix-missing && \
+RUN apt-get update --fix-missing --yes && \
     apt-get install -yq graphviz git build-essential cmake telnet && \
-    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps ca-certificates p11-kit wget bzip2 git mercurial subversion && \
+    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps ca-certificates p11-kit wget bzip2 git mercurial subversion sudo locales fonts-liberation && \
+    wget http://mirrors.kernel.org/ubuntu/pool/main/r/run-one/run-one_1.17-0ubuntu1_all.deb && \
+    dpkg --install run-one_1.17-0ubuntu1_all.deb && \
+    rm *.deb && \
     rm /bin/sh && \
-    ln -sv /bin/bash /bin/sh
+    ln -sv /bin/bash /bin/sh && \
+    rm -rf /var/cache/apt/*
 
-COPY bin/pysetup.sh /pysetup.sh 
+COPY bin/pysetup.sh /pysetup.sh
 RUN chmod a+x /pysetup.sh && ./pysetup.sh
-RUN conda install -c conda-forge --yes mamba && \
-    mamba install --yes python==3.8.6 && \
-    pip install --upgrade pip setuptools && \
-    mamba install --yes numpy==1.19.2 pandas cytoolz numba lz4 scikit-build python-blosc=1.9.2 && \
-    (mamba install --yes pyarrow ||  pip install -vvv pyarrow)
 
 # s3a support
 #tag::s3a[]
@@ -62,8 +63,10 @@ RUN chmod a+rx ${SPARK_HOME}/jars/*.jar
 #end::perms[]
 
 
-COPY python/pyspark ${SPARK_HOME}/python/pyspark
-COPY python/lib ${SPARK_HOME}/python/lib
+COPY licenses/ ${SPARK_HOME}/licenses
+COPY python/ ${SPARK_HOME}/python
+
+RUN cd ${SPARK_HOME}/python/; pip install -e .
 
 WORKDIR /opt/spark/work-dir
 ENTRYPOINT [ "/opt/entrypoint.sh" ]

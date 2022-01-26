@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: jupyterhub
+    component: singleuser
+  name: singleuser-spark
+spec:
+  egress:
+  - {}
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 169.254.169.254/32
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - port: 7777
+      protocol: TCP
+    - port: 2222
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: jupyterhub
+      component: singleuser-server
+      release: jhub
+  policyTypes:
+  - Ingress
+  - Egress

@@ -1,0 +1,33 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: daskKubernetes
+  namespace: dask
+rules:
+- apiGroups:
+  - ""  # indicates the core API group
+  resources:
+  - "pods"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+- apiGroups:
+  - ""  # indicates the core API group
+  resources:
+  - "pods/log"
+  verbs:
+  - "get"
+  - "list"
+- apiGroups:
+  - "" # indicates the core API group
+  resources:
+  - "services"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"

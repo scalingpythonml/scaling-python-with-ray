@@ -1,0 +1,8 @@
+= Serverless Python with Ray
+:doctype: book
+
+include::preface.asciidoc[]
+
+include::ch01.asciidoc[]
+
+include::index.asciidoc[]

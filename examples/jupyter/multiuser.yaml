@@ -1,0 +1,98 @@
+debug:
+  enabled: true
+custom:
+  users:
+    holdenk:
+      secrets:
+        - env_name: MINIO_ACCESS_KEY
+          secret_name: minio
+          secret_key: accessKey
+        - env_name: MINIO_SECRET_KEY
+          secret_name: minio
+          secret_key: secretKey
+      service_account: holdenk
+hub:
+  extraConfig:
+      preSpawnHook: |
+        import z2jh
+        async def my_pre_spawn_hook(spawner):
+            users = z2jh.get_config('custom.users') or {}
+            username = spawner.user.name
+            if username in users:
+                user = users[username]
+                print(user)
+                if 'service_account' in user:
+                    spawner.service_account = user['service_account']
+                if 'secrets' in user:
+                    secrets = user['secrets']
+                    for secret in secrets:
+                        name = secret['env_name']
+                        spawner.env[name] = {
+                                'valueFrom': {
+                                    'secretKeyRef': {
+                                        'name': secret['secret_name'],
+                                        'key': secret['secret_key']
+                                    }
+                                }
+                            }
+
+        c.KubeSpawner.pre_spawn_hook = my_pre_spawn_hook
+  config:
+    GitHubOAuthenticator:
+      client_id: YOURSECRET
+      client_secret: YOURSECRET
+      oauth_callback_url: YOURURL
+      allowed_organizations:
+        - scalingpythonml
+      scope:
+        - read:user
+    Authenticator:
+      admin_users:
+        - holdenk
+    JupyterHub:
+      authenticator_class: github
+ingress:
+  enabled: true
+  annotations:
+# With traefik 2+ this makes SSL only.
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+#    kubernetes.io/tls-acme: "true"
+  hosts:
+    - jupyter.pigscanfly.ca
+  tls:
+   - hosts:
+      - jupyter.pigscanfly.ca
+     secretName: k3s-jupyter-tls
+singleuser:
+  memory:
+    limit: 10G
+    guarantee: 10G
+  cpu:
+    limit: 4
+    guarantee: 1
+  profileList:
+    - display_name: "Minimal environment"
+      description: "To avoid too much bells and whistles: Python."
+      default: true
+    - display_name: "Dask container"
+      description: "If you want to run dask"
+      kubespawner_override:
+        image: holdenk/dask-notebook:2020.1.1
+    - display_name: "Spark 3.1.1.11 container"
+      description: "If you want to run Spark"
+      kubespawner_override:
+        image: holdenk/spark-notebook:v3.1.1.11
+    - display_name: "Ray"
+      description: "If you want to run Ray"
+      kubespawner_override:
+        image: holdenk/ray-ray-nb:nightly
+prePuller:
+  continuous:
+    # I've got a bunch of images that I use rarely
+    # in "real life" you probably want to leave this optimization on.
+    enabled: false
+  hook:
+    # I've got a bunch of images that I use rarely and
+    # in "real life" you probably want to leave this optimization on.
+    enabled: false

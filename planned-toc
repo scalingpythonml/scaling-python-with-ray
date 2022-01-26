@@ -1,0 +1,46 @@
+Chapter 1: What is Ray & where can it be used & how it compares in the ecosystem
+○	Distributed/Magically Scaleable Python
+○	Celery, Spark, Airflow, Dask, multiprocessing, kubeflow
+●	Chapter 2: Installing Ray & a hello world
+○	How to install ray locally
+○	References to the cloud provider options & K8s in the appendix
+○	Computing 420! with ray
+●	Chapter 3: Understanding the basics of ray
+○	The different paradigms of programming in ray & how to choose
+○	Execution model
+○	Fault tolerance overview & implications
+○	Handling Dependencies
+●	Chapter 4: Stateless* Serverless
+○	Remote functions & tasks
+○	General APIs
+○	Handling user requests
+●	Chapter 5: Batch Data-Parallel processing
+○	Loading data
+○	Data parallel operations
+○	Data sources in detail
+●	Chapter 6: Actors (going beyond stateless)
+○	Basics
+○	Actors for ML
+○	Scaling your actors
+○	Where to store your state & implications for fault tolerance
+●	Chapter 7: Streaming
+○	Sources & sinks
+○	Stateful streaming with Ray
+●	Chapter 8: Higher-level building blocks
+○	Pools, etc. - letting you plug in random shit
+○	DataFrames (almost) w/Arrow
+○	DataFrames w/Koalas w/Spark (ugh)
+○	ML: tune & reinforcement learning
+●	Chapter 9: Integrated libraries - Using, limitations, etc.
+○	Pytorch
+○	Pandas
+●	Chapter 10: Porting existing code
+○	Understanding implications with state
+○	Finding components suitable for distributed computation
+●	Chapter 11: Using Ray on GPUs
+○	Rapids etc.
+●	Appendix A: Notebooks
+●	Appendix B: Deploying Ray
+○	Running Ray on Kubernetes
+○	Ray on Clouds
+●	Appendix C: Debugging

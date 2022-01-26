@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: k3s-jupyter-tls
+  namespace: jhub
+spec:
+  secretName: k3s-jupyter-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: jupyter.pigscanfly.ca
+  dnsNames:
+  - jupyter.pigscanfly.ca

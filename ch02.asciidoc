@@ -97,7 +97,7 @@ include::examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=remote_fu
 ----
 ====
 
-When you run these two examples, you'll see that the first is executed in the same process, and that Ray schedules the second one in another process. When we run the two examples we get "'Running on jupyter-holdenk in pid 33'" and "'Running on jupyter-holdenk in pid 173'" respectively.
+When you run these two examples, you'll see that the first is executed in the same process, and that Ray schedules the second one in another process. When we run the two examples we get "Running on jupyter-holdenk in pid 33" and "Running on jupyter-holdenk in pid 173", respectively.
 
 ===== Sleepy task
 

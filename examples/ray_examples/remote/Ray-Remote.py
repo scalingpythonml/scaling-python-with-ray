@@ -45,7 +45,7 @@ def in_order():
     for v in values:
         print(f" Completed {v}")
         time.sleep(1) # Business logic goes here
-#tag::get_only[]
+#end::get_only[]
 
 
 # In[ ]:

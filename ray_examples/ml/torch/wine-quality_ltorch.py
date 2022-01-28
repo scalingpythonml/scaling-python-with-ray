@@ -2,6 +2,7 @@ import pandas as pd
 from numpy import vstack
 import time
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
@@ -16,7 +17,7 @@ from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning import Trainer, seed_everything
 
 # Dataset
-class CSVDataset(Dataset):
+class WineQualityDataset(Dataset):
     # load the dataset
     def __init__(self, path):
         # load the csv file as a dataframe
@@ -28,7 +29,7 @@ class CSVDataset(Dataset):
         df = df.drop(['quality'], axis = 1)
         print(df['goodquality'].value_counts())
         # store the inputs and outputs
-        self.X = df.values[:, :-1]
+        self.X = StandardScaler().fit_transform(df.values[:, :-1])
         self.y = df.values[:, -1]
         # ensure input data is floats
         self.X = self.X.astype('float32')
@@ -52,10 +53,10 @@ class CSVDataset(Dataset):
         return random_split(self, [train_size, test_size])
 
 # model definition
-class WineQuality(LightningModule):
+class WineQualityModel(LightningModule):
     # define model elements
     def __init__(self, n_inputs):
-        super(WineQuality, self).__init__()
+        super(WineQualityModel, self).__init__()
         # input to first hidden layer
         self.hidden1 = Linear(n_inputs, 10)
         kaiming_uniform_(self.hidden1.weight, nonlinearity='relu')
@@ -95,7 +96,7 @@ class WineQuality(LightningModule):
 seed_everything(42)
 
 # load the dataset
-dataset = CSVDataset("winequality-red.csv")
+dataset = WineQualityDataset("winequality-red.csv")
 
 # calculate split
 train, test = dataset.get_splits()
@@ -104,8 +105,7 @@ train_dl = DataLoader(train, batch_size=32, shuffle=True)
 test_dl = DataLoader(test, batch_size=32, shuffle=False)
 
 # Train the model
-model = WineQuality(11)
-# define the optimization
+model = WineQualityModel(11)
 start = time.time()
 # train
 trainer = Trainer(max_steps=1000)

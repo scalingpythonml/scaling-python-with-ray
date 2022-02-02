@@ -6,6 +6,7 @@
 
 import ray
 import time
+from typing import Tuple
 
 
 # In[ ]:
@@ -72,10 +73,4 @@ time.sleep(1)
 # Check the placement group has died.
 print(placement_group_table(pg))
 print(ray.available_resources())
-
-
-# In[ ]:
-
-
-
 

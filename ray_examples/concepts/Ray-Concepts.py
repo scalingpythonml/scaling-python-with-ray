@@ -442,21 +442,3 @@ while len(not_ready) > 0:
     print(ray.get(ready))
 #end::bring_it_together_with_fetch_and_runtime_env[]
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-

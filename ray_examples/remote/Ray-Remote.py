@@ -4,6 +4,7 @@
 # In[ ]:
 
 
+from typing import Tuple
 import ray
 ray.init(num_cpus=20) # In theory auto sensed, in practice... eh
 
@@ -46,6 +47,19 @@ def in_order():
         print(f" Completed {v}")
         time.sleep(1) # Business logic goes here
 #tag::get_only[]
+
+
+# In[ ]:
+
+
+# Does not work - TypeError: get() takes 1 positional argument but 10 were given
+#tag::get_only_splat[]
+# Make the futures
+#futures = map(lambda x: remote_task.remote(x), things)
+#values = ray.get(*futures)
+#for v in values:
+#    print(f" Completed {v}")
+#tag::get_only_splat[]
 
 
 # In[ ]:
@@ -213,5 +227,71 @@ while len(futures) > 0:
 # In[ ]:
 
 
+#tag::bring_it_together_with_ensemble[]
+import random
 
+@ray.remote
+def fetch(url: str) -> Tuple[str, str]:
+    import urllib.request
+    with urllib.request.urlopen(url) as response:
+       return (url, response.read())
+
+@ray.remote
+def has_spam(site_text: Tuple[str, str]) -> bool:
+    # Open the list of spammers or download it
+    spammers_url = "https://raw.githubusercontent.com/matomo-org/referrer-spam-list/master/spammers.txt"
+    import urllib.request
+    with urllib.request.urlopen(spammers_url) as response:
+            spammers = response.readlines()
+            for spammer in spammers:
+                if spammer in site_text[1]:
+                    return True
+    return False
+            
+    
+@ray.remote
+def fake_spam1(us: Tuple[str, str]) -> bool:
+    # You should do something fancy here with TF or even just NLTK
+    time.sleep(10)
+    if random.randrange(10) == 1:
+        return True
+    else:
+        return False
+    
+@ray.remote
+def fake_spam2(us: Tuple[str, str]) -> bool:
+    # You should do something fancy here with TF or even just NLTK
+    time.sleep(5)
+    if random.randrange(10) > 4:
+        return True
+    else:
+        return False
+    
+@ray.remote
+def combine_is_spam(us: Tuple[str, str], model1: bool, model2: bool, model3: bool) -> Tuple[str, str, bool]:
+    # Questionable fake ensemble
+    score = model1 * 0.2 + model2 * 0.4 + model3 * 0.4
+    if score > 0.2:
+        return True
+    else:
+        return False
+#end::bring_it_together_with_ensemble[]
+
+
+# In[ ]:
+
+
+urls = ["http://www.unitedwifi.com", "http://www.google.com", "http://www.holdenkarau.com"]
+site_futures = map(lambda url: fetch.remote(url), urls)
+spam_futures = map(lambda us: [us, has_spam.remote(us), fake_spam1.remote(us), fake_spam2.remote(us)],
+                   site_futures)
+info_futures = map(lambda i: combine_is_spam.remote(*i), spam_futures)
+                   
+                   
+not_ready = list(info_futures)
+while len(not_ready) > 0:
+    ready, not_ready = ray.wait(not_ready, num_returns = 1)
+    if len(ready) < 1:
+        raise Exception("Error fetching futures")
+    print(ray.get(ready))
 

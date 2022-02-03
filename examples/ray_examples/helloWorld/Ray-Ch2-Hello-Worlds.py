@@ -164,7 +164,7 @@ def fetch_page(url):
 pages = urls.map(fetch_page)
 # Look at a page to make sure it worked
 pages.take(1)
-#end:ds[]
+#end::ds[]
 
 
 # In[ ]:

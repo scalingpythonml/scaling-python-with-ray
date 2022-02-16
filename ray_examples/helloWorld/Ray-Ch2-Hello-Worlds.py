@@ -138,12 +138,10 @@ class HelloWorld(object):
         self.value += 1
         return f"Hi user #{self.value}"
 
+# Make an instance of the actor
 hello_actor = HelloWorld.remote()
 
-
-# In[ ]:
-
-
+# Call the actor
 print(ray.get(hello_actor.greet.remote()))
 print(ray.get(hello_actor.greet.remote()))
 #end::actor[]
@@ -158,31 +156,14 @@ urls = ray.data.from_items([
     "https://github.com/scalingpythonml/scalingpythonml",
     "https://github.com/ray-project/ray"])
 
-
-# In[ ]:
-
-
 def fetch_page(url):
     import requests
     f = requests.get(url)
     return f.text
 
-
-# In[ ]:
-
-
 pages = urls.map(fetch_page)
-
-
-# In[ ]:
-
-
+# Look at a page to make sure it worked
 pages.take(1)
-
-
-# In[ ]:
-
-
 #end:ds[]
 
 
@@ -191,11 +172,6 @@ pages.take(1)
 
 #tag::ray_wordcount_on_ds[]
 words = pages.flat_map(lambda x: x.split(" ")).map(lambda w: (w, 1))
-
-
-# In[ ]:
-
-
 grouped_words = words.groupby(lambda wc: wc[0])
 #end::ray_wordcount_on_ds[]
 
@@ -210,10 +186,4 @@ word_counts = grouped_words.count()
 
 
 word_counts.show()
-
-
-# In[ ]:
-
-
-
 

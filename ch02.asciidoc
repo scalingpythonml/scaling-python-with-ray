@@ -13,11 +13,6 @@ If you are in a hurry, you can also use https://gitpod.io/#https://github.com/sc
 
 Installing Ray, even on a single machine, can range from relatively straightforward to fairly complicated. Ray publishes wheels to PyPi following a normal release cadence as well as nightly releases. These wheels are currently only available for x86 users, so ARM users will mostly need to build Ray from source.footnote:[As ARM grows in popularity, Ray is more likely to add ARM wheels so this is hopefully temporary.]
 
-[TIP]
-====
-M1 ARM users on OSX can use the x86 packages with Rosetta. There is some performance impact, but it's a much simpler setup. To use the x86s package install Anaconda Python for OSX.
-====
-
 ==== Installing (for x86 and Mac ARM)
 
 Most users can run `pip install -U ray` to install Ray from PyPi automatically. When you go to distribute your computation on multiple machines it's often easier to have been working in a conda environment so you can match Python versions with your cluster and know your package dependencies. The commands in <<ex_ray_conda>> set up a fresh conda environment with Python and install Ray with some minimal dependencies.

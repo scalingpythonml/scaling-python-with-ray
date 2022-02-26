@@ -18,7 +18,7 @@ Installing Ray, even on a single machine, can range from relatively straightforw
 M1 ARM users on OSX can use the x86 packages with Rosetta. There is some performance impact, but it's a much simpler setup. To use the x86s package install Anaconda Python for OSX.
 ====
 
-==== Installing (for x86 and M1 ARM)
+==== Installing (for x86 and Mac ARM)
 
 Most users can run `pip install -U ray` to install Ray from PyPi automatically. When you go to distribute your computation on multiple machines it's often easier to have been working in a conda environment so you can match Python versions with your cluster and know your package dependencies. The commands in <<ex_ray_conda>> set up a fresh conda environment with Python and install Ray with some minimal dependencies.
 
@@ -30,45 +30,8 @@ include::examples/ray_examples/installRay/ray_setup_on_x86.sh[tags=install]
 ----
 ====
 
+For those running on systems without pre-built wheels, installing from source is possible but a little slow. See <<appa_deploying>>.
 
-==== Installing (from Source) for ARM
-
-For ARM users or any users with a system architecture that does not have a prebuilt wheel available, you will need to build Ray from the source.
-
-On our ARM Ubuntu system, we need to install some additional packages, as shown in <<debian_ray_arms_pkgs>>.
-
-[[debian_ray_arms_pkgs]]
-====
-[source, bash]
-----
-include::examples/ray_examples/installRay/ray_setup_on_arm.sh[tags=deps]
-----
-====
-
-If you are an M1 Mac user who doesn't want to use Rosetta you'll need to install some dependencies. You can install them with homebrew and pip as shown in <<m1_ray_arms_pkgs>>.
-
-[[m1_ray_arms_pkgs]]
-====
-[source, bash]
-----
-include::examples/ray_examples/installRay/ray_setup_on_arm_osx.sh[tags=deps]
-----
-====
-
-You need to build some of the Ray components separately because they are written in different languages. This does make it more complicated, but you can follow the steps in <<build_ray>>.
-
-[[build_ray]]
-====
-[source, bash]
-----
-include::examples/ray_examples/installRay/ray_setup_on_arm.sh[tags=build]
-----
-====
-
-[TIP]
-====
-The slowest part of the build is compiling the C++ code, which can easily take up to an hour on even modern machines. If you have a cluster with a number of ARM machines, it's often worth it to build a wheel once and reuse it on your cluster.
-====
 
 === Hello Worlds
 

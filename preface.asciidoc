@@ -9,14 +9,11 @@ Serverless is a bit of a buzzword, and despite its name, it does contain servers
 
 == Acknowledgments
 
-This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewerss. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
+This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, Vini Jaiswal, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
 
 Holden would also like to thank her wife and partners for putting up with her long in-the-bath-tub writing sessions. A special thank you to Timbit for guarding the house and generally giving me a reason to get out of bed (albeit often a bit too early for my taste).
 
-<p id="gdcalert1" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image1.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert2">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image1.png "image_tooltip")
+image::images/preface/timbit.png[]
 
 
 
@@ -32,7 +29,7 @@ Once published in print and excluding O’Reilly’s distinctive design elements
 
 == Code Examples
 
-The [Scaling Python ML Github](https://github.com/scalingpythonml/scalingpythonml) contains most of the examples for this book. The examples in this book are in the "ray" directory, with some parts (namely Dask on Ray) being found in the "dask" directory and Spark on Ray in the "spark" directory. 
+The https://github.com/scalingpythonml/scalingpythonml[Scaling Python ML Github] contains most of the examples for this book. The examples in this book are in the "ray" directory, with some parts (namely Dask on Ray) being found in the "dask" directory and Spark on Ray in the "spark" directory. 
 
 This book is here to help you get your job done. In general, if an example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you’re reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing a CD-ROM of examples from O’Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. The code is also available under an Apache 2 License. Incorporating a significant amount of example code from this book into your product’s documentation may require permission.
 

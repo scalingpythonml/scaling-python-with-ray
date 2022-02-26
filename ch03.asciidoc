@@ -8,7 +8,7 @@ You often need some form of distributed or parallel computing when building mode
 * Efficiently handling large parameters
 * Easily passing information between processes
 
-Unlike multiprocessing, Ray's remote functions satisfy the above requirements. It's important to note that "remote" doesn't necessarily refer to a separate computer despite its name. When you create a remote function, Ray takes over distributing calls to that function instead of running in the same process. When calling remote functions, you are effectively running asynchronouslyfootnote:[A fancy way of saying running multiple things at the same time without waiting on each other.] on multiple cores or different machines, without having to concern yourself with how or where.
+Unlike multiprocessing, Ray's remote functions satisfy the above requirements. It's important to note that "remote" doesn't necessarily refer to a separate computer despite its name - - it could be running on the same machine. What Ray does provide is mapping function calls to the right process on your behalf - Ray takes over distributing calls to that function instead of running in the same process. When calling remote functions, you are effectively running asynchronouslyfootnote:[A fancy way of saying running multiple things at the same time without waiting on each other.] on multiple cores or different machines, without having to concern yourself with how or where.
 
 In this chapter, you will learn how to create remote functions, wait for their completion, and fetch results. Once you've got the basics down, you will learn to compose remote functions together to create more complex operations. Before you go too far, let's start with understanding some of what we glossed over in the previous chapter.
 

@@ -28,7 +28,7 @@ Ray runs cleanly on your laptop as well as at scale with the same APIs. This pro
 
 === Where Can You Run Ray?
 
-Ray can be deployed in a variety of environments ranging from your laptop to the cloud, to cluster managers like Kubernetes or Yarn, to six raspberry pis hidden under your desk.footnote:[ARM support, including for PIs and native M1s, requires manual building for now.] In local mode, getting started can be as simple as a `pip install` and a call to `ray.init`.footnote:[Much of modern ray will automatically initialize a context if one is not present, allowing you to skip even this part.]
+Ray can be deployed in a variety of environments ranging from your laptop to the cloud, to cluster managers like Kubernetes or Yarn, to six raspberry pis hidden under your desk.footnote:[ARM support, including for PIs and native M1s, requires manual building for now.] In local mode, getting started can be as simple as a `pip install` and a call to `ray.init()`.footnote:[Much of modern ray will automatically initialize a context if one is not present, allowing you to skip even this part.]
 
 .Ray Cluster
 ****
@@ -41,11 +41,11 @@ As you can see from the preceding figure, a head node, in addition to supporting
 Global control store:: Contains https://medium.com/coinmonks/ray-a-cluster-computing-ml-framework-for-emerging-applications-9dfa14934749[cluster-wide information] including object table, task table, function table, events log, etc. The content of this store is used for web UI, error diagnostics, debugging, and profiling tools.
 Autoscaler:: Attempts to launch/terminate worker nodes to ensure that workloads have sufficient resources to run while minimizing the idle resources.
 
-The head node is effectively a master (singletonfootnote:[Unfortunately a head node is also a single point of failure. If you lose a head node, you will use the cluster and need to recreate it. Moreover if you lose a head node, existing worker nodes can be come orphans and will have to be removed “manually.”]) which manages a complete cluster (via autoscaler).
+The head node is effectively a master (singletonfootnote:[Unfortunately a head node is also a single point of failure. If you lose a head node, you will use the cluster and need to recreate it. Moreover if you lose a head node, existing worker nodes can become orphans and will have to be removed “manually.”]) which manages a complete cluster (via autoscaler).
 Each of the Ray’s nodes contains a Raylet, that consists of two main components:
 
 Object store:: All of the object stores are connected together and you can think about this collection somewhat similar to https://memcached.org/[memcached], a distributed cache.
-Schedular:: Each Ray node provides a local schedular that can communicate with each other thus create a unified distributed schedular for overall Ray cluster. 
+Scheduler:: Each Ray node provides a local schedular that also communicates with each other creating a unified distributed scheduler for the cluster.
 
 When we are talking about nodes in a Ray cluster we are not talking about physical machines, but rather about logical nodes based on docker images. As a result, when mapping to physical machines, a given physical node can run one or more logical nodes. 
 ****
@@ -58,7 +58,7 @@ When we are talking about nodes in a Ray cluster we are not talking about physic
 * Initialize the Ray cluster
 * Deploy an autoscaler if required
 
-In addition to `ray up`, if running on kubernetes you can use Ray kubernetes operator. Although `ray up` or kubernetes operator are preferred ways of Ray cluster creation, if you have a set of existing machines (either physical or VMs) you can set up the Ray cluster manually.
+In addition to `ray up`, if running on kubernetes you can use Ray kubernetes operator. Although `ray up` or the kubernetes operator are the preferred ways of Ray cluster creation, if you have a set of existing machines (either physical or VMs) you can set up the Ray cluster manually.
 
 Regardless of which deployment approach you take, the same Ray code should work everywhere.footnote:[With large variances in speed. This can get more complicated when you need specific libraries or hardware for code, for example.] We'll look more at running Ray in local mode in the next chapter, and if you want to scale even more we'll cover deploying to the cloud and resource managers in <<appendix_deploying>>.
 
@@ -77,7 +77,9 @@ Ray sits at a unique intersection of problem spaces.
 The first problem that Ray solves is that of scaling your Python code by managing resources, be it servers, threads, or GPUs. Ray's core building blocks are a scheduler, distributed data storage, and actor system. 
 The scheduler that Ray uses is general purpose enough to exist in the space of workflow scheduling, not just with "traditional" problems of scale.
 Ray's actor system gives you a simple way of handling resilient distributed execution state.footnote:[For those of you familiar, this is in the space of "reactive systems."]
-In addition to the scalable building blocks, Ray has higher-level libraries such as Serve, Data, Tune, RLlib, Train and Workflows that exist in the machine learning problem space. 
+In addition to the scalable building blocks, Ray has higher-level libraries such as Serve, Data, Tune, RLlib, Train and Workflows that exist in the machine learning problem space. These are designed to be used by folks with more of a data science background than necessarily a distributed systems background.
+
+
 Overall Ray ecosystem is presented in <<fig_ray_ecosystem>>.
 
 [[fig_ray_ecosystem]]
@@ -113,11 +115,13 @@ Let's take a look at some of the different problem spaces and see how Ray fits i
 
 ==== "Big" Data / Scalable Dataframes
 
-Ray offers a few different APIs for scalable dataframes, a cornerstone of the big data ecosystem. It builds on top of the Apache Arrow project to provide a (limited) distributed Dataframe API called `ray.data.Dataset`. Beyond that, Ray also provides support for a more pandas-like experience through DaskOnRay.
+Ray offers a few different APIs for scalable dataframes, a cornerstone of the big data ecosystem. Ray builds on top of the Apache Arrow project to provide a (limited) distributed Dataframe API called `ray.data.Dataset`. This is largely intended for the simplest of transformations and reading from cloud or distributed storage. Beyond that, Ray also provides support for a more pandas-like experience through DaskOnRay, which leverages the Dask interface on top of Ray.
 
 [WARNING]
 ====
 In addition to the libraries above, you may find references to Mars on Ray or Ray's (deprecated) built-in pandas support. These libraries do not support distributed mode, so they can limit your scalability.
+
+This is a rapidly evolving area and something to keep your eye on in the future.
 ====
 
 .Ray and Spark

@@ -1,3 +1,4 @@
+[[geting_started_with_ray]]
 == Getting Started with Ray (Locally)
 
 As we've discussed, Ray is useful for managing resources from a single computer up to a cluster. It is simpler to get started with a local installation, which leverages the parallelism of multi-core/multi-CPU. Even when deploying to a cluster you'll want to have Ray installed locally for development. Once you've got Ray installed, we'll show you how to make and call your first asynchronous parallelized function and store state in an actor.

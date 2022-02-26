@@ -1,4 +1,5 @@
-= Preface
+[preface]
+== Preface
 
 We wrote this book for developers and data scientists looking to build and scale applications in Python without becoming systems administrators. We expect this book to be most beneficial for individuals and teams dealing with the growing complexity and scale of problems moving from single-threaded solutions to multi-threaded, all the way to distributed computing.
 
@@ -7,7 +8,7 @@ While you can use Ray from Java, this book is in Python, and we assume a general
 Serverless is a bit of a buzzword, and despite its name, it does contain servers, but the idea is you don't have to worry about the servers. For many developers and data scientists, the promise of having things magically scale without worrying about the servers' details is quite appealing. On the other hand, if you enjoy getting into the nitty-gritty of your servers, deployment mechanisms, load-balancers, etc., this is probably not the book for you -- but hopefully, you recommend this to your users.
 
 
-== Acknowledgments
+=== Acknowledgments
 
 This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, Vini Jaiswal, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
 
@@ -17,17 +18,17 @@ image::images/preface/timbit.png[]
 
 
 
-== A note on responsibility
+=== A note on responsibility
 
 As the saying goes, with great power comes great responsibility. Ray, and tools like it, enable you to build more complex systems handling more data and users. It's important not to get too excited and carried away solving problems because they are fun, and stop to ask yourself what the impact of your decisions will be. You don't have to search very hard to find stories of well-meaning engineers and data scientists accidentally building models or tools that caused devastating impacts, like the new VA payment system breaking, to hiring algorithms that discriminate based on gender. We ask that you use your newfound powers keeping this in mind, for one never wants to end up in a textbook for the wrong reasons.
 
 
-== License
+=== License
 
 Once published in print and excluding O’Reilly’s distinctive design elements (i.e. cover art, design format, “look and feel”) or O’Reilly’s trademarks, service marks, and trade names, this book is available under a Creative Commons Attribution-Noncommercial-NoDerivatives 4.0 International Public License. We thank O'Reilly for allowing us to make this book available under a creative commons license. We hope that you will choose to support this book (and the authors) by purchasing several copies of this book with your corporate expense account (it makes an excellent gift for whichever holiday season is coming up next).
 
 
-== Code Examples
+=== Code Examples
 
 The https://github.com/scalingpythonml/scalingpythonml[Scaling Python ML Github] contains most of the examples for this book. The examples in this book are in the "ray" directory, with some parts (namely Dask on Ray) being found in the "dask" directory and Spark on Ray in the "spark" directory. 
 

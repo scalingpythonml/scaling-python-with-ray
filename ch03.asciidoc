@@ -47,7 +47,7 @@ Tasks can end in an error. Ray distinguishes between two types of task errors:
 Application-level:: This is any scenario where the worker process is alive, but the task ends in an error. For example, a task that throws an `IndexError` in Python.
 System-level:: This is any scenario where the worker process dies unexpectedly. For example, a process that segfaults, or if the worker’s local raylet dies.
 
-Tasks that fail due to application-level errors are never retried. The exception is caught and stored as the return value of the task. Tasks that fail due to system-level errors may be automatically retried up to a specified number of attempts. This is covered in more detail in <<fault_tolerance>>.
+Tasks that fail due to application-level errors are never retried. The exception is caught and stored as the return value of the task. Tasks that fail due to system-level errors may be automatically retried up to a specified number of attempts. This is covered in more detail in <<ray_details_fault_tolerance>>.
 ****
 
 In our examples so far, using `ray.get` was fine because the futures all had the same execution time. If the execution times are different, such as training, a model on different-sized batches of data, and you don't need all of the results at the same time, this can be quite wasteful. Instead of directly calling `ray.get`, you should use `ray.wait`, which returns the requested number of futures that have already been completed. To see the performance difference, you will need to modify your remote function to have a variable sleep time, as in <<variable_sleep_task>>.

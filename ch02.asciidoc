@@ -25,7 +25,7 @@ include::examples/ray_examples/installRay/ray_setup_on_x86.sh[tags=install]
 ----
 ====
 
-For those running on systems without pre-built wheels, installing from source is possible but a little slow. See <<appa_deploying>>.
+For those running on systems without pre-built wheels, installing from source is possible but a little slow. See <<appendix_deploying>>.
 
 
 === Hello Worlds

@@ -18,7 +18,8 @@ args = parser.parse_args()
 numberOfIterations = int(args.kwargs["iterations"])
 print(f"Requested number of iterations is: {numberOfIterations}")
 
-print(f'Envarionment variable MY_VARIABLE has a value of {os.getenv("MY_VARIABLE")}')
+print(f'environment variable MY_VARIABLE1 has a value of {os.getenv("MY_VARIABLE1")}, '
+      f'MY_VARIABLE2 has a value of {os.getenv("MY_VARIABLE2")}')
 
 ray.init()
 

@@ -1,5 +1,5 @@
 from ray.dashboard.modules.job.sdk import JobSubmissionClient
-from ray.dashboard.modules.job.common import JobStatus, JobStatusInfo
+from ray.dashboard.modules.job.common import JobStatus
 
 import time
 
@@ -10,9 +10,9 @@ job_id = client.submit_job(
     entrypoint="python script_with_parameters.py --kwargs iterations=7",
     # Working dir
     runtime_env={
-        "working_dir": "/Users/boris/Projects/Platform-Infrastructure/middleware/ray/test",
+        "working_dir": ".",
         "pip": ["requests==2.26.0", "qiskit==0.34.2"],
-        "env_vars": {"MY_VARIABLE": "foo"}
+        "env_vars": {"MY_VARIABLE1": "foo", "MY_VARIABLE2": "bar"}
     }
 )
 

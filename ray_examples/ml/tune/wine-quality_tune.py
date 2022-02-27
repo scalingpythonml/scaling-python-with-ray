@@ -158,7 +158,7 @@ search_space = {
 
 analysis = tune.run(
     train_winequality,
-    num_samples=50,
+    num_samples=100,
     scheduler=ASHAScheduler(metric="mean_accuracy", mode="max"),
     config=search_space
 )

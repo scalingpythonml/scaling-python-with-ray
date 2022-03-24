@@ -191,7 +191,9 @@ Specify how many times to retry an actor's task if the task fails due to a syste
 
 As further explained in the next chapter and https://docs.ray.io/en/master/fault-tolerance.html#actors[here] when an actor is restarted, Ray will recreate its state by rerunning its constructor. This means that if a state was changed during the actor’s execution, it will be lost. In order to preserve such a state, an actor has to implement its custom persistence.
 In our example case, the actor’s state is lost on failure since we haven't used actor persistence. This might be okay for some use cases, but not acceptable for others (see also this https://docs.ray.io/en/master/ray-design-patterns/fault-tolerance-actor-checkpointing.html[Ray pattern]). In the next section, you will learn how to programmatically implement custom actor persistence.
+
 === Implementing Actor’s Persistence
+
 In this implementation, the state is saved as a whole, which works well enough if the size of the state is relatively small and the state changes are relatively rare. Also to keep an example simple a local disk persistence is used. In reality, for a distributed Ray case, you should consider using NFS or S3 or a database to enable access to the actor’s data from any node in the Ray cluster.
 Persistent Account actor is presented in <<pers_acct_actor>>.footnote:[In this implementation, we are using file system persistence, but the same approach can be used for other types of persistence, for example, S3 or databases.]
 
@@ -259,9 +261,9 @@ class Account:
 
 If we compare this implementation with the original one (<<impl_ray_remote_actor>>), we will notice several important changes:
 
-Here the constructor has two additional parameters - `account_key` and `basedir`. The account key is a unique identifier for the account that is also used as the name of the persistence file. Basedir is a base directory used for storing persistence files. When the constructor is invoked we first check if there is a persistent state for this account saved and if there is one, we ignore passed in balance and minimum balance and restore them from persistence.
-Two additional methods are added to the class - `store_state` and `restore_state`. Store_state is a method that stores an actor state into a file. State information is represented as a dictionary with keys as names of the state elements and values as the state elements values. We are using Ray's implementation of cloud pickling to convert this dictionary to the byte string and then write this byte string to the file, defined by the account key and base directory.footnote:[See Chapter 5 for a detailed discussion on cloud pickling.] Restore_state is a method that restores a state from a file defined by an account key and base directory. It reads a binary string from the file and uses Ray's implementation of cloud pickling to convert it to the dictionary. Then it uses the content of the dictionary to populate the state.
-Finally, both `deposit` and `withdrawal` methods, that are changing the state, use the `store_state` method to update persistence
+* Here the constructor has two additional parameters - `account_key` and `basedir`. The account key is a unique identifier for the account that is also used as the name of the persistence file. Basedir is a base directory used for storing persistence files. When the constructor is invoked we first check if there is a persistent state for this account saved and if there is one, we ignore passed in balance and minimum balance and restore them from persistence.
+* Two additional methods are added to the class - `store_state` and `restore_state`. Store_state is a method that stores an actor state into a file. State information is represented as a dictionary with keys as names of the state elements and values as the state elements values. We are using Ray's implementation of cloud pickling to convert this dictionary to the byte string and then write this byte string to the file, defined by the account key and base directory.footnote:[See Chapter 5 for a detailed discussion on cloud pickling.] Restore_state is a method that restores a state from a file defined by an account key and base directory. It reads a binary string from the file and uses Ray's implementation of cloud pickling to convert it to the dictionary. Then it uses the content of the dictionary to populate the state.
+* Finally, both `deposit` and `withdrawal` methods, that are changing the state, use the `store_state` method to update persistence.
 
 The implementation shown in <<pers_acct_actor>> works fine, but our account actor implementation now contains too much persistence-specific code and is tightly coupled to file persistence. A better solution is to separate persistence-specific code into a separate class.
 
@@ -353,7 +355,9 @@ class Account:
 Only the code changes from our original persistent actor implementation (<<pers_acct_actor>>) are shown here. Note that the constructor is now taking the BasePersistence class, which allows for easily changing persistence implementation without changing the actor’s code. Additionally, `restore_state` and `savestate` methods are generalized to move all of the persistence-specific code to the persistence class. 
 
 This implementation is flexible enough to support different persistence implementations, but if a persistence implementation requires permanent connections to a persistence source (for example DB connection), it can become unscalable by simultaneously maintaining too many connections. In this case, we can implement persistence as an https://github.com/scalingpythonml/scalingpythonml/blob/master/ray/actors/persistent_account_2actors.py[additional actor]. But this requires scaling of this actor. Let’s take a look at the options that Ray provides for scaling actors.
+
 === Scaling Ray Remote Actors
+
 The original actor model described earlier in this chapter, typically assumes that actors are lightweight, e.g. contain a single piece of state, and they do not require scaling/parallelization. In Ray and similar systems,footnote:[Including Akka] actors are often used for coarser grained implementations and can require scaling.footnote:[A coarse grained actor means a single actor may contain multiple pieces of state rather than fine-grained where each piece of state would be represented as a separate actor. This is similar to the concept of https://www.martinfowler.com/eaaCatalog/coarseGrainedLock.html[coarse-grained locking].]
 
 As with Ray remote functions, you can scale actors both horizontally (across processes/machines) with "pools" or vertically (with more resources). The <<ray_resources>> section covers how to request more resources, but for now, let's focus on horizontal scaling.
@@ -497,10 +501,8 @@ As mentioned before, Ray offers support for actors’ fault tolerance. Specifica
 If in your applications you have global variables that you have to change do not change them in remote functions, rather use actors to encapsulate them and access them through the actor’s methods. This is because remote functions are running in different processes and do not share the same address space and as a result, these changes are not reflected across ray driver and remote functions.
 One of the common application use cases is the execution of the same remote function many times for different data sets. Usage of the remote functions directly can cause delays due to the creation of new processes for each of the functions. It can also overwhelm the Ray cluster with a large number of processes. A more controlled option for such a use case is the usage of the Actor’s pool. In this case, a pool provides a controlled set of workers that are readily available (no process creation delay) for execution. As the pool is maintaining its requests queue, the programming model for this option is identical to starting independent remote functions but provides a better-controlled execution environment. 
 
-
-
-
 === Conclusion
+
 In this chapter, you have learned how to use Ray remote actors to implement stateful execution in Ray. You have learned about the actor model and how to implement Ray remote actors. Note that Ray internally heavily relies on using actors, for example, for multi-node https://docs.ray.io/en/master/advanced.html#multi-node-synchronization-using-signalactor[synchronization], streaming (see Chapter 6), microservices implementation (see Chapter 7), etc. It is also widely used for ML implementations, see, for example, usage of actors for implementing https://ray-project.github.io/2018/07/15/parameter-server-in-fifteen-lines.html[parameter server]. 
 You have also learned how to improve an actor’s reliability by implementing an actor’s persistence and saw a simple example of persistence implementation.
 Finally, you have learned about the options that Ray provides for scaling actors, their implementation, and tradeoffs. 

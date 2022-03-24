@@ -472,7 +472,7 @@ So, which scaling approach should we use for our implementation? This https://le
 
 [[comp_scaling_approaches]]
 .Comparison of different actor’s scaling approaches
-[cols="1,1,1"]
+[options="header"]
 |===
 |Scaling approach |Feature |Usage criteria
 

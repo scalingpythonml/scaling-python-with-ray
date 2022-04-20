@@ -3,7 +3,7 @@ from ray.dashboard.modules.job.common import JobStatus
 
 import time
 
-client = JobSubmissionClient("http://raycluster-ray.borisdata-cluster-2a0beb393d3242574412e5315d3d4662-0000.us-south.containers.appdomain.cloud")
+client = JobSubmissionClient("http://raycluster-ray.borisdata-cluster-2a0beb393d3242574412e5315d3d4662-0000.us-south.containers.appdomain.cloud:80")
 
 job_id = client.submit_job(
     # Entrypoint shell command to execute
@@ -19,8 +19,7 @@ job_id = client.submit_job(
 print(f"Submitted job with ID : {job_id}")
 
 while True:
-    status_info = client.get_job_status(job_id)
-    status = status_info.status
+    status = client.get_job_status(job_id)
     print(f"status: {status}")
     if status in {JobStatus.SUCCEEDED, JobStatus.STOPPED, JobStatus.FAILED}:
         break

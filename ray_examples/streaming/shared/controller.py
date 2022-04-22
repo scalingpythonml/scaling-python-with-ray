@@ -1,4 +1,11 @@
 #tag::shared[]
+from enum import Enum
+class Action(Enum):
+    NONE = -1
+    OFF = 0
+    ON = 1
+
+
 class BaseTemperatureController:
     def __init__(self, id: str):
         self.current_setting = None
@@ -24,16 +31,16 @@ class BaseTemperatureController:
         self.down_delta = down_delta
 
     # Process new measurements
-    def process_sensordata(self, sensor: dict) ->bool:
+    def process_sensor_data(self, sensor: dict) ->bool:
         if self.current_setting is not None:           # desired temperature is set, otherwise ignore
             # calculate desired action
             measurement = sensor['measurement']
-            action = -1
+            action = Action.NONE
             if measurement > (self.current_setting + self.up_delta):
-                action = 1
+                action = Action.ON
             if measurement < (self.current_setting - self.down_delta):
-                action = 0
-            if action >= 0 and self.previous_command != action:  # new action
+                action = Action.OFF
+            if action != Action.NONE and self.previous_command != action:  # new action
                 self.previous_command = action
                 # publish new action to kafka
                 return True

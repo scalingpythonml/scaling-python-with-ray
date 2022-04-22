@@ -1,7 +1,8 @@
+#tag::shared[]
 class BaseTemperatureController:
     def __init__(self, id: str):
-        self.currentSetting = None
-        self.previousCommand = -1
+        self.current_setting = None
+        self.previous_command = -1
         self.id = id
 
     # Process new message
@@ -18,25 +19,26 @@ class BaseTemperatureController:
         downdelta = setting['down_delta']
         print(f'Controller {self.id} new temperature setting {desired} up delta {updelta} '
               f'down delta {downdelta}')
-        self.currentSetting = desired
-        self.upDelta = updelta
-        self.downDelta = downdelta
+        self.current_setting = desired
+        self.up_delta = updelta
+        self.down_delta = down_delta
 
     # Process new measurements
     def process_sensordata(self, sensor: dict) ->bool:
-        if self.currentSetting is not None:           # desired temperature is set, otherwise ignore
+        if self.current_setting is not None:           # desired temperature is set, otherwise ignore
             # calculate desired action
             measurement = sensor['measurement']
             action = -1
-            if measurement > (self.currentSetting + self.upDelta):
+            if measurement > (self.current_setting + self.up_delta):
                 action = 1
-            if measurement < (self.currentSetting - self.downDelta):
+            if measurement < (self.current_setting - self.down_delta):
                 action = 0
-            if action >= 0 and self.previousCommand != action:  # new action
-                self.previousCommand = action
+            if action >= 0 and self.previous_command != action:  # new action
+                self.previous_command = action
                 # publish new action to kafka
                 return True
             else:
                 return False
         else:
             return False
+#end::shared[]

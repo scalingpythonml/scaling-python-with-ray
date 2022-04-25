@@ -9,7 +9,7 @@ podTypes:
   rayGPUWorkerType:
     memory: 10Gi
     maxWorkers: 4
-    minWorkers: 0
+    minWorkers: 1
 # Normally you'd ask for a GPU but NV auto labeler is... funky on ARM
     CPU: 1
     rayResources:

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 export SCALING_PYTHON_ML_EXAMPLES_PATH=$(realpath "$(dirname "$0")")
 if [ ! -d ray ]; then
 #tag::add_ray_chart[]

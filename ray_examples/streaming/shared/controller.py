@@ -15,7 +15,7 @@ class BaseTemperatureController:
     # Process new message
     def process_new_message(self, message: dict):
         if 'measurement' in message:    # measurement request
-            self.process_sensordata(message)
+            self.process_sensor_data(message)
         else:                           # temp set request
             self.set_temperature(message)
 

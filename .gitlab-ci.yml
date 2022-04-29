@@ -38,7 +38,6 @@ test:
     - docker pull $CI_REGISTRY_IMAGE:ci || true
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX up -d
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX exec -T -w /app app make test
-    - docker-compose -f compose/ci.yml -p $STACK_PREFIX exec -T -w /app/private app npm install
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX down
   only:
     - develop
@@ -49,8 +48,6 @@ compile-staging:
   script:
     - docker pull $CI_REGISTRY_IMAGE:staging || true
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX up -d
-    - docker-compose -f compose/ci.yml -p $STACK_PREFIX exec -T -w /app/private app npm install
-    - docker-compose -f compose/ci.yml -p $STACK_PREFIX exec -T -w /app/private app npm run-script build
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX down -v
   environment:
     name: staging
@@ -68,8 +65,6 @@ compile-production:
   script:
     - docker pull $CI_REGISTRY_IMAGE:production || true
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX up -d
-    - docker-compose -f compose/ci.yml -p $STACK_PREFIX exec -T -w /app/private app npm install
-    - docker-compose -f compose/ci.yml -p $STACK_PREFIX exec -T -w /app/private app npm run-script build
     - docker-compose -f compose/ci.yml -p $STACK_PREFIX down -v
   environment:
     name: production

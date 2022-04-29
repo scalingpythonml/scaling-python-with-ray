@@ -2,7 +2,6 @@ FROM revolutionsystems/python:3.8.9-wee-optimized-lto as base
 
 ENV PYTHONBREAKPOINT=ipdb.set_trace \
     DEBIAN_FRONTEND=noninteractive \
-    NODE_MAJOR=16 \
     PG_MAJOR=13
 
 RUN set -ex; \
@@ -76,14 +75,6 @@ COPY src/requirements /requirements
 RUN pip install --pre -r /requirements/runtime.txt && rm -rf /requirements; \
     find /usr/lib/python3/dist-packages/ \
 		-type d -name __pycache__ -empty -print0 | xargs --null --no-run-if-empty rmdir
-
-RUN set -xe; \
-    curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - ; \
-    echo "deb https://deb.nodesource.com/node_$NODE_MAJOR.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-    nodejs; \
-    npm i -g npm@^6
 
 ###############################################################################
 FROM deps as ci

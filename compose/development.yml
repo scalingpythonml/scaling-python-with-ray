@@ -14,7 +14,6 @@ services:
       target: local
     volumes:
       - ../src:/app
-      - node:/src/private/node_modules
     shm_size: 128m
     environment:
       __ENV__: Local

@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: head-pod-metrics
+  labels:
+    app: ray
+spec:
+  jobLabel: ray-cluster-name
+  selector:
+    matchLabels:
+      ray-node-type: head
+  namespaceSelector:
+    matchNames:
+      - ray
+  podMetricsEndpoints:
+  - path: /
+    port: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: worker-pod-metrics
+  labels:
+    app: ray
+spec:
+  jobLabel: ray-cluster-name
+  selector:
+    matchLabels:
+      ray-node-type: worker
+  namespaceSelector:
+    matchNames:
+      - ray
+  podMetricsEndpoints:
+  - path: /
+    port: metrics

@@ -1,0 +1,63 @@
+version: '3.8'
+
+volumes:
+  data: {}
+  broker: {}
+  cache: {}
+  node: {}
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: compose/build/Dockerfile
+      target: local
+    volumes:
+      - ../src:/app
+      - node:/src/private/node_modules
+    shm_size: 128m
+    environment:
+      __ENV__: Local
+      ENVIRONMENT: "development"
+      SECRET_KEY: d7b24a10f65b4cae8549d79991ebaf2b
+      DOMAIN: 0.0.0.0:8000
+      SSL: 'off'
+      DATA_NETLOC: postgresql://local:local@data:5432/local
+      CACHE_NETLOC: redis://cache:6379/0
+      BROKER_NETLOC: amqp://broker:5672
+      STATIC_URL: /static/
+      MEDIA_URL: /media/
+      SENTRY_DSN_BACKEND: ""
+      SENTRY_DSN_FRONTEND: ""
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    depends_on:
+      - data
+      - broker
+      - cache
+
+  data:
+    image: postgres:13.3
+    shm_size: 500m
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: local
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+
+  broker:
+    image: rabbitmq:3.8-alpine
+    volumes:
+      - broker:/var/lib/rabbitmq
+
+  cache:
+    image: redis:6.2
+    volumes:
+      - cache:/data
+    environment:
+      MAX_MEMORY: 300mb
+      MAX_MEMORY_POLICY: allkeys-lru

@@ -1,0 +1,63 @@
+version: "3.8"
+
+volumes:
+  data: {}
+  broker: {}
+  cache: {}
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: compose/build/Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+      cache_from:
+        - revolutionsystems/python:3.8.9-wee-optimized-lto
+        - ${CI_REGISTRY_IMAGE}:ci
+      target: ci
+    volumes:
+      - ${CI_PROJECT_DIR}/src:/app
+    shm_size: 128m
+    environment:
+      __ENV__: Test
+      ENVIRONMENT: "testing"
+      SECRET_KEY: ${SECRET_KEY}
+      DOMAIN: ${DOMAIN}
+      SSL: "off"
+      DATA_NETLOC: ${DATA_NETLOC}
+      CACHE_NETLOC: ${CACHE_NETLOC}
+      BROKER_NETLOC: ${BROKER_NETLOC}
+      STATIC_URL: ${STATIC_URL}
+      MEDIA_URL: ${MEDIA_URL}
+    expose:
+      - "8000"
+    depends_on:
+      - data
+      - broker
+      - cache
+
+  data:
+    image: postgres:13.3
+    shm_size: 500m
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  broker:
+    image: rabbitmq:3.8-alpine
+    volumes:
+      - broker:/var/lib/rabbitmq
+
+  cache:
+    image: redis:6.2
+    volumes:
+      - cache:/data
+    environment:
+      MAX_MEMORY: 300mb
+      MAX_MEMORY_POLICY: allkeys-lru

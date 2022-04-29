@@ -1,0 +1,25 @@
+{
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "browsers": [
+              "Chrome >= 52",
+              "FireFox >= 44",
+              "Safari >= 7",
+              "Explorer 11",
+              "last 4 Edge versions"
+            ]
+          },
+          "useBuiltIns": false
+        }
+      ],
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-do-expressions",
+      "@babel/plugin-proposal-export-namespace-from",
+      "@babel/plugin-proposal-throw-expressions"
+    ]
+  }

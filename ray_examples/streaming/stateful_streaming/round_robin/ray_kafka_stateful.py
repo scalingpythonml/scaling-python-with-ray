@@ -11,8 +11,8 @@ class TemperatureController(BaseTemperatureController):
         self.producer = producer
 
     # Process new measurements
-    def process_sensordata(self, sensor: dict):
-        if super().process_sensordata(sensor):
+    def process_sensor_data(self, sensor: dict):
+        if super().process_sensor_data(sensor):
             # publish new action to kafka
             self.producer.produce.remote({'control': self.previousCommand})
 

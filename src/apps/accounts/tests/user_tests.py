@@ -7,10 +7,9 @@ import pytest
 
 
 User = get_user_model()
-UserStub = namedtuple("User", "first_name last_name email password")
+UserStub = namedtuple("User", "full_name email password")
 test_user_data = UserStub(
-    "test-name",
-    "test-surname",
+    "test-fullname",
     "somewhere@test.com",
     "&Aqa&5y!8wMpWGUC8gJBWqpxjE8p8nT7XDB2xwZA4$KEb9Nd2&&kv42Y*!Vg4kHE8fPw5k2PwBSD$y*bqzEmXdH8fe#F4#BdY5x",
 )
@@ -20,8 +19,7 @@ test_user_data = UserStub(
 def user():
     assert not User.objects.count()
     user = User.objects.create(
-        first_name=test_user_data.first_name,
-        last_name=test_user_data.last_name,
+        full_name=test_user_data.full_name,
         email=test_user_data.email,
     )
     user.is_active = True
@@ -39,8 +37,7 @@ def superuser():
     user = User.objects.create_superuser(
         email=test_user_data.email,
         password=test_user_data.password,
-        first_name=test_user_data.first_name,
-        last_name=test_user_data.last_name,
+        full_name=test_user_data.full_name,
     )
     assert User.objects.count() == 1
     # Check user
@@ -58,8 +55,7 @@ def inactiveuser():
     user = User.objects.create_inactive_user(
         email=test_user_data.email,
         password=test_user_data.password,
-        first_name=test_user_data.first_name,
-        last_name=test_user_data.last_name,
+        full_name=test_user_data.full_name,
     )
     assert User.objects.count() == 1
     # Check user
@@ -77,8 +73,7 @@ def activeuser():
     user = User.objects.create_user(
         email=test_user_data.email,
         password=test_user_data.password,
-        first_name=test_user_data.first_name,
-        last_name=test_user_data.last_name,
+        full_name=test_user_data.full_name,
     )
     assert User.objects.count() == 1
     # Check user

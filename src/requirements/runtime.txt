@@ -33,3 +33,4 @@ sorl-thumbnail==12.8.0
 collectfast==2.2.0
 single-beat==0.5.1
 sentry-sdk==1.5.6
+django-countries==7.3.2

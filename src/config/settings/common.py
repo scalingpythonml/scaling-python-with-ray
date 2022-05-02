@@ -336,6 +336,10 @@ class Settings:
     # ~~~~~~
     LIBS += ["watchman"]
 
+    # DJANGO COUNTRIES
+    # ~~~~~~~~~~~~~~~~
+    LIBS += ["django_countries"]
+
     # STORAGES
     # ~~~~~~~~
     LIBS += ["storages"]

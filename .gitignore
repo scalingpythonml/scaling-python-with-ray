@@ -19,6 +19,7 @@ htmlcov
 *.mo
 *.pot
 .idea/*
+*.idea
 *~
 *.swp
 *.swo

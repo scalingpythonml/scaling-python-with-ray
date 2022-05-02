@@ -8,6 +8,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.utils import timezone
 
+from django_countries.fields import CountryField
 from sorl.thumbnail import ImageField, get_thumbnail
 
 
@@ -94,8 +95,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     id = models.BigAutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    first_name = models.CharField(max_length=50, blank=True)
-    last_name = models.CharField(max_length=50, blank=True)
+    full_name = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(null=True, blank=True, unique=True)
     thumb = ImageField(upload_to=_get_user_image_path, null=True, blank=True)
     is_staff = models.BooleanField(
@@ -104,6 +104,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     is_active = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    company = models.CharField(max_length=100, blank=True, null=True)
+    country = CountryField(blank=True, null=True)
 
     objects = UserManager()
 

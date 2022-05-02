@@ -1,0 +1,26 @@
+<form method="post" action="{{ action }}">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="form-group">
+      <label for="{{ field.id_for_label }}">{{ field.label_tag }}</label>
+      <input type="{{ field.field.widget.input_type }}"
+             class="form-control {% if field.errors %} is-invalid {% endif %}"
+             id="{{ field.id_for_label }}" name="{{ field.name }}"
+             aria-describedby="emailHelp" required="{{ field.field.required }}"
+             placeholder="{{ field.field.widget.attrs.placeholder }}">
+      {% if field.errors %}
+        <div class="invalid-feedback">
+          {{ field.errors }}
+        </div>
+      {% endif %}
+      <small id="emailHelp" class="form-text text-muted">{{ field.help_text }}</small>
+    </div>
+  {% endfor %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-warning" role="alert">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+  <button type="submit" class="btn btn-primary">Next</button>
+</form>
+

@@ -6,6 +6,7 @@ from django.contrib.auth import (
     password_validation,
 )
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views import View
 
 
@@ -54,12 +55,14 @@ class SignUpForm(forms.ModelForm):
 
 
 class SignUpView(View):
-    template_name = "sign_up.html"
+    template_name = "onboarding_wizard_form.html"
     form_class = SignUpForm
 
     def get(self, request):
         form = self.form_class()
-        return render(request, self.template_name, {"form": form})
+        return render(
+            request, self.template_name, {"form": form, **self.base_context}
+        )
 
     def post(self, request):
         form = self.form_class(request.POST)
@@ -73,4 +76,14 @@ class SignUpView(View):
             )
             login(request, new_user)
             return redirect("/")
-        return render(request, self.template_name, {"form": form})
+        return render(
+            request, self.template_name, {"form": form, **self.base_context}
+        )
+
+    @property
+    def base_context(self):
+        return {
+            "title": "Sign Up",
+            "navname": "Sign Up",
+            "action": reverse("core:sign-up"),
+        }

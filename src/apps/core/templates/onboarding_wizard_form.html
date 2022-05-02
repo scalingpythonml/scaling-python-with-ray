@@ -1,0 +1,16 @@
+{% extends 'spacebeaver.html' %}
+{% load bootstrap_form %}
+
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block navname %} {{ navname }} {% endblock %}
+
+{% block content %}
+  <div class="col-md-6 card centered">
+    <div class="card-body">
+      {% bs_form form action %}
+    </div>
+  </div>
+
+{% endblock %}

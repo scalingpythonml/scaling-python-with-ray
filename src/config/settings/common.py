@@ -450,6 +450,10 @@ class Settings:
 
     AUTH_USER_MODEL = "accounts.User"
 
+    # CORE
+    # ~~~~
+    APPS += ["apps.core.apps.Config"]
+
     # -----------------------------------------------------------------------
     INSTALLED_APPS = FRAMEWORK + LIBS + APPS
     # -----------------------------------------------------------------------

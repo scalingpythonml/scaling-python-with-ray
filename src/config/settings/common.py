@@ -424,10 +424,18 @@ class Settings:
             "Plan price",
             "decimal_field",
         ),
+        "STRIPE_PUBLIC_KEY": ("", "Public API key"),
+        "STRIPE_PRIVATE_KEY": ("", "Private API key"),
+        "STRIPE_PRICE_ID": ("", "Product price id"),
     }
 
     CONSTANCE_CONFIG_FIELDSETS = {
         "Plan options": ("TITLE", "IMAGE", "DESCRIPTION", "PRICE"),
+        "Stripe setup": (
+            "STRIPE_PUBLIC_KEY",
+            "STRIPE_PRIVATE_KEY",
+            "STRIPE_PRICE_ID",
+        ),
     }
 
     # CELERY EMAIL

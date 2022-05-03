@@ -3,7 +3,9 @@ from django.urls import path
 
 from apps.core.views import (
     AddDeviceView,
+    CheckoutSessionView,
     IndexView,
+    PaymentSuccessView,
     PersonalInfoView,
     PickPlanView,
     SignUpView,
@@ -27,5 +29,15 @@ urlpatterns = [
     ),
     path(
         "pick-plan", login_required(PickPlanView.as_view()), name="pick-plan"
+    ),
+    path(
+        "checkout-session",
+        login_required(CheckoutSessionView.as_view()),
+        name="checkout-session",
+    ),
+    path(
+        "payment-success",
+        login_required(PaymentSuccessView.as_view()),
+        name="payment-success",
     ),
 ]

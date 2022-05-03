@@ -1,14 +1,15 @@
 imagePullSecrets: []
-# In practice you probably want an official Ray image
-# but I run a bleeding edge mixed arch cluster so I roll
-# my own.
+# In practice you _might_ want an official Ray image
+# but this is for a bleeding edge mixed arch cluster
+# which still is not fully supported by Ray's official
+# wheels & containers.
 image: holdenk/ray-ray:nightly
 operatorImage: holdenk/ray-ray:nightly
 podTypes:
   rayGPUWorkerType:
     memory: 10Gi
     maxWorkers: 4
-    minWorkers: 0
+    minWorkers: 1
 # Normally you'd ask for a GPU but NV auto labeler is... funky on ARM
     CPU: 1
     rayResources:

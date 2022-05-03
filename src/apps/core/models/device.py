@@ -13,6 +13,13 @@ class DeviceManager(models.Manager):
         except self.model.DoesNotExist:
             return False
 
+    def delete_user_device(self, user: User):
+        device = self.get(user_id=user.id)
+        device.user = None
+        device.used = False
+        device.nickname = None
+        device.save()
+
 
 class Device(models.Model):
     serial_number = models.CharField(max_length=100, unique=True)
@@ -33,15 +40,14 @@ class Device(models.Model):
 
     def assign_to_user(self, user: User):
         if self.is_used:
-            raise ValueError(f"Device: {self.serial_number} already used")
-        if user.device:
+            raise ValueError(f"{self.serial_number} already used")
+        if self.objects.filter(user_id=user.id):
             raise ValueError(f"User: {user} already have device")
         self.user = user
-        self.save()
+        self.used = True
 
     def set_nickname(self, nickname: str):
         self.nickname = nickname
-        self.save()
 
     @property
     def is_used(self):

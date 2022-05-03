@@ -57,7 +57,8 @@ class AddDeviceView(views.View):
                 serial_number=form.cleaned_data["serial_number"]
             )
             device.assign_to_user(request.user)
-            device.set_nickname(form.cleaned_data['nickname'])
+            device.set_nickname(form.cleaned_data["nickname"])
+            device.save()
         return render(
             request, self.template, {"form": form, **self.base_context}
         )

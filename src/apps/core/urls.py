@@ -1,7 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
-from apps.core.views import IndexView, PersonalInfoView, SignUpView
+from apps.core.views import (
+    AddDeviceView,
+    IndexView,
+    PersonalInfoView,
+    SignUpView,
+)
 
 
 app_name = "core"
@@ -13,5 +18,10 @@ urlpatterns = [
         "personal-info/",
         login_required(PersonalInfoView.as_view()),
         name="personal-info",
+    ),
+    path(
+        "add-device",
+        login_required(AddDeviceView.as_view()),
+        name="add-device",
     ),
 ]

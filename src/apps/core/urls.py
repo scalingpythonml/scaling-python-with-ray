@@ -5,6 +5,7 @@ from apps.core.views import (
     AddDeviceView,
     IndexView,
     PersonalInfoView,
+    PickPlanView,
     SignUpView,
 )
 
@@ -23,5 +24,8 @@ urlpatterns = [
         "add-device",
         login_required(AddDeviceView.as_view()),
         name="add-device",
+    ),
+    path(
+        "pick-plan", login_required(PickPlanView.as_view()), name="pick-plan"
     ),
 ]

@@ -240,6 +240,7 @@ class Settings:
     # STATIC & MEDIA FILE CONFIGURATION
     # =======================================================================
     PUBLIC_ROOT = os.path.join(PROJECT_PATH, "public")
+
     # STATIC CONFIGURATION
     # -----------------------------------------------------------------------
     @property
@@ -252,6 +253,7 @@ class Settings:
         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     )
     STATICFILES_DIRS = (os.path.join(PROJECT_PATH, "static"),)
+
     # MEDIA CONFIGURATION
     # -----------------------------------------------------------------------
     @property
@@ -395,6 +397,38 @@ class Settings:
     TEMPLATED_EMAIL_AUTO_PLAIN = False
     TEMPLATED_EMAIL_TEMPLATE_DIR = "emails/"
     TEMPLATED_EMAIL_FILE_EXTENSION = "email"
+
+    # DJANGO CONSTANCE
+    LIBS += ["constance"]
+    LIBS += ["constance.backends.database"]
+
+    CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+
+    CONSTANCE_DATABASE_CACHE_BACKEND = "default"
+
+    CONSTANCE_ADDITIONAL_FIELDS = {
+        "image_field": ["django.forms.ImageField", {}],
+        "decimal_field": ["django.forms.DecimalField", {}],
+    }
+
+    CONSTANCE_CONFIG = {
+        "TITLE": ("", "Plan title"),
+        "IMAGE": (
+            "",
+            "Plan image",
+            "image_field",
+        ),
+        "DESCRIPTION": ("", "Plan description"),
+        "PRICE": (
+            "",
+            "Plan price",
+            "decimal_field",
+        ),
+    }
+
+    CONSTANCE_CONFIG_FIELDSETS = {
+        "Plan options": ("TITLE", "IMAGE", "DESCRIPTION", "PRICE"),
+    }
 
     # CELERY EMAIL
     LIBS += ["djcelery_email"]

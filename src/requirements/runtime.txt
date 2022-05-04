@@ -37,3 +37,4 @@ django-countries==7.3.2
 django-constance==2.8.0
 django-picklefield==3.0.1
 stripe==2.74.0
+dj-stripe==2.6.1 

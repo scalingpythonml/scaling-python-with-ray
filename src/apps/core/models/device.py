@@ -41,7 +41,7 @@ class Device(models.Model):
     def assign_to_user(self, user: User):
         if self.is_used:
             raise ValueError(f"{self.serial_number} already used")
-        if self.objects.filter(user_id=user.id):
+        if Device.objects.filter(user_id=user.id):
             raise ValueError(f"User: {user} already have device")
         self.user = user
         self.used = True

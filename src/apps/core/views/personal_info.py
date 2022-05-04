@@ -1,6 +1,6 @@
 from django import forms, views
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from django_countries.widgets import CountrySelectWidget
@@ -32,6 +32,7 @@ class PersonalInfoView(views.View):
         form = self.form_class(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
+            return redirect(reverse("core:add-device"))
         return render(
             request, self.template, {"form": form, **self.base_context}
         )
@@ -42,4 +43,5 @@ class PersonalInfoView(views.View):
             "title": "Personal Info",
             "navname": "Personal Info",
             "action": reverse("core:personal-info"),
+            "step": 2,
         }

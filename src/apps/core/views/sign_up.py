@@ -75,7 +75,7 @@ class SignUpView(View):
                 password=password,
             )
             login(request, new_user)
-            return redirect("/")
+            return redirect(reverse("core:personal-info"))
         return render(
             request, self.template_name, {"form": form, **self.base_context}
         )
@@ -86,4 +86,5 @@ class SignUpView(View):
             "title": "Sign Up",
             "navname": "Sign Up",
             "action": reverse("core:sign-up"),
+            "step": 1,
         }

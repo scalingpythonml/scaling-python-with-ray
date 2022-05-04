@@ -24,4 +24,5 @@ class PickPlanView(View):
             "image": f"/media/{config.IMAGE}",
             "description": config.DESCRIPTION,
             "price": config.PRICE,
+            "step": 4,
         }

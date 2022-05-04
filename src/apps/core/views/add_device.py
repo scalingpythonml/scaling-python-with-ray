@@ -1,5 +1,5 @@
 from django import forms, views
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from apps.core.models import Device
@@ -42,6 +42,7 @@ class AddDeviceView(views.View):
             "title": "Add device",
             "navname": "Add device",
             "action": reverse("core:add-device"),
+            "step": 3,
         }
 
     def get(self, request):
@@ -59,6 +60,7 @@ class AddDeviceView(views.View):
             device.assign_to_user(request.user)
             device.set_nickname(form.cleaned_data["nickname"])
             device.save()
+            return redirect(reverse("core:pick-plan"))
         return render(
             request, self.template, {"form": form, **self.base_context}
         )

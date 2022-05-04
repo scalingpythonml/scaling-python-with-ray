@@ -1,15 +1,17 @@
-{% extends 'spacebeaver.html' %}
+{% extends 'onboarding_wizard.html' %}
 
 {% load static %}
 {% block title %} Payment Form {% endblock %}
 {% block navname %} Payment Form {% endblock %}
 {% block extra_head %}
+  {{ block.super }}
   <link rel="stylesheet" type="text/css" href="{% static 'core/stripe.css' %}">
   <script src="https://js.stripe.com/v3/"></script>
 
 
 {% endblock %}
 {% block content %}
+  {{ block.super }}
   <div class="centered col-md-4">
 
       <form id="payment-form">

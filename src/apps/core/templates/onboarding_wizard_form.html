@@ -1,4 +1,4 @@
-{% extends 'spacebeaver.html' %}
+{% extends 'onboarding_wizard.html' %}
 {% load bootstrap_form %}
 
 
@@ -7,6 +7,7 @@
 {% block navname %} {{ navname }} {% endblock %}
 
 {% block content %}
+  {{ block.super }}
   <div class="col-md-6 card centered">
     <div class="card-body">
       {% bs_form form action %}

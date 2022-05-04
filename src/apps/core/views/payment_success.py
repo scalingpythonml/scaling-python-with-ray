@@ -6,4 +6,4 @@ class PaymentSuccessView(View):
     template = "payment_success.html"
 
     def get(self, request):
-        return render(request, self.template)
+        return render(request, self.template, {"step": 6})

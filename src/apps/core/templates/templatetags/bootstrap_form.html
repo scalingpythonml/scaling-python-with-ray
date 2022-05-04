@@ -3,11 +3,16 @@
   {% for field in form %}
     <div class="form-group">
       <label for="{{ field.id_for_label }}">{{ field.label_tag }}</label>
-      <input type="{{ field.field.widget.input_type }}"
-             class="form-control {% if field.errors %} is-invalid {% endif %}"
-             id="{{ field.id_for_label }}" name="{{ field.name }}"
-             aria-describedby="emailHelp" required="{{ field.field.required }}"
-             placeholder="{{ field.field.widget.attrs.placeholder }}">
+      {% if field.field.widget.input_type == 'select' %}
+
+        {{ field }}
+      {% else %}
+        <input type="{{ field.field.widget.input_type }}"
+               class="form-control {% if field.errors %} is-invalid {% endif %}"
+               id="{{ field.id_for_label }}" name="{{ field.name }}"
+               aria-describedby="emailHelp" required="{{ field.field.required }}"
+               placeholder="{{ field.field.widget.attrs.placeholder }}">
+      {% endif %}
       {% if field.errors %}
         <div class="invalid-feedback">
           {{ field.errors }}
@@ -21,6 +26,6 @@
       {{ form.non_field_errors }}
     </div>
   {% endif %}
-  <button type="submit" class="btn btn-primary">Next</button>
+  <button type="submit" class="btn btn-primary" style="margin-top: 10px">Next</button>
 </form>
 

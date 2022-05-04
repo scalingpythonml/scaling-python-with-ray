@@ -19,5 +19,6 @@ class PaymentFormView(View):
             "success_url": request.build_absolute_uri(
                 reverse("core:payment-success")
             ),
+            "step": 5,
         }
         return render(request, self.template, context)

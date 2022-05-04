@@ -30,7 +30,11 @@
             </span>
     </a>
     <div class="d-flex">
-      <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+      <div class="btn-group">
+        <a class="btn btn-primary text-uppercase" href="{% url 'core:login' %}">Login</a>
+        <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+      </div>
+
     </div>
   </div>
 </nav>

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from django.db.models import ExpressionWrapper, Q
 from django.utils import timezone
 
 from django_countries.fields import CountryField
@@ -82,6 +83,22 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
+    def onboarding_complete_annotate(self, **filters):
+        return (
+            self.filter(**filters)
+            .annotate(
+                have_personal_info=ExpressionWrapper(
+                    Q(full_name__isnull=False) & Q(country__isnull=False),
+                    output_field=models.BooleanField(),
+                )
+            )
+            .annotate(
+                have_device=ExpressionWrapper(
+                    Q(device__isnull=False), output_field=models.BooleanField()
+                )
+            )
+        )
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -106,7 +123,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     company = models.CharField(max_length=100, blank=True, null=True)
     country = CountryField(blank=True, null=True)
-
+    complete_onboarding = models.BooleanField(default=False)
     objects = UserManager()
 
     USERNAME_FIELD = "email"

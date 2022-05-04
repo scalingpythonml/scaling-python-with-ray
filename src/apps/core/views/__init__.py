@@ -1,6 +1,7 @@
 from .add_device import AddDeviceView
 from .checkout_session import CheckoutSessionView
 from .index import IndexView
+from .login import LoginView
 from .payment_form import PaymentFormView
 from .payment_success import PaymentSuccessView
 from .personal_info import PersonalInfoView

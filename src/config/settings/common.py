@@ -245,7 +245,7 @@ class Settings:
     # -----------------------------------------------------------------------
     @property
     def STATIC_URL(self):
-        return self._STATIC_URL
+        return "static/"
 
     STATIC_ROOT = os.path.join(PUBLIC_ROOT, "static")
     STATICFILES_FINDERS = (

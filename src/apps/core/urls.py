@@ -5,6 +5,7 @@ from apps.core.views import (
     AddDeviceView,
     CheckoutSessionView,
     IndexView,
+    PaymentFormView,
     PaymentSuccessView,
     PersonalInfoView,
     PickPlanView,
@@ -39,5 +40,10 @@ urlpatterns = [
         "payment-success",
         login_required(PaymentSuccessView.as_view()),
         name="payment-success",
+    ),
+    path(
+        "payment-form",
+        login_required(PaymentFormView.as_view()),
+        name="payment-form",
     ),
 ]

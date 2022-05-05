@@ -99,6 +99,11 @@ class UserManager(BaseUserManager):
             )
         )
 
+    def update_user_device_nickname(self, user, new_nickname):
+        device = user.device
+        device.nickname = new_nickname
+        device.save()
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -131,3 +136,25 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return str(self.id)
+
+    @property
+    def device_nickname(self):
+        try:
+            return self.device.nickname
+        except self.device.DoesNotExist:
+            return None
+
+    @property
+    def have_device(self):
+        try:
+            return bool(self.device)
+        except Exception:
+            return False
+
+    @property
+    def twillion_number(self):
+        return "---"
+
+    @property
+    def company_email(self):
+        return "---"

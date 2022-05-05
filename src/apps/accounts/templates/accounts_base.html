@@ -1,0 +1,35 @@
+{% extends 'spacebeaver.html' %}
+
+
+{% block page_head %}
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      {% url 'accounts:profile' as profile_url %}
+      <a class="nav-link {% if request.path == profile_url %}active{% endif %}" href="#">Profile</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Replace device</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Change email</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Change password</a>
+    </li>
+  </ul>
+{% endblock %}
+
+
+{% block content %}
+  <div class="col-md-6 centered">
+    <div class="card mb-3">
+      <div class="card-header">
+        {{ title }}
+      </div>
+      {% block card_content %}
+
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}
+

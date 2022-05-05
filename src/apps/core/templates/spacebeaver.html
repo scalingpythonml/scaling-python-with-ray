@@ -11,11 +11,14 @@
           integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
           crossorigin="anonymous"></script>
 
-  <title>SB: {% block title %} {% endblock %}</title>
+  <title>SB: {% block title %} {{ title }} {% endblock %}</title>
   <style>
     .centered {
       margin: 10px auto;
 
+    }
+    .page-container{
+      margin: 20px;
     }
   </style>
   {% block extra_head %}  {% endblock %}
@@ -26,7 +29,7 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'core:index' %}"> SpaceBeaver
       <span class="text-muted">
-            {% block navname %} {% endblock %}
+            {% block navname %} {{ navname }} {% endblock %}
             </span>
     </a>
     <div class="d-flex">
@@ -39,12 +42,15 @@
   </div>
 </nav>
 <!-- END NAVBAR -->
+<div class="page-container">
+  {% block page_head %}
 
+  {% endblock %}
 
-{% block content %}
+  {% block content %}
 
-{% endblock %}
-
+  {% endblock %}
+</div>
 {% block extra_js %}  {% endblock %}
 </body>
 </html>

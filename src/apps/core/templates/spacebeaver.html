@@ -17,7 +17,8 @@
       margin: 10px auto;
 
     }
-    .page-container{
+
+    .page-container {
       margin: 20px;
     }
   </style>
@@ -34,8 +35,12 @@
     </a>
     <div class="d-flex">
       <div class="btn-group">
+        {% if request.user.is_authenticated %}
+        <a class="btn btn-primary text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
+        {% else %}
         <a class="btn btn-primary text-uppercase" href="{% url 'core:login' %}">Login</a>
         <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+        {% endif %}
       </div>
 
     </div>

@@ -8,12 +8,13 @@
 
         {{ field }}
       {% else %}
-        <input type="{{ field.field.widget.input_type }}" value="{{ field.value }}"
+        <input type="{{ field.field.widget.input_type }}"
+               {% if field.value %}value="{{ field.value }}"{% endif %}
                class="form-control {% if field.errors %} is-invalid {% endif %}"
                id="{{ field.id_for_label }}" name="{{ field.name }}"
                aria-describedby="emailHelp" required="{{ field.field.required }}"
                placeholder="{{ field.field.widget.attrs.placeholder }}"
-               {% if field.field.disabled %} disabled {% endif %}
+                {% if field.field.disabled %} disabled {% endif %}
         >
       {% endif %}
       {% if field.errors %}

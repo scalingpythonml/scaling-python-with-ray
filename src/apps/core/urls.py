@@ -10,6 +10,7 @@ from apps.core.views import (
     PaymentSuccessView,
     PersonalInfoView,
     PickPlanView,
+    ReplaceDeviceView,
     SignUpView,
 )
 
@@ -48,4 +49,9 @@ urlpatterns = [
         name="payment-form",
     ),
     path("login", LoginView.as_view(), name="login"),
+    path(
+        "replace-device",
+        login_required(ReplaceDeviceView.as_view()),
+        name="replace-device",
+    ),
 ]

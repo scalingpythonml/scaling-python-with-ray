@@ -5,10 +5,13 @@
   <ul class="nav nav-tabs">
     <li class="nav-item">
       {% url 'accounts:profile' as profile_url %}
-      <a class="nav-link {% if request.path == profile_url %}active{% endif %}" href="#">Profile</a>
+      <a class="nav-link {% if request.path == profile_url %}active{% endif %}"
+         href="{{ profile_url }}">Profile</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Replace device</a>
+      {% url 'core:replace-device' as device_url %}
+      <a class="nav-link {% if request.path == device_url %}active{% endif %}"
+         href="{{ device_url }}">Replace device</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="#">Change email</a>

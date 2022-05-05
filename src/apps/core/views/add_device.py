@@ -5,7 +5,7 @@ from django.urls import reverse
 from apps.core.models import Device
 
 
-class AddDeviceForm(forms.Form):
+class DeviceForm(forms.Form):
     serial_number = forms.CharField(
         max_length=100,
         widget=forms.TextInput(
@@ -22,7 +22,7 @@ class AddDeviceForm(forms.Form):
     )
 
     def clean(self):
-        cleaned_data = super(AddDeviceForm, self).clean()
+        cleaned_data = super(DeviceForm, self).clean()
         serial_number = cleaned_data["serial_number"]
         serial_number_is_valid = Device.objects.can_register_device(
             serial_number
@@ -34,7 +34,7 @@ class AddDeviceForm(forms.Form):
 
 class AddDeviceView(views.View):
     template = "onboarding_wizard_form.html"
-    form_class = AddDeviceForm
+    form_class = DeviceForm
 
     @property
     def base_context(self):

@@ -2,7 +2,11 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import include, path
 
-from apps.accounts.views import ChangePasswordView, ProfileView
+from apps.accounts.views import (
+    ChangeEmailView,
+    ChangePasswordView,
+    ProfileView,
+)
 
 
 app_name = "accounts"
@@ -13,5 +17,10 @@ urlpatterns = [
         "/change-password",
         login_required(ChangePasswordView.as_view()),
         name="change-password",
+    ),
+    path(
+        "/change-email",
+        login_required(ChangeEmailView.as_view()),
+        name="change-email",
     ),
 ]

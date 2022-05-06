@@ -129,6 +129,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     company = models.CharField(max_length=100, blank=True, null=True)
     country = CountryField(blank=True, null=True)
     complete_onboarding = models.BooleanField(default=False)
+    twillion_number = models.CharField(max_length=100, null=True, blank=True)
+    company_email = models.EmailField(null=True, blank=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = "email"
@@ -150,11 +153,3 @@ class User(AbstractBaseUser, PermissionsMixin):
             return bool(self.device)
         except Exception:
             return False
-
-    @property
-    def twillion_number(self):
-        return "---"
-
-    @property
-    def company_email(self):
-        return "---"

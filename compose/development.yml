@@ -5,6 +5,7 @@ volumes:
   broker: {}
   cache: {}
   node: {}
+  outside_db: {}
 
 services:
   app:
@@ -22,6 +23,7 @@ services:
       DOMAIN: 0.0.0.0:8000
       SSL: 'off'
       DATA_NETLOC: postgresql://local:local@data:5432/local
+      OUTSIDE_DATA_NETLOC: postgresql://test:test@outside_data:5332/test
       CACHE_NETLOC: redis://cache:6379/0
       BROKER_NETLOC: amqp://broker:5672
       STATIC_URL: /static/
@@ -35,6 +37,7 @@ services:
       - data
       - broker
       - cache
+      - outside_data
 
   data:
     image: postgres:13.3
@@ -60,3 +63,17 @@ services:
     environment:
       MAX_MEMORY: 300mb
       MAX_MEMORY_POLICY: allkeys-lru
+
+  outside_data:
+    build:
+      context: ..
+      dockerfile: compose/outside_db/Dockerfile
+    shm_size: 500m
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - "5332:5432"
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test

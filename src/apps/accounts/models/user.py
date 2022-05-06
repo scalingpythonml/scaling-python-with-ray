@@ -93,7 +93,7 @@ class UserManager(BaseUserManager):
                 )
             )
             .annotate(
-                have_device=ExpressionWrapper(
+                user_have_device=ExpressionWrapper(
                     Q(device__isnull=False), output_field=models.BooleanField()
                 )
             )

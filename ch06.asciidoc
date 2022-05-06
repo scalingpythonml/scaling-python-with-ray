@@ -63,7 +63,7 @@ Data in a partition is sequential and can be replicated across multiple brokers 
 
 When writing to topics, Kafka supports two main partitioning mechanisms during write operation: if a key is not defined it uses round-robin partitioning, distributing the topic’s messages equally across partitions; if the key is defined, then the partition to write to is determined by the key. By default Kafka uses key hashing for partioning. You can also implement custom partitioning mechanism with Kafka. Message ordering only happens within a partition, so any messages to be processed order must be in the same partition.
 
-You deploy Kafka in the form of a cluster composed of multiple (1 to n) brokers (servers) to maintain load balancing.footnote[Refer to this nice https://www.confluent.io/events/kafka-summit-europe-2021/capacity-planning-your-kafka-cluster/[presentation] on Kafka capacity planning and more. Kafka is also available as a serverless product from vendors such as ConfluentCloud.] Depending on the configured replication factor, each partition can exist on one or more brokers, this can improve Kafka's throughput.
+You deploy Kafka in the form of a cluster composed of multiple (1 to n) brokers (servers) to maintain load balancing.footnote:[Refer to this nice https://www.confluent.io/events/kafka-summit-europe-2021/capacity-planning-your-kafka-cluster/[presentation] on Kafka capacity planning and more. Kafka is also available as a serverless product from vendors such as ConfluentCloud.] Depending on the configured replication factor, each partition can exist on one or more brokers, this can improve Kafka's throughput.
 
 Kafka clients can connect to any broker and the broker routes the requests transparently to one of the correct brokers.
 

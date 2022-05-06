@@ -14,7 +14,9 @@
          href="{{ device_url }}">Replace device</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Change email</a>
+      {% url "accounts:change-email" as change_email_url %}
+      <a class="nav-link {% if request.path == change_email_url %}active{% endif %}"
+         href="{{ change_email_url }}">Change email</a>
     </li>
     <li class="nav-item">
       {% url 'accounts:change-password' as change_password_url %}

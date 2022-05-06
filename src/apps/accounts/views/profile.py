@@ -14,6 +14,7 @@ class ProfileForm(forms.ModelForm):
     device_nickname = forms.CharField(max_length=100)
     twillion_number = forms.CharField(disabled=True, required=False)
     company_email = forms.EmailField(disabled=True, required=False)
+    email = forms.EmailField(disabled=True, required=False)
 
     class Meta:
         model = User
@@ -40,8 +41,6 @@ class ProfileView(View):
             instance=request.user,
             initial={
                 "device_nickname": request.user.device_nickname,
-                "twillion_number": request.user.twillion_number,
-                "company_email": request.user.company_email,
             },
         )
         context = {**self.base_context, "form": form}

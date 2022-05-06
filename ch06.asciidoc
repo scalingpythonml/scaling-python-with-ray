@@ -1,0 +1,607 @@
+== Implementing streaming applications
+
+So far in the book we have been using Ray for implementing serverless batch applications. In this case, data is collected, or provided from the user, and then used for calculations. Another important group of use cases are the situations requiring you to process data in “real-time”.footnote:[We use the overloaded term real-time to mean processing the data as it arrives within some latency constraints]  This type of data processing is called streaming. 
+
+.Streaming applications
+****
+What we are going to describe here is a fairly simple streaming implementation. We will not cover https://medium.com/big-data-processing/windowing-in-flink-8896e0fed787[windowing] or https://medium.com/stream-processing/stream-processing-101-from-sql-to-streaming-sql-in-10-minutes-5edcb10e56e9[streaming SQL] as neither is currently implemented in Ray. If you need windowing or streaming SQL you can integrate Ray with an additional streaming engine, for example, https://flink.apache.org/[Apache Flink] using Kafka.
+****
+
+In this book, we mean streaming as taking action on a series of data close to the time when the data is created.
+
+Some common streaming https://www.upsolver.com/blog/6-most-common-streaming-data-use-cases[use cases] include the following:
+
+* Log Analysis is a way of gaining insights into the state of your hardware and software. It is typically implemented as a distributed processing of streams of logs as they are being produced.
+* Fraud Detection is monitoring financial transactions and watching for anomalies that signal fraud in real-time and stopping fraudulent transactions. 
+* Cyber Security is the monitoring of interactions with the system to detect anomalies, allowing the identification of security issues in real-time to isolate threats. 
+* Streaming logistics monitors cars, trucks, fleets, and shipments in real-time, to optimize routing.
+* IoT data processing: An example of this is collecting data about an engine to gain insights that can detect a faulty situation before becoming to a major problem.
+* Recommendation engines are used to understand user interests based on online behavior for serving ads, recommending products and services, etc.
+
+When it comes to implementing streaming applications in Ray you currently have two main options:
+
+* Ray’s ecosystem provides a lot of underlying components, described in the previous chapters, that can be used for custom implementations of streaming applications.
+* There are some external libraries and tools that can be used with Ray to implement streaming.
+
+Ray is not built as a streaming system, rather it is an ecosystem that enables companies to build streaming systems on these lower-level primitives. You can find several stories of users from big and small companies building streaming applications on top of Ray.
+
+With that being said, building a small streaming application on Ray will give you a perfect example of how to think about Ray applications, how to use Ray effectively, and allow you to understand the basics of streaming applications and how Ray’s capabilities can be leveraged for its implementation. Even if you decide to use external libraries, this material will help you to make better decisions on whether and how to use these libraries.
+
+One of the most popular approaches for implementing streaming applications is the usage of https://kafka.apache.org/[Apache Kafka] to connect data producers with consumers implementing data processing. 
+
+Before delving into Ray’s streaming implementation let's start with a quick introduction to Kafka.
+
+=== Apache Kafka
+
+Here we describe only features of Kafka that are relevant for our discussion, for in-depth information refers to https://kafka.apache.org/documentation/#gettingStarted[Kafka documentation].
+
+.Getting started with Kafka
+****
+If you want to experiment with Kafka, you can either run it locally or on the cloud. For local Kafka installation, refer to these https://kafka.apache.org/quickstart[instructions]. Additionally, for Mac installation you can use https://brew.sh/[Homebrew], following this https://gist.github.com/jarrad/3528a5d9128fe693ca84[Github Gist]. Alternatively, you can use Kafka on the cloud, for example, leveraging the https://www.confluent.io/confluent-cloud/[Confluent platform] or any other Kafka installation provided by your favorite cloud provider. Finally, if you are working on Kubernetes, https://strimzi.io/[Strimzi] can be a good choice for Kafka installation.  
+****
+
+==== Basic Kafka concepts
+
+Although many people consider Kafka to be a type of messaging system, similar to, for example, http://rabbitmq/[RabbitMq], it is a very different thing. Kafka is a https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying[distributed log]footnote:[Other examples of distributed Log implementation are http://bookkeeper.apache.org/distributedlog/[Apache Bookkeeper],  https://pulsar.apache.org/[Apache Pulsar], and https://pravega.io/[Pravega].] that stores records sequentially (see <<img-distributed-log>>). Kafka records are key/value pairs.footnote:[Both key and value are optional, an empty value can be used to tombstone an existing value.] Both keys and values are represented in Kafka as byte arrays and are opaque to Kafka itself. Producers always write to the end of the log; while consumers can choose the position (offset) where they want to read from.
+
+[[img-distributed-log]]
+.Distributed log
+image::images/ch06/fig_0601.png[]
+
+The main differences between log-oriented systems like Kafka and messaging systems, like RabbitMQ, are:
+
+* Logs orient systems persist records regardless of whether it is read. Queues only contain messages that are waiting for a consumer. You can replay records from a Log-based, which traditional messaging systems do not support.footnote:[Although we tend to think about infinite logs, in reality a Kafka log is limited to the amount of disk space available to the corresponding Kafka server. As a result, Kafka introduces https://medium.com/@sunny_81705/kafka-log-retention-and-cleanup-policies-c8d9cb7e09f8[log retention and cleanup policies], which prevent logs from growing indefinitely and consequently crashing Kafka servers. As a result, when we are talking about log replay in a production system, we are talking about replay within a retention window.]
+* While traditional message brokers manage consumers and their offsets, in log systems consumers are responsible for managing their offsets. This allows a log-based system to support significantly more consumers.
+
+Similar to the messaging systems, Kafka organizes data into topics.  Unlike messaging systems, topics in Kafka are purely logical constructs, composed of multiple partitions (<<img-anatomy-topic>>).
+
+[[img-anatomy-topic]]
+.Anatomy of topic
+image::images/ch06/fig_0602.png[]
+
+Data in a partition is sequential and can be replicated across multiple brokers (see below). Partitioning is a vital scalability mechanism, allowing individual consumers to read dedicated partitions in parallel and allowing Kafka to store the partitions separately. 
+
+When writing to topics, Kafka supports two main partitioning mechanisms during write operation: if a key is not defined it uses round-robin partitioning, distributing the topic’s messages equally across partitions; if the key is defined, then the partition to write to is determined by the key. By default Kafka uses key hashing for partioning. You can also implement custom partitioning mechanism with Kafka. Message ordering only happens within a partition, so any messages to be processed order must be in the same partition.
+
+You deploy Kafka in the form of a cluster composed of multiple (1 to n) brokers (servers) to maintain load balancing.footnote[Refer to this nice https://www.confluent.io/events/kafka-summit-europe-2021/capacity-planning-your-kafka-cluster/[presentation] on Kafka capacity planning and more. Kafka is also available as a serverless product from vendors such as ConfluentCloud.] Depending on the configured replication factor, each partition can exist on one or more brokers, this can improve Kafka's throughput.
+
+Kafka clients can connect to any broker and the broker routes the requests transparently to one of the correct brokers.
+
+To understand how applications scale with Kafka, you will need to understand how Kafka's consumer groups (<<img-kafka-cons-grp>>) work.
+
+[[img-kafka-cons-grp]]
+.Kafka consumer group
+image::images/ch06/fig_0603.png[]
+
+You can assign consumer that read from the same set of topics to a consumer group. Kafka then gives each consumer in the group a subset of the partitions. For example, if you have a topic with 10 partitions and a single consumer in a group, this consumer will read all of the topics’ partitions. With the same topic, if you instead have 5 consumers in the group, then each consumer will read two partitions from the topic. If you have 11 consumers, 10 of them will each read a single partition, and the 11th one will not read any data.
+
+As you can see, the two main factors in how much you can scale your Kafka reading is the number of partitions and the number of consumers in your consumer group. It is easier to add more consumers to a consumer group than add new partitions, so over provisioning the number of partitions is a best practice.
+
+==== Kafka APIs
+
+As defined in the https://kafka.apache.org/20/documentation.html#api[Kafka documentation], Kafka has five core API groups:
+
+* The Producer API allows applications to send streams of data to topics in the Kafka cluster.
+* The Consumer API allows applications to read streams of data from topics in the Kafka cluster.
+* The AdminClient API allows managing and inspecting topics, brokers, and other Kafka objects.
+* The Streams API allows transforming streams of data from input topics to output topics.
+* The Connect API allows implementing connectors that continually pull from some source system or application into Kafka or push from Kafka into some sink system or application.
+These APIs are implemented in multiple https://docs.confluent.io/platform/current/clients/index.html[languages], including Java, C/C++, Go, .Net and Python. We will be using Kafka's https://github.com/confluentinc/confluent-kafka-python[Python APIs] for integration with Ray, implementing the first three APIs groups, which is sufficient for our purposes.footnote:[For a simple example of using Python Kafka APIs see 
+https://github.com/scalingpythonml/scalingpythonml/tree/master/ray_examples/streaming/just_kafka[Github]]
+
+[TIP]
+====
+Kafka messages are byte-arrays, so we need to serialize our messages (called marshaling in Kafka) using, for example, https://avro.apache.org/[Apache Avro], https://developers.google.com/protocol-buffers[Google Protocol buffers], https://www.json.org/json-en.html[JSON] or https://realpython.com/python-pickle-module/[Python pickling]. The Python Kafka Github provides a handful of https://github.com/confluentinc/confluent-kafka-python/tree/master/examples[examples] of using different encoding with Kafka. To make code examples simpler we will be using JSON throughout, but make sure that you pick up an appropriate marshaling for your implementation. When deciding on the format you need to consider its performance (remember we marshall/unmarshall every message), size (smaller messages are written/read faster), message extensibility (implementation behavior when a message is changed like field added or removed), and language interoperability. A good overview of different marshaling methods is presented https://simon-aubury.medium.com/kafka-with-avro-vs-kafka-with-protobuf-vs-kafka-with-json-schema-667494cbb2af[here]. 
+====
+
+Unlike other messaging systems, Kafka does not guarantee non-duplicate messages. Instead, each Kafka consumer is responsible for ensuring messages are only processed once.
+
+[NOTE]
+====
+If you are interested in learning more, the Confluent Kafka Python Client https://docs.confluent.io/clients-confluent-kafka-python/current/overview.html[documentation] has more information on different commit options and their implications on delivery guarantees. By default, the Python client uses automatic commit, which is what we use in our examples. For real-life implementation, consider delivery guarantees (“exactly once”, “at least once”, etc.) that you need to provide and use an appropriate commit approach. 
+====
+
+=== Using Kafka with Ray
+
+Now that you know about Kafka and its basic APIs, let's take a look at options for integrating Kafka with Ray. We will implement both the Kafka consumer and producer as Ray actors.footnote:[For another example of the same approach, see this https://www.anyscale.com/blog/serverless-kafka-stream-processing-with-ray[blog post],] There are several reasons you can benefit from using Ray actors with Kafka including:
+
+* Kafka consumers run in an infinite loop waiting for new records to arrive and need to keep track of messages consumed. Being a stateful service, Ray Actor provides an ideal paradigm for implementing a Kafka consumer.
+* By putting your Kafka producer in an actor, you can write records to any Kafka topic asynchronously without having to create separate producers.
+
+A simple implementation of Kafka Producer Actor looks like <<kafka-producer-actor>>.
+
+.Kafka producer actor
+[[kafka-producer-actor]]
+====
+----
+@ray.remote
+class KafkaProducer:
+   def __init__(self, broker: str = 'localhost:9092'):
+       from confluent_kafka import Producer
+       conf = {'bootstrap.servers': broker}
+       self.producer = Producer(**conf)
+  
+   def produce(self, data: dict, key: str = None, topic: str = 'test'):
+  
+       def delivery_callback(err, msg):
+           if err:
+               print('Message failed delivery: ', err)
+           else:
+               print(f’Message delivered to topic {msg.topic()} partition {msg.partition()} offset {msg.offset()}’)
+  
+       binary_key = None
+       if key is not None:
+           binary_key = key.encode('UTF8')
+       self.producer.produce(topic=topic, value=json.dumps(data).encode('UTF8'), key=binary_key, callback=delivery_callback)
+       self.producer.poll(0)
+  
+   def destroy(self):
+       self.producer.flush(30)
+----
+====
+
+The actor implementation in this listing includes the following methods:
+
+* The constructor, which initializes the Kafka producer based on the location of the Kafka cluster.
+* The method you will call to send data is produce, which takes data to write to Kafka (as a Python dictionary), an optional key (as a string), and the Kafka topic to write to. Here we chose to use a dictionary for the data as it is a fairly generic way to represent data and can be easily marshaled/unmarshaled to JSON. For debugging, we added an internal pass:[<em>delivery_callback</em>] method that prints out when a message is written or an error has occurred.
+* A destroy method that Ray calls before exiting the application. Our destroy method waits for up to 30 seconds for any outstanding messages to be delivered and for delivery report callbacks to be triggered. 
+
+A simple implementation of Kafka consumer actor looks like <<kafka-consumer-actor>>. 
+
+.Kafka consumer actor
+[[kafka-consumer-actor]]
+====
+----
+@ray.remote
+class KafkaConsumer:
+   def __init__(self, callback, group: str = 'ray', broker: str = 'localhost:9092', topic: str = 'test', restart: str = 'latest'):
+       from confluent_kafka import Consumer
+       from uuid import uuid4
+       # Configuration
+       consumer_conf = {'bootstrap.servers': broker,   # bootstrap server
+                'group.id': group,                      # group ID
+                'session.timeout.ms': 6000,      # session tmout
+                'auto.offset.reset': restart}         # restart
+  
+       # Create Consumer instance
+       self.consumer = Consumer(consumer_conf)
+       self.topic = topic
+       self.id = str(uuid4())
+       self.callback = callback
+  
+   def start(self):
+       self.run = True
+       def print_assignment(consumer, partitions):
+           print(f’Consumer {self.id}’)
+           print(f’Assignment: {partitions}’)
+  
+       # Subscribe to topics
+       self.consumer.subscribe([self.topic], on_assign = print_assignment)
+       while self.run:
+           msg = self.consumer.poll(timeout=1.0)
+           if msg is None:
+               continue
+           if msg.error():
+               print(f"Consumer error: {msg.error()}”)
+           else:
+               # Proper message
+               self.callback(self.id, msg)
+   def stop(self):
+       self.run = False
+  
+   def destroy(self):
+       self.consumer.close()
+----
+====
+
+The consumer actor in this listing has the following methods:
+
+* A constructor that initializes the Kafka consumer. Here we have some more parameters compared to a producer. In addition to the broker location, you need to specify: 
+** the topic name
+** the consumer group name (for parallel runs) 
+** restart, which configures how the client behaves when starting with no offset or if the current offset does not exist anymore on the serverfootnote:[Allowed values for reset are _earliest_ which automatically reset the offset to the beginning of the log, and _latest_ which automatically resets the offset to the latest offset processed by the consumer group.]
+** callback which is a pointer to the customer’s function that is used to process a message. 
+* A start method that runs an infinite loop polling for records. In our example, new records  are just printed. For debugging, we also print show the consumer's assignment - which partitions it is consuming
+* A stop method that updates the class property that stops the infinite loop.
+* A destroy method that Ray calls before exiting the application to kill the consumers.
+
+In addition to these two actors, we also need to setup the Kafka topics. While Kafka auto-creates new topics as they are used, the default parameters for the number of partitions and https://kafka.apache.org/documentation/#replication[replication factor] may not match your needs. We create the topic with our preferred settings in <<topics-setup-function>>.
+
+.Topics setup function
+[[topics-setup-function]]
+====
+----
+def setup_topics(broker: str = 'localhost:9092', topics: [] = ['test'],
+                partitions: int = 10, replication: int = 1):
+   # Recreate topic
+   # Wait for operation completion method
+   def wait_for_operation_completion(futures: dict, success: str, failure: str):
+       for topic, f in futures.items():
+           try:
+               f.result()  # The result itself is None
+               print(f"Topic {topic} {success}")
+           except Exception as e:
+               print(f"{failure} {topic} error {e}")
+  
+   admin = AdminClient({'bootstrap.servers': broker})
+  
+   # Delete topics
+   fs = admin.delete_topics(topics)
+  
+   # Wait for each operation to finish.
+   wait_for_operation_completion(fs, " is deleted", "Failed to delete topic ")
+  
+   # Wait to make sure topic is deleted
+   sleep(3)
+   # Call create_topics to asynchronously create topics.
+   new_topics = [NewTopic(topic, num_partitions=partitions,
+                          replication_factor=replication) for topic in topics]
+   fs = admin.create_topics(new_topics)
+  
+   # Wait for each operation to finish.
+   wait_for_operation_completion(fs, " is created", "Failed to create topic ")
+----
+====
+
+Because the topics may already exist, the code first deletes them. Once the deletion is completed, the code waits for a short period of time to make sure that deletion took place on the cluster and then recreates topics with the target number of partitions and replication factor.
+
+With these three components in place, you can now create a Ray application to publish and read from Kafka. You can run this application either locally or on a cluster. The Ray application itself looks like <<ch6_bringing-it-all-together>>.
+
+.Bringing it all together
+[[ch6_bringing-it-all-together]]
+====
+----
+# Simple callback function to print topics
+def print_message(consumer_id: str, msg):
+   print(f"Consumer {consumer_id} new message: topic={msg.topic()}  partition= {msg.partition()}  "
+     f"offset={msg.offset()} key={msg.key().decode('UTF8')}")
+   print(json.loads(msg.value().decode('UTF8')))
+# Setup topics
+setup_topics()
+# Setup random number generator
+seed(1)
+# Start Ray
+ray.init()
+# Start consumers and producers
+n_consumers = 1     # Number of consumers
+consumers = [KafkaConsumer.remote(print_message) for _ in range(n_consumers)]
+producer = KafkaProducer.remote()
+refs = [c.start.remote() for c in consumers]
+# publish messages
+user_name = 'john'
+user_favorite_color = 'blue'
+# loop forever publishing messages to Kafka
+try:
+   while True:
+       user = {
+           'name': user_name,
+           'favorite_color': user_favorite_color,
+           'favorite_number': randint(0, 1000)
+       }
+       producer.produce.remote(user, str(randint(0, 100)))
+       sleep(1)
+  
+# end gracefully
+except KeyboardInterrupt:
+   for c in consumers:
+       c.stop.remote()
+finally:
+   for c in consumers:
+       c.destroy.remote()
+   producer.destroy.remote()
+   ray.kill(producer)
+----
+====
+
+The code above does the following:
+
+. defines a simple callback function for the Kafka consumer that just prints the message. 
+. initializes Ray. 
+. creates required topics
+. starts both producer and consumers (the code allows us to specify the number of consumers we want to use) 
+. calls start method on all created consumers. 
+. once all consumers are created, the producer starts sending Kafka requests every second. 
+
+Additionally, the code also implements graceful termination, ensuring that all resources are cleaned up, once the job is interrupted. 
+
+The complete code for this example is https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/streaming/ray_with_kafka/ray_kafka.py[here]. 
+
+Once the code runs it produces the output that looks as follows (<<execution-results-single-cons>>).
+
+.Execution results for a single consumer
+[[execution-results-single-cons]]
+====
+----
+Topic  test  is deleted
+Topic  test  is created
+2021-08-23 17:00:57,951	INFO services.py:1264 -- View the Ray dashboard at http://127.0.0.1:8265
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d
+(pid=19981) Assignment: [TopicPartition{topic=test,partition=0,offset=-1001,error=None}, TopicPartition{topic=test,partition=1,offset=-1001,error=None}, TopicPartition{topic=test,partition=2,offset=-1001,error=None}, TopicPartition{topic=test,partition=3,offset=-1001,error=None}, TopicPartition{topic=test,partition=4,offset=-1001,error=None}, 
+…………………………………………………………………………………………..
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 8  offset= 0  key= 57
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 779}
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 2  offset= 0  key= 63
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 120}
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 8  offset= 1  key= 83
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 483}
+(pid=19977) Message delivered to topic  test  partition  8  offset 0
+(pid=19977) Message delivered to topic  test  partition  2  offset 0
+(pid=19977) Message delivered to topic  test  partition  8  offset 1
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 8  offset= 2  key= 100
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 388}
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 5  offset= 0  key= 12
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 214}
+(pid=19977) Message delivered to topic  test  partition  8  offset 2
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 1  offset= 0  key= 3
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 499}
+(pid=19977) Message delivered to topic  test  partition  5  offset 0
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 6  offset= 0  key= 49
+(pid=19981) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 914}
+(pid=19977) Message delivered to topic  test  partition  1  offset 0
+(pid=19977) Message delivered to topic  test  partition  6  offset 0
+(pid=19981) Consumer  04c698a5-db3a-4da9-86df-cd7d6fb7dc6d new message: topic= test  partition= 8  offset= 3  key= 77
+…………………………...
+----
+====
+
+As you can see from the results, the execution does the following: 
+
+. deletes and recreates the topic _test_. 
+. creates a consumer listening to all of the partitions of a topic (we are running a single consumer here). 
+. Messages, that are delivered and consequently processed from different partitions, but are always read by the same consumer.
+
+==== Scaling our implementation
+
+Now that everything is working, let’s see how to scale our implementation. As discussed earlier in this chapter, the basic approach to scale an application that reads from Kafka is to increase the number of Kafka consumers (assuming that the topic has enough partitions). Luckily the code (<<ch6_bringing-it-all-together>>) already supports this, so we can easily increase the number of consumers by setting `n_consumer=5`. Once this update is done, re-running of the code will produce the output that looks as follows (<<execution-results-five-cons>>).
+
+.Execution results for five consumers
+[[execution-results-five-cons]]
+====
+----
+Topic  test  is deleted
+Topic  test  is created
+2021-08-23 17:15:12,353	INFO services.py:1264 -- View the Ray dashboard at http://127.0.0.1:8265
+(pid=20100) Message delivered to topic  test  partition  8  offset 0
+(pid=20100) Message delivered to topic  test  partition  2  offset 0
+(pid=20103) Consumer  9e2773d4-f006-4d4d-aac3-fe75ed27f44b
+(pid=20103) Assignment: [TopicPartition{topic=test,partition=0,offset=-1001,error=None}, TopicPartition{topic=test,partition=1,offset=-1001,error=None}]
+(pid=20107) Consumer  bdedddd9-db16-4c24-a7ef-338e91b4e100
+(pid=20107) Assignment: [TopicPartition{topic=test,partition=4,offset=-1001,error=None}, TopicPartition{topic=test,partition=5,offset=-1001,error=None}]
+(pid=20101) Consumer  d76b7fad-0b98-4e03-92e3-510aac2fcb11
+(pid=20101) Assignment: [TopicPartition{topic=test,partition=6,offset=-1001,error=None}, TopicPartition{topic=test,partition=7,offset=-1001,error=None}]
+(pid=20106) Consumer  e3d181af-d095-4b7f-b3d6-830299c207a8
+……………………………………………………………………………………..
+(pid=20100) Message delivered to topic  test  partition  8  offset 1
+(pid=20104) Consumer  5ef01543-a1be-46c3-a5ab-735c42851d58 new message: topic= test  partition= 8  offset= 2  key= 100
+(pid=20104) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 388}
+(pid=20100) Message delivered to topic  test  partition  8  offset 2
+(pid=20107) Consumer  bdedddd9-db16-4c24-a7ef-338e91b4e100 new message: topic= test  partition= 5  offset= 0  key= 12
+(pid=20107) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 214}
+(pid=20100) Message delivered to topic  test  partition  5  offset 0
+(pid=20103) Consumer  9e2773d4-f006-4d4d-aac3-fe75ed27f44b new message: topic= test  partition= 1  offset= 0  key= 3
+(pid=20103) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 499}
+(pid=20100) Message delivered to topic  test  partition  1  offset 0
+(pid=20101) Consumer  d76b7fad-0b98-4e03-92e3-510aac2fcb11 new message: topic= test  partition= 6  offset= 0  key= 49
+(pid=20101) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 914}
+(pid=20100) Message delivered to topic  test  partition  6  offset 0
+(pid=20104) Consumer  5ef01543-a1be-46c3-a5ab-735c42851d58 new message: topic= test  partition= 8  offset= 3  key= 77
+(pid=20104) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 443}
+(pid=20100) Message delivered to topic  test  partition  8  offset 3
+(pid=20103) Consumer  9e2773d4-f006-4d4d-aac3-fe75ed27f44b new message: topic= test  partition= 1  offset= 1  key= 98
+(pid=20103) {'name': 'john', 'favorite_color': 'blue', 'favorite_number': 780}
+……………………………………………………….
+----
+====
+
+Here, unlike <<execution-results-single-cons>>, five Kafka consumers start each listening on 2 partitions (remember our topic uses ten partitions). You can also see that as messages are delivered on different partitions they are being processed by different consumer instances. So we can scale our Kafka applications manually, but what about autoscaling?
+
+Unlike native Kubernetes auto scalers, for example, https://keda.sh/[Keda], which scales consumers based on the https://faun.pub/event-driven-autoscaling-for-kubernetes-with-kafka-keda-d68490200812[queue depth], Ray uses a different https://www.anyscale.com/blog/serverless-kafka-stream-processing-with-ray[approach]. Instead of bringing up and down Kafka consumers, Ray uses a fixed number of consumers and spreads them across nodes (adding nodes if required). This gives better performance for each consumer but still runs into issues when there are not enough partitions.
+Now that you know how to integrate Ray with Kafka let's discuss how you can use this technique for building streaming applications.
+
+=== Building stream processing applications with Ray
+
+There are two important classes of stream processing:
+
+* _Stateless stream processing_, where each event is handled completely independently from any previous events or mutable shared state. Given an event, the stream processor will treat it exactly the same way every time, no matter what data arrived beforehand or the state of the execution. 
+* _Stateful stream processing_, which means that a "state" is shared between events and can influence the way current events are processed. The state, in this case, can be a result of previous events or produced by an external system, controlling stream processing.
+
+Stateless stream processing implementations are typically simple and straightforward, They require an extension of the _start_ method of the Kafka consumer (<<kafka-consumer-actor>>) to implement any required transformation of the incoming messages. The result of these transformations can be sent either to different Kafka topics or to any other part of the code. An example stateless a streaming application can be found https://www.anyscale.com/blog/serverless-kafka-stream-processing-with-ray[here].
+
+Implementing stateful stream processing is typically more involved. Let’s take a look at different options for implementing stateful stream processing based on https://www.lightbend.com/blog/serve-machine-learning-models-dynamically-controlled-streams[dynamically controlled streams].
+
+==== Implementing stateful stream processing
+
+Our sample implementation uses the heater controller examplefootnote:[This example is adapted from https://www.lightbend.com/blog/serve-machine-learning-models-dynamically-controlled-streams[here]] which consists of the following:
+
+* There is a constant stream of temperature measurements from the sensor.
+* The thermostat settings are defined as the desired temperature Td and ∆t 
+* The thermostat settings can arrive at any point.
+* When the temperature falls below Td - ∆t, an implementation sends a signal to the heater to start.
+* When the temperature goes above Td + ∆t a signal is sent to the heater to stop.
+* A very simple “heater model” is used here, where temperature increases by 1 degree every N(configurable) minutes when the heater is on and decreases by 1 degree every M(configurable) minutes when it is off.
+
+The following are simplifications that we made to the original example:
+
+* Instead of using Protobuf marshaling, we are using JSON marshaling (the same as in the previous examples), which allows us to marshall/unmarshall Python dictionary messages generically.
+* To simplify our implementation, instead of using two queues as in the original sample we are using a single queue containing both control and sensor messages, discriminating between the two as we receive them. Although it works in our toy example, it might not be a good solution in a real-life implementation with a large volume of messages, because it can slow down sensor message processing.
+
+With these simplifications in place, we will here demonstrate two approaches to implement stateful stream processing with Ray - a key-based approach and a key independent one.
+
+===== Key-based approach 
+
+Many stateful streaming applications rely on Kafka message keys. Remember that Kafka partitioning uses the key hash to determine which partition a message is written to. This means that Kafka guarantees that all of the messages with the same key are always picked up by the same consumer. In this case, it is possible to implement stateful stream processing locally on the Kafka consumer that receives them.  Because the consumer is implemented as a Ray Actor, Ray keeps track of the data inside the actor.footnote:[As described in chapter 4, Ray’s actors are not persistent, and as a result in the case of node failures, the actor state will be lost. We can implement persistence here as described in Chapter 4 to overcome this.]
+
+For this implementation, we created a small heater simulator program that you can find in the https://github.com/scalingpythonml/scalingpythonml/tree/master/ray_examples/streaming/stateful_streaming[accompanying Github project]footnote:[Note usage of threading to ensure that Kafka consumer is running forever without interference with measurement computations.] that publishes and gets data based on the heater ID.footnote:[Again, this is a simplification we made for our toy example; in real implementations, every request to the temperature controller should contain replyTo topic, thus ensuring that any replies will get to the correct instance of the heater.] With this in place you can implement the temperature controller as follows (<<impl_temp_controller>>).
+
+.Implementation of temperature controller
+[[impl_temp_controller]]
+====
+[source, python]
+----
+include::examples/ray_examples/streaming/shared/controller.py[tags=shared]
+----
+====
+
+The implementation is a Python class with the following methods:
+
+* A constructor taking Kafka producer actor (<<kafka-producer-actor>>), that is used by this class to write control data to Kafka and an ID - an ID of this temperature controller (which is the same as heater device ID).
+* The erocess_new_message method that receives messages and depending on their contents calls either pass:[<em>set_temperature</em>] or pass:[<em>process_sensordata</em>].
+* The set_temperature method is processing a new set temperature method from the thermostat. This message contains the new desired temperature along with additional heater-specific parameters - temperature intervals where controls are ignored.
+* The process_sensordata method which handles the temperature control. If the desired temperature is set, then it compares the current temperature with the desired one and calculates the desired control (heater on/off). To avoid resending the same control over and over again, this method additionally compares the calculated control value with the current (cached) and only submits a new control value if it has changed.
+
+Because Kafka calculates partitions based on the key hash, the same partition can serve many keys. To manage multiple keys per partition we introduced a _TemperatureControllerManager_ class whose purpose is to manage individual temperature controllers (<<impl_temp_contr_manager>>)
+
+.Implementation of temperature controller manager
+[[impl_temp_contr_manager]]
+====
+----
+class TemperatureControllerManager:
+   def __init__(self, producer: KafkaProducer):
+       self.controllers = {}
+       self.producer = producer
+  
+   def process_controller_message(self, key: str,  request: dict):
+       if not key in self.controllers:   # create a new controller
+           print(f'Creating a new controller {controller_id}')
+           controller = TemperatureController(producer=self.producer, id=key)
+           self.controllers[key] = controller
+       self.controllers[key].process_new_message(request)
+----
+====
+
+This implementation is based on a dictionary keeping track of temperature controllers based on their IDs. The class provides 2 methods:
+
+* The constructor taking Kafka producer actor (<<kafka-producer-actor>>). The constructor then creates a new empty dictionary of the individual temperature controllers.
+* The process_controller_message function that takes every new message received by the “local” Kafka consumer and, based on a key, decides if a required temperature controller exists. If it is not, a new temperature controller is created and stores a reference to it. After it finds or creates the controller, it then passes the message to it for processing.
+
+To link this implementation to the Kafka consumer, we do need to modify the Kafka consumer (<<kafka-consumer-actor>>) a little bit (<<int_kafka_cons_temp_con>>).
+
+.Integrating Kafka consumer with temperature controller manager
+[[int_kafka_cons_temp_con]]
+====
+----
+@ray.remote
+class KafkaConsumer:
+   def __init__(self, producer: KafkaProducer, group: str = 'ray', broker: str = 'localhost:9092', topic: str = 'sensor', restart: str = 'earliest'):
+       from confluent_kafka import Consumer
+       import logging
+       # Configuration
+       consumer_conf = {'bootstrap.servers': broker,   # bootstrap server
+                'group.id': group,                      # group ID
+                'session.timeout.ms': 6000,            # session tmout
+                'auto.offset.reset': restart}          # restart
+
+       # Create Consumer instance
+       self.consumer = Consumer(consumer_conf)
+       self.topic = topic
+       self.callback = TemperatureControllerManager(producer).process_controller_message
+  
+   def start(self):
+       self.run = True
+       def print_assignment(consumer, partitions):
+       	print(f'Assignment: {partitions}')
+  
+       # Subscribe to topics
+       self.consumer.subscribe([self.topic], on_assign = print_assignment)
+       while self.run:
+       	msg = self.consumer.poll(timeout=1.0)
+       	if msg is None:
+                 continue
+       	If msg.error():
+                  print(f'Consumer error: {msg.error()}')
+           	    continue
+       	else:
+           	    # Proper message
+                 print(f"New message: topic={msg.topic()}  partition= {msg.partition()} offset={msg.offset()}")
+                key = None
+                if msg.key() != None:
+                    key = msg.key().decode("UTF8")
+                print(f'key={key}')
+                value = json.loads(msg.value().decode("UTF8"))
+                print(f'value = {value}')
+                self.callback(key, value)
+  
+   def stop(self):
+       self.run = False
+  
+   def destroy(self):
+       self.consumer.close()
+----
+====
+
+A couple of notable differences between this and the original implementations are:
+
+* The constructor takes an additional parameter - the Kafka producer, which is used internally to create a _temperature controller manager_ as part of the actor’s initialization.
+* For every incoming message, in addition to printing it out, we are invoking the temperature _controller manager_ to process it.
+
+With these changes in place, you can implement the main program, similar to <<ch6_bringing-it-all-together>>footnote:[You can find the complete code for this implementation https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/keyed/keyed_ray_kafka_persistent.py[here]] and start an execution. The partial execution result (in <<contr_execution_results>>) shows the output of processing:
+
+.Controller execution results
+[[contr_execution_results]]
+====
+----
+(pid=29041) New message: topic= sensor  partition= 9  offset= 18
+(pid=29041) key  1234  value  {'measurement': 44.99999999999996}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 19
+(pid=29041) key  1234  value  {'measurement': 45.16666666666662}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 20
+(pid=29041) key  1234  value  {'measurement': 45.333333333333286}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 21
+(pid=29041) key  1234  value  {'measurement': 45.49999999999995}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 22
+(pid=29041) key  1234  value  {'measurement': 45.666666666666615}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 23
+(pid=29041) key  1234  value  {'measurement': 45.83333333333328}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 24
+(pid=29041) key  1234  value  {'measurement': 45.99999999999994}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 25
+(pid=29041) key  1234  value  {'measurement': 46.16666666666661}
+(pid=29040) Message delivered to topic  heatercontrol  partition  9  offset 0
+(pid=29041) New message: topic= sensor  partition= 9  offset= 26
+(pid=29041) key  1234  value  {'measurement': 46.08333333333327}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 27
+(pid=29041) key  1234  value  {'measurement': 45.999999999999936}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 28
+(pid=29041) key  1234  value  {'measurement': 45.9166666666666}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 29
+(pid=29041) key  1234  value  {'measurement': 45.833333333333265}
+(pid=29041) New message: topic= sensor  partition= 9  offset= 30
+(pid=29041) key  1234  value  {'measurement': 45.74999999999993}
+----
+====
+
+This listing shows the behavior of the controller when the temperature is around the desired value (45 degrees). As expected the temperature keeps growing until it gets above 46 degrees (temperature intervals where controls are ignored is 1 degree). When the measurement is 46.16666666666661 the new message is sent to the heater to switch off and the temperature starts to decrease. Also looking at this listing we can see that the requests are always delivered to the same partition (they have the same key).
+
+A key-based approach is a good option for many real world implementations. The advantage of this approach is that all of the data processing is done locally - inside the same Kafka consumer actor. 
+
+There are two potential pitfalls of such implementations:
+
+* As the number of keys grows it is necessary to ensure that the keys are evenly distributed across Kafka topic partitions. Ensuring this key distribution can sometimes require additional key design procedures, but the default hashing is often sufficient.
+* Execution locality can become a problem when executions are CPU and memory expensive. Because all the executions are part of the Kafka consumer actor, its scaling can become insufficient for keeping up with high-volume traffic
+
+Some of these drawbacks can be rectified in a key independent approach.
+
+===== Key independent approach
+
+The difference of this approach compared to the previous one is that both the temperature controller (<<impl_temp_contr_manager>>) and temperature controller manager (<<int_kafka_cons_temp_con>>) are converted from Python objects to https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/round_robin/ray_kafka_persistent.py[Ray actors]. By doing this both become individually addressable and can be located anywhere.footnote:[Complete code for this example can be found https://github.com/scalingpythonml/scalingpythonml/tree/master/streaming/persistent_ray/round_robin[here]] Such an approach loses execution locality (which can lead to a slight execution time increase), but can improve overall scalability of the solution (each actor can run on a separate node). If necessary, you can improve scalability even further by leveraging an actor’s pool (described in chapter 4) and thus allowing Ray to split execution to even more nodes.
+
+=== Going beyond Kafka 
+
+In this chapter you have learned how to use Ray’s native capabilities to implement streaming by directly integrating Ray with Kafka. What if you need to use a different messaging infrastracture? If your favorite communication backbone provides Python APIs, you can integrate it with Ray, similar to the Kafka integration described above. 
+
+Another option, as mentioned in the beginning of this chapter, is to use an external library, for example, project https://github.com/project-codeflare/rayvens[Rayvens], which internally leverages https://camel.apache.org/[Apache Camel] (a generic integration framework) to make it possible to use a wide range of messaging backbones. You can find a description of the supported messaging backbones and an example of their usage https://medium.com/codeflare/accessing-hundreds-of-event-sources-and-sinks-with-rayvens-17f3ff45d92[here]. 
+
+Similar to the Kafka integration described above, under the hood, Rayvens is implemented as a set of Ray actors. The Rayvens base class Stream is a stateless, serializable, wrapper around the Stream Ray actor class which is responsible for keeping track of the current Rayvens state (see chapter 4 for using actors to manage global variables), including currently defined sources and sinks and their connectivity. Stream class hides the remote nature of a Stream actor and implement wrappers that are internally implementing all communications with the underlying remote actor. If you want more control (in terms of execution timing), it is possible to invoke methods directly on the stream actor. The stream actor will be reclaimed when the original stream handle goes out of scope. 
+
+As Rayvens is based on Camel, it requires a setting of Camel to make it work. Ravens supports two main options of Camel usage:
+
+* Local mode: in this mode Camel source or sink run in the same execution context as the stream actor which is attached to using the Camel client: same container, same virtual or physical machine.
+* Operator mode: in this case Camel source or sink run inside a Kubernetes cluster relying on the Camel operator to manage dedicated Camel pods.
+
+=== Conclusion
+
+In this chapter, you have learned one option to use Ray for implementing streaming. You first learned the basics of Kafka - the most popular streaming application backbone used today  - and some different ways to integrate it with Ray. You then learned how to scale Kafka-based applications with Ray. We have also outlined implementation approaches for both stateless and stateful streaming applications with Ray that you can use as a foundation for your custom implementations.
+
+Finally, we briefly discussed alternatives to using Kafka as transport, including Rayvens - a general-purpose integration framework based on Apache Camel, that can be used for integration of a wide variety of streaming backbones. You can use this discussion to decide how to implement your specific transports.
+
+In the next chapter, we will introduce Ray’s microservices framework implementation and its usage for model serving implementation.

@@ -447,7 +447,7 @@ For this implementation, we created a small heater simulator program that you ca
 ====
 [source, python]
 ----
-include::./examples/ray_examples/streaming/shared/controller.py[tags=shared]
+include::examples/ray_examples/streaming/shared/controller.py[tags=shared]
 ----
 ====
 

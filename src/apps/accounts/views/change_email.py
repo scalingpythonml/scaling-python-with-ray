@@ -56,8 +56,8 @@ class ChangeEmailView(View):
     @property
     def base_context(self):
         return {
-            "title": "Change password",
-            "navname": "Change password",
+            "title": "Change email",
+            "navname": "Change email",
             "action": reverse("accounts:change-email"),
             "action_button_name": "Update",
         }

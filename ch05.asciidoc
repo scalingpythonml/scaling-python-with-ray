@@ -252,7 +252,7 @@ The auto-scaler creates new nodes in response to the following events:footnote:[
 * Cluster creation with the min-nodes configuration. In this case, the autoscaler creates the required amount of nodes.
 * Resource demands. For remote functions with the resource requirements, the autoscaler checks whether a cluster can satisfy additional resource requirements and, if not, creates a new worker node(s).
 * Placement groups. Similar to resource demand, for new placement groups the autoscaler checks whether the cluster has enough resources and, if not, creates new worker node(s).
-* SDK pass:[<a href=”https://docs.ray.io/en/latest/cluster/sdk.html”><em>request_resources</em></a>] function call is similar to the cluster creation request, but these resources are never released for the life of the cluster.
+* SDK pass:[<a href="https://docs.ray.io/en/latest/cluster/sdk.html"><em>request_resources</em></a>] function call is similar to the cluster creation request, but these resources are never released for the life of the cluster.
 
 Ray's autoscaler works with different node/computer types, which can map to different physical instance type (for example different AWS node types), or accelerators (for example GPU).
 

@@ -25,7 +25,7 @@ def login_routing(user: User):
     user = User.objects.onboarding_complete_annotate(id=user.id).first()
     if not user.have_personal_info:
         return redirect(reverse("core:personal-info"))
-    if not user.have_device:
+    if not user.user_have_device:
         return redirect(reverse("core:add-device"))
     if not user.complete_onboarding:
         return redirect(reverse("core:pick-plan"))

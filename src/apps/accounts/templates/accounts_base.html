@@ -17,7 +17,9 @@
       <a class="nav-link" href="#">Change email</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Change password</a>
+      {% url 'accounts:change-password' as change_password_url %}
+      <a class="nav-link {% if request.path == change_password_url %}active{% endif %}"
+         href="{{ change_password_url }}">Change password</a>
     </li>
   </ul>
 {% endblock %}

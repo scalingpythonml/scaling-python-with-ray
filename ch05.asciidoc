@@ -60,7 +60,7 @@ Ray actors are lazily initialized, so failure during the init stage is the same 
 
 When an actor fails between messages, Ray automatically attempts to recover the actor the next time it is called, up to max_retries times. If you've written your state recovery code well, failures between messages are generally invisible besides slightly slower processing times. If you don't have state recovery, each restart will reset the actor to the initial values.
 
-If your application fails, nearly all of the resources your application was using will eventually be garbage collected. The one exception is detached resources,footnote:[ Like detached actors and detached placement groups.] which Ray will restart as configured beyond the life of your current program provided the cluster does not fail.footnote[This can prevent your cluster from scaling down as Ray will not release the resources.]
+If your application fails, nearly all of the resources your application was using will eventually be garbage collected. The one exception is detached resources,footnote:[ Like detached actors and detached placement groups.] which Ray will restart as configured beyond the life of your current program provided the cluster does not fail.footnote:[This can prevent your cluster from scaling down as Ray will not release the resources.]
 
 Ray does not automatically attempt to recreate lost objects after they are first stored. You can configure Ray to try and recreate lost objects when accessed. In the next section, you'll learn more about the Ray objects and how to configure that resiliency.
 

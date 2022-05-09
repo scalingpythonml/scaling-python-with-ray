@@ -39,3 +39,4 @@ django-picklefield==3.0.1
 stripe==2.74.0
 dj-stripe==2.6.1
 SQLAlchemy==1.4.36
+PyMySQL==1.0.2

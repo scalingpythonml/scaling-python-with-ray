@@ -38,7 +38,7 @@ Since remote functions do not contain any persistent state, recovering from thei
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=flaky_remote_fun]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=flaky_remote_fun]
 ----
 ====
 
@@ -88,7 +88,7 @@ Ray objects are immutable, meaning they can not be modified. It's important to n
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=ex_ray_immuteable]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ex_ray_immuteable]
 ----
 ====
 
@@ -101,7 +101,7 @@ If a parameter or return value is large and used more than once, or medium-sized
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=ex_use_ray_put]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ex_use_ray_put]
 ----
 ====
 
@@ -135,7 +135,7 @@ If you have a mixture of fast and slow disks (e.g. SSD, HDD, network), you shoul
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=ray_obj_store_config]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ray_obj_store_config]
 ----
 ====
 
@@ -164,7 +164,7 @@ When pickling classes, Cloudpickle still uses the same extension mechanisms (get
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=custom_serializer]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=custom_serializer]
 ----
 ====
 
@@ -175,7 +175,7 @@ Alternatively, Ray allows you to register serializers for classes. This approach
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=custom_serializer_not_own_class]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=custom_serializer_not_own_class]
 ----
 ====
 
@@ -323,7 +323,7 @@ To make a placement group you will need a few extra imports, shown in <<placemen
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=placement_group_imports]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=placement_group_imports]
 ----
 ====
 
@@ -332,7 +332,7 @@ include::examples/ray/details/Ray-Concepts.py[tags=placement_group_imports]
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=placement_group]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=placement_group]
 ----
 ====
 
@@ -343,7 +343,7 @@ If you are running Ray on a cluster you can create a more complex resource group
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts-Remote.py[tags=mixed_placement_group]
+include::examples/ray_examples/concepts/Ray-Concepts-Remote.py[tags=mixed_placement_group]
 ----
 ====
 
@@ -382,7 +382,7 @@ The fastest way to add a "few" packages to your runtime context is by specifying
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=pip_pkg_reqs]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_reqs]
 ----
 ====
 
@@ -393,7 +393,7 @@ This works well for a few dependencies, but if you've got a requirements.txt lik
 ====
 [source, python]
 ----
-include::examples/ray/details/Ray-Concepts.py[tags=pip_pkg_reqs]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_reqs]
 ----
 ====
 

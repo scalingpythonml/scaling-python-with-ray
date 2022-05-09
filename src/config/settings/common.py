@@ -495,7 +495,6 @@ class Settings:
     CELERY_TASK_DEFAULT_EXCHANGE_TYPE = "direct"
     CELERY_TASK_DEFAULT_DELIVERY_MODE = "persistent"
 
-
     # OUTSIDE DATABASE
     # -----------------------------------------------------------------------
     def OUTSIDE_DATA_NETLOC(self):

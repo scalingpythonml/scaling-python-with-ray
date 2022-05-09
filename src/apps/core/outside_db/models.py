@@ -2,12 +2,13 @@
 from sqlalchemy import Column, Date, Integer, String, text
 from sqlalchemy.ext.declarative import declarative_base
 
+
 Base = declarative_base()
 metadata = Base.metadata
 
 
 class SmsItem(Base):
-    __tablename__ = 'sms_item'
+    __tablename__ = "sms_item"
 
     id = Column(Integer, primary_key=True)
     sms_text = Column(String(50), nullable=False)

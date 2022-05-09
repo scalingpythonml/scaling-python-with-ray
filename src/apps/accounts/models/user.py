@@ -144,7 +144,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def device_nickname(self):
         try:
             return self.device.nickname
-        except self.device.DoesNotExist:
+        except Exception:
             return None
 
     @property

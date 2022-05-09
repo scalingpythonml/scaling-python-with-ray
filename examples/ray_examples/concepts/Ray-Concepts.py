@@ -42,7 +42,7 @@ if False:
                 {"type": "filesystem", "params": {"directory_path": "/tmp/fast"}},
                 )
              })
-    #end::ray_obj_store_cofig[]
+    #end::ray_obj_store_config[]
 else:
     #tag::runtime_env_init[]
     ray.init(num_cpus=20, runtime_env=runtime_env)

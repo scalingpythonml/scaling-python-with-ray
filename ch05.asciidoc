@@ -389,7 +389,7 @@ The fastest way to add a "few" packages to your runtime context is by specifying
 ====
 [source, python]
 ----
-include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_reqs]
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_list]
 ----
 ====
 

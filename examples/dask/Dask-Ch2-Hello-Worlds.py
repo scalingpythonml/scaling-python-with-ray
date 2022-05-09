@@ -5,24 +5,9 @@
 
 
 #tag::make_dask_client[]
-
-
-# In[ ]:
-
-
 import dask
-from dask.distributed import Client, 
-
-
-# In[ ]:
-
-
+from dask.distributed import Client
 client = Client() # Here we could specify a cluster, defaults to local mode
-
-
-# In[ ]:
-
-
 #end::make_dask_client[]
 
 
@@ -46,6 +31,20 @@ slow_time = timeit.timeit(lambda: list(very_slow_result), number=1)
 fast_time = timeit.timeit(lambda: list(dask.compute(*slowish_result)), number=1)
 print("In sequence {}, in parallel {}".format(slow_time, fast_time))
 #end::sleepy_task_hello_world[]
+
+
+# In[ ]:
+
+
+d = dask.delayed(slow_task)(1)
+d
+
+
+# In[ ]:
+
+
+f = client.submit(d)
+f
 
 
 # In[ ]:
@@ -156,4 +155,62 @@ wc_df = initial_df.text.str.split().explode().value_counts()
 
 dask.compute(wc_df)
 #end::wc_dataframe
+
+
+# In[ ]:
+
+
+#tag::dask_array[]
+import dask.array as da
+distributed_array = da.from_array(list(range(0, 1000)))
+avg = dask.compute(da.average(distributed_array))
+#end::dask_array[]
+avg
+
+
+# In[ ]:
+
+
+na = distributed_array.persist()
+na
+
+
+# In[ ]:
+
+
+dir(na)
+
+
+# In[ ]:
+
+
+na = None
+
+
+# In[ ]:
+
+
+#tag::cache[]
+from dask.cache import Cache
+
+c = Cache(1e9) # 1GB cache
+# A local cache for the part of our code where we need a cache
+with c:
+    distributed_array.compute()
+    
+# Or global for any calls we make
+c.register()
+#end::cache[]
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 

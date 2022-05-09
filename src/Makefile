@@ -46,3 +46,7 @@ compilemessages:
 .PHONY: makemessages
 makemessages:
 	@$(MANAGE) makemessages --extension=html,txt,py,email
+
+.PHONY: genoutsidedb
+genoutsidedb:
+	sqlacodegen $(OUTSIDE_DATA_NETLOC) >> apps/core/outside_db/models.py

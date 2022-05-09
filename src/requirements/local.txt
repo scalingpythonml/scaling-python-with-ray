@@ -12,3 +12,4 @@ pytest-instafail==0.4.2
 pytest-blockage==0.2.4
 pytest-xdist==2.5.0
 django-test-plus==2.2.0
+sqlacodegen==2.3.0

@@ -4,6 +4,7 @@ from django.urls import path
 from apps.core.views import (
     AddDeviceView,
     CheckoutSessionView,
+    DashboardView,
     IndexView,
     LoginView,
     PaymentFormView,
@@ -53,5 +54,8 @@ urlpatterns = [
         "replace-device",
         login_required(ReplaceDeviceView.as_view()),
         name="replace-device",
+    ),
+    path(
+        "dashboard", login_required(DashboardView.as_view()), name="dashboard"
     ),
 ]

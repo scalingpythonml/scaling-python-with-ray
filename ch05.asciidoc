@@ -143,6 +143,7 @@ Frameworks like Ray use serialization to pass both data and functions between wo
 
 [[help_im_in_a_pickle]]
 === Serialization/Pickling
+
 Ray, and systems like it, depend on serialization, to be able to store and move data (and functions) between different processes.footnote:[These processes can be on the same node or different ones] Not all objects are serializable, and as a result, can not move between workers. In addition to the object store and IPC, fault tolerance depends on serialization so the same restrictions apply. There are many different kinds of serialization, from multi-language data-only tools like JSON and Arrow to Python's internal pickle. Serializing with pickle is called "pickling." Pickling can handle a wider range of types than JSON, but can only be used between Python processes. Pickling does not work for all objects —in most cases, there is no good way to serialize (like a network connection), and in other cases, this is because no one has had the time to implement one.
 
 In addition to communicating between processes, Ray also has a shared in-memory object store. This object store allows multiple processes on the same computer to share objects.
@@ -150,6 +151,7 @@ In addition to communicating between processes, Ray also has a shared in-memory 
 Ray uses a few different serialization techniques depending on the use case. With some exceptions, Ray's Python libraries generally use a fork of Cloudpickle, an improved pickle. For Datasets, Ray tries to use Apache Arrow (Arrow) and will fall back to cloudpickle when Arrow does not work. Ray's Java libraries use a variety of serializers, including "fast-serialization", and msgpack. Internally, Ray uses protocol buffers between workers. As a Ray Python developer, you will benefit the most from an in-depth understanding of the  Cloudpickle and Arrow serialization tools.
 
 ==== Cloudpickle
+
 Cloudpickle serializes the functions, actors, and most of the data in Ray. Most non-distributed Python code doesn't depend on serializing functions. However, cluster computing often does require serializing functions. Cloudpickle is a project designed for cluster computing and can serialize and deserialize more functions than Python's built-in pickle.
 
 [TIP]
@@ -187,6 +189,7 @@ Cloudpickle requires that the version of Python loading and the version of Pytho
 ====
 
 ==== Apache Arrow
+
 As mentioned before, Ray uses Apache Arrow to serialize Datasets when possible. Ray DataFrames can have types that are not supported by Apache Arrow. Under the hood, Ray performs schema inference or translation when loading data into Datasets. If Arrow can not represent a type, Ray serializes the dataset using lists via Cloudpickle.
 
 Apache Arrow works with many data processing and machine learning tools, including Pandas, PySpark, Tensorflow, and Dask. Arrow is a columnar format with a strongly typed schema. It is generally more space-efficient than pickling, and it can be used not only between different versions of Python but also between programming languages (e.g. Rust/C/Java/Python/CUDA/ etc.)
@@ -363,7 +366,9 @@ Additional improvements to this basic algorithm are described https://medium.com
 ****
 
 You can assign placement groups names. You can achieve this by specifying a parameter pass:[<em>name="desired_name"</em>] at the point of placement group creation. This allows you to retrieve and use the placement group from any job in the Ray cluster by name rather than passing a placement group handle.
+
 === Namespaces
+
 A namespace is a logical grouping of jobs and actors that provides limited isolation. By default, each Ray program runs in its own anonymous namespace. The anonymous namespace can not be accessed from another Ray program. To share actors between your Ray applications, you'll need to put both of your programs in the same namespace. When constructing your Ray context with `ray.init`, just add the `namespace` named parameter, e.g. `ray.init(namespace="timbit")`.
 
 [NOTE]
@@ -372,7 +377,9 @@ Namespaces are not intended to provide security isolation.
 ====
 
 You can get the current namespace by calling `ray.get_runtime_context().namespace`.
+
 === Managing Dependencies with Runtime Environments
+
 One of the big draws of Python is the amazing ecosystem of tools available. Ray supports managing dependencies with both conda and virtualenv. Ray dynamically creates these virtual environments inside of your larger container as needed and launches workers using the matching environment.
 
 The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from the https://pypi.org/[Python Package Index (PyPI)] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
@@ -412,7 +419,9 @@ Not all dependencies are well suited to the dynamically created execution contex
 
 Adding certain packages to a runtime execution context can result in a slower start & scale-up. Think of, for example, how long it takes to install Tensorflow without a wheel. If Ray had to do that for each time it started another worker, this would be much slower. You can solve this by creating conda environments in your cluster or container. We discuss how to do this in <<app_deploying>>.
 
+
 === Deploying Ray Applications with the Ray Job API
+
 In addition to connecting your job to an existing cluster with `ray.init`, Ray offers a job API. The job API provides a lightweight mechanism to submit jobs without having to worry about library mismatches and avoids the issue of flaky networks between the remote cluster and the head node. The three main methods of the job API you will use are:
 
 * Submit a new job to the cluster, returning a job ID.
@@ -506,5 +515,7 @@ while True:
 logs = client.get_job_logs(job_id)
 print(f"logs: {logs}")
 ----
+
 === Conclusion
+
 In this chapter, you've gained a deeper understanding of how Ray works. Your knowledge of serialization will help you understand which work to distribute and which to keep in the same process. You now know your different options and how to choose the right scaling technique. You have a few different techniques to manage Python dependencies, even conflicting ones, on your Ray cluster. You are well set up to learn about the higher-level building blocks covered in the next part of the book.

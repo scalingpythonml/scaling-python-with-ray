@@ -74,6 +74,7 @@ class Settings:
             "BROKER_NETLOC",
             "STATIC_URL",
             "MEDIA_URL",
+            "OUTSIDE_DATA_NETLOC",
         ]
 
     # INSTANCE CONFIGURATION
@@ -493,6 +494,12 @@ class Settings:
     CELERY_TASK_DEFAULT_ROUTING_KEY = CELERY_TASK_DEFAULT_QUEUE
     CELERY_TASK_DEFAULT_EXCHANGE_TYPE = "direct"
     CELERY_TASK_DEFAULT_DELIVERY_MODE = "persistent"
+
+
+    # OUTSIDE DATABASE
+    # -----------------------------------------------------------------------
+    def OUTSIDE_DATA_NETLOC(self):
+        return self._OUTSIDE_DATA_NETLOC
 
     # APPS CONFIGURATION
     # -----------------------------------------------------------------------

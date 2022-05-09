@@ -57,6 +57,7 @@ React development server can be started with `npm start`.
 #### Management commands in `app shell` (`make shell app`):
 * `make format` - Fix black format issues
 * `make sort` - Fix import sorting issues
+* `make genoutsidedb` - SqlAlchemy models generation for outside database
 
 #### Notes:
 Try run `make rebuild` and `make up` if something went wrong.

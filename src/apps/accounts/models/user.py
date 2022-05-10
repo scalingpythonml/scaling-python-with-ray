@@ -9,9 +9,15 @@ from django.db import models
 from django.db.models import ExpressionWrapper, Q
 from django.utils import timezone
 
-from django_countries.fields import CountryField
-from sorl.thumbnail import ImageField, get_thumbnail
 
+from constance import config
+from django_countries.fields import CountryField
+from djstripe.models import Customer
+from sorl.thumbnail import ImageField, get_thumbnail
+import stripe
+
+
+stripe.api_key = config.STRIPE_PRIVATE_KEY
 
 __all__ = ("User",)
 
@@ -153,3 +159,15 @@ class User(AbstractBaseUser, PermissionsMixin):
             return bool(self.device)
         except Exception:
             return False
+
+    def create_customer_account(self):
+        return stripe.Customer.create(email=self.email, name=self.full_name)
+
+    @property
+    def customer_id(self):
+        customer = Customer.objects.filter(email=self.email).first()
+        if customer:
+            return customer.id
+
+        customer_object = self.create_customer_account()
+        return customer_object.get(id, None)

@@ -43,7 +43,7 @@ urlpatterns = [
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
     path("rosetta/", include("rosetta.urls")),
     path("admin/", admin.site.urls),
-    # path("stripe/", include("djstripe.urls", namespace="djstripe")),
+    path("djstripe/", include("djstripe.urls", namespace="djstripe")),
     path("", include("apps.urls")),
 ]
 

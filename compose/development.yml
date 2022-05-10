@@ -76,3 +76,12 @@ services:
     volumes:
       - outside_db:/var/lib/mysql
       - ./outside_db/sms_item_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  
+  stripe:
+    image: stripe/stripe-cli:v1.7.4
+    command: listen --forward-to http://app:8000/djstripe/webhook/
+    depends_on:
+      - app
+    environment:
+      - STRIPE_API_KEY=sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2
+      - STRIPE_DEVICE_NAME=djstripe_docker

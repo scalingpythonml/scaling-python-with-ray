@@ -4,15 +4,16 @@ from django.urls import path
 from apps.core.views import (
     AddDeviceView,
     CheckoutSessionView,
+    CreateSubscriptionAPIView,
     DashboardView,
     IndexView,
     LoginView,
-    PaymentFormView,
     PaymentSuccessView,
     PersonalInfoView,
     PickPlanView,
     ReplaceDeviceView,
     SignUpView,
+    SubscriptionView,
 )
 
 
@@ -44,11 +45,6 @@ urlpatterns = [
         login_required(PaymentSuccessView.as_view()),
         name="payment-success",
     ),
-    path(
-        "payment-form",
-        login_required(PaymentFormView.as_view()),
-        name="payment-form",
-    ),
     path("login", LoginView.as_view(), name="login"),
     path(
         "replace-device",
@@ -57,5 +53,14 @@ urlpatterns = [
     ),
     path(
         "dashboard", login_required(DashboardView.as_view()), name="dashboard"
+    ),
+    path(
+        "subscription",
+        login_required(SubscriptionView.as_view()),
+        name="subscription",
+    ),
+    path(
+        "create-subscription",
+        login_required(CreateSubscriptionAPIView.as_view()),
     ),
 ]

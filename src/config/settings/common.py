@@ -333,6 +333,12 @@ class Settings:
             "rest_framework.authentication.BasicAuthentication",
         ),
         "DEFAULT_THROTTLE_RATES": {},
+        "DEFAULT_PARSER_CLASSES": (
+            "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+        ),
+        "DEFAULT_RENDERER_CLASSES": (
+            "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+        ),
     }
 
     # WATCHMAN
@@ -444,13 +450,19 @@ class Settings:
 
     STRIPE_LIVE_SECRET_KEY = "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
     STRIPE_TEST_SECRET_KEY = "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
+    STRIPE_PUBLIC_KEY = "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
     STRIPE_LIVE_MODE = False  # Change to True in production
-    # DJSTRIPE_WEBHOOK_SECRET = "whsec_xxx"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
+    DJSTRIPE_WEBHOOK_SECRET = "whsec_d1e28f144fa2b70e468a8fb483937ed019f1c9ce60387eab505df34881253ea6"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
     DJSTRIPE_USE_NATIVE_JSONFIELD = (
         True  # We recommend setting to True for new installations
     )
     DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
-    DJSTRIPE_WEBHOOK_VALIDATION = "retrieve_event"
+    DJSTRIPE_TEST_DB_VENDOR = "postgres"
+    DJSTRIPE_TEST_DB_PORT = 5432
+    DJSTRIPE_TEST_DB_USER = "local"
+    DJSTRIPE_TEST_DB_NAME = "local"
+    DJSTRIPE_TEST_DB_PASS = "local"
+    DJSTRIPE_TEST_DB_HOST = "data"
 
     # CELERY EMAIL
     LIBS += ["djcelery_email"]

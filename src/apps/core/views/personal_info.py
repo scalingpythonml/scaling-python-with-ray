@@ -32,6 +32,7 @@ class PersonalInfoView(views.View):
         form = self.form_class(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
+            request.user.create_customer_account()
             return redirect(reverse("core:add-device"))
         return render(
             request, self.template, {"form": form, **self.base_context}

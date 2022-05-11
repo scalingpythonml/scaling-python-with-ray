@@ -24,17 +24,20 @@ class BillingView(View):
         invoices = customer.invoices.all().values(
             "status", "created", "invoice_pdf"
         )
-        dc = customer.default_payment_method.card
         paginator = Paginator(invoices, self.page_size)
         page = paginator.get_page(request.GET.get("page", 1))
-        card = {
-            "brand": dc["brand"],
-            "last4": dc["last4"],
-            "exp_month": dc["exp_month"]
-            if dc["exp_month"] >= 10
-            else f'0{dc["exp_month"]}',
-            "exp_year": str(dc["exp_year"])[-2:],
-        }
+        if customer.default_payment_method:
+            dc = customer.default_payment_method.card
+            card = {
+                "brand": dc["brand"],
+                "last4": dc["last4"],
+                "exp_month": dc["exp_month"]
+                if dc["exp_month"] >= 10
+                else f'0{dc["exp_month"]}',
+                "exp_year": str(dc["exp_year"])[-2:],
+            }
+        else:
+            card = None
         context = {
             "page": page,
             "card": card,
@@ -65,6 +68,11 @@ class UpdatePaymentMethodAPIView(APIView):
             try:
                 data = serializer.validated_data
                 user = request.user
+                customer = Customer.objects.get(id=user.customer_id)
+                if customer.default_payment_method:
+                    stripe.PaymentMethod.detach(
+                        customer.default_payment_method.id
+                    )
                 stripe.PaymentMethod.attach(
                     data["payment_method_id"],
                     customer=user.customer_id,
@@ -82,3 +90,29 @@ class UpdatePaymentMethodAPIView(APIView):
         return Response(
             {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class DeletePaymentMethodAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        error_message = "Error"
+        try:
+            user = request.user
+            customer = Customer.objects.get(id=user.customer_id)
+            stripe.PaymentMethod.detach(customer.default_payment_method.id)
+            return Response({"success": True}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            if hasattr(e, "user_message"):
+                error_message = e.user_message
+        return Response(
+            {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+__all__ = [
+    "BillingView",
+    "UpdatePaymentMethodAPIView",
+    "DeletePaymentMethodAPIView",
+]

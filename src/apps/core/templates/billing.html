@@ -13,6 +13,7 @@
 
     .card {
       height: 100%;
+      min-height: 300px;
     }
   </style>
 {% endblock %}
@@ -25,39 +26,49 @@
             Current payment method
           </div>
           <div class="card-body">
-            <div class="credit-card">
-              <div class="bank-name" title="BestBank">{{ card.brand }}</div>
-              <div class="chip">
-                <div class="side left"></div>
-                <div class="side right"></div>
-                <div class="vertical top"></div>
-                <div class="vertical bottom"></div>
-              </div>
-              <div class="data">
-                <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** **** {{ card.last4 }}</div>
-                <div class="first-digits"></div>
-                <div class="exp-date-wrapper">
-                  <div class="left-label">EXPIRES END</div>
-                  <div class="exp-date">
-                    <div class="upper-labels">MONTH/YEAR</div>
-                    <div class="date" title="01/17">{{ card.exp_month }}/{{ card.exp_year }}</div>
-                  </div>
+            {% if card %}
+              <div class="credit-card">
+                <div class="bank-name" title="BestBank">{{ card.brand }}</div>
+                <div class="chip">
+                  <div class="side left"></div>
+                  <div class="side right"></div>
+                  <div class="vertical top"></div>
+                  <div class="vertical bottom"></div>
                 </div>
-                <div class="name-on-card"></div>
+                <div class="data">
+                  <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** **** {{ card.last4 }}</div>
+                  <div class="first-digits"></div>
+                  <div class="exp-date-wrapper">
+                    <div class="left-label">EXPIRES END</div>
+                    <div class="exp-date">
+                      <div class="upper-labels">MONTH/YEAR</div>
+                      <div class="date"
+                           title="{{ card.exp_month }}/{{ card.exp_year }}">
+                        {{ card.exp_month }}/{{ card.exp_year }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="name-on-card"></div>
+                </div>
+                <div class="lines-down"></div>
+                <div class="lines-up"></div>
               </div>
-              <div class="lines-down"></div>
-              <div class="lines-up"></div>
-            </div>
+            {% endif %}
           </div>
           <div class="btn-group">
             <button type="button" class="btn btn-success" data-toggle="modal"
                     data-target="#exampleModalCenter" onclick="updatePaymentMethodModal(true)">
-              Update
+              {% if card %}
+                Update
+              {% else %}
+                Add
+              {% endif %}
             </button>
-            <button class="btn btn-danger">
-              Delete
-            </button>
-
+            {% if card %}
+              <button class="btn btn-danger" onclick="deletePaymentMethodConfirmation(true)">
+                Delete
+              </button>
+            {% endif %}
           </div>
 
         </div>
@@ -69,6 +80,9 @@
             Current plan
           </div>
           <div class="card-body">
+
+          </div>
+          <div class="btn-group">
             <button class="btn btn-danger">Cancel plan</button>
           </div>
         </div>
@@ -116,6 +130,7 @@
       </div>
     </div>
   </div>
+  <!-- UPDATE PAYMENT METHOD MODAL -->
   <div class="modal fade" id="update-payment-method-modal" tabindex="-1" role="dialog"
        aria-labelledby="exampleModalCenterTitle"
        aria-hidden="true">
@@ -149,6 +164,29 @@
       </div>
     </div>
   </div>
+  <!-- DELETE PAYMENT METHOD CONFIRMATION MODAL -->
+  <div class="modal fade" id="delete-payment-method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure what you want delete payment method?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" id="delete-payment-method-button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADER -->
   <div id="loader-container">
     <div class="loader-item spinner-border text-primary" role="status">
     </div>
@@ -249,5 +287,41 @@
       setLoading(true);
       createPaymentMethod({card});
     });
+  </script>
+
+  <script>
+    /**********************
+     * DELETE PAYMENT METHOD
+     **********************/
+    const deletePaymentMethodConfirmation = (show) => {
+      $('#delete-payment-method').modal(show ? 'show' : 'hide');
+    }
+    const deletePaymentMethod = () => {
+      setLoading(true);
+      fetch('/delete-payment-method', {
+        method: 'delete',
+        headers: {
+          'Content-type': 'application/json',
+          'X-CSRFToken': "{{ csrf_token }}"
+        },
+      })
+              .then(res => res.json())
+              .then(res => {
+                if (res.error) {
+                  console.log(res);
+                } else if (res.success) {
+                  console.log(res);
+                }
+                console.log(res);
+              })
+              .finally(() => {
+                setLoading(false);
+                deletePaymentMethodConfirmation(false);
+              });
+    }
+
+    $('#delete-payment-method-button').click(() => {
+      deletePaymentMethod();
+    })
   </script>
 {% endblock %}

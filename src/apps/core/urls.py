@@ -7,6 +7,7 @@ from apps.core.views import (
     CheckoutSessionView,
     CreateSubscriptionAPIView,
     DashboardView,
+    DeletePaymentMethodAPIView,
     IndexView,
     LoginView,
     PaymentSuccessView,
@@ -67,4 +68,5 @@ urlpatterns = [
     ),
     path("billing", BillingView.as_view(), name="billing"),
     path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
+    path("delete-payment-method", DeletePaymentMethodAPIView.as_view()),
 ]

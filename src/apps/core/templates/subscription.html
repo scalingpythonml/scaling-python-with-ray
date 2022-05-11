@@ -2,28 +2,9 @@
 
 {% block extra_head %}
   {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="{% static 'core/stripe.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
   <script src="https://js.stripe.com/v3/"></script>
   <style>
-    #loader-container {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9000;
-      opacity: .5;
-      background-color: #0f0f0f;
-      display: none;
-    }
-
-    .loader-item {
-      position: absolute;
-      z-index: 9999;
-      left: 50%;
-      top: 50%;
-    }
-
     .card-container {
       margin: 20px;
     }

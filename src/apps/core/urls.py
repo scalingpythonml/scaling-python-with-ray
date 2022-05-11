@@ -15,6 +15,7 @@ from apps.core.views import (
     ReplaceDeviceView,
     SignUpView,
     SubscriptionView,
+    UpdatePaymentMethodAPIView,
 )
 
 
@@ -64,5 +65,6 @@ urlpatterns = [
         "create-subscription",
         login_required(CreateSubscriptionAPIView.as_view()),
     ),
-    path("billing", login_required(BillingView.as_view()), name="billing"),
+    path("billing", BillingView.as_view(), name="billing"),
+    path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
 ]

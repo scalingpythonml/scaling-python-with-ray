@@ -1,0 +1,100 @@
+{% extends "spacebeaver.html" %}
+
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'core/credit-card.css' %}">
+
+  <style>
+    .col-sm {
+      margin: 10px;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <div class="card">
+          <div class="card-header">
+            Current payment method
+          </div>
+          <div class="card-body">
+            <div class="credit-card">
+              <div class="bank-name" title="BestBank">{{ card.brand }}</div>
+              <div class="chip">
+                <div class="side left"></div>
+                <div class="side right"></div>
+                <div class="vertical top"></div>
+                <div class="vertical bottom"></div>
+              </div>
+              <div class="data">
+                <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** **** {{ card.last4 }}</div>
+                <div class="first-digits"></div>
+                <div class="exp-date-wrapper">
+                  <div class="left-label">EXPIRES END</div>
+                  <div class="exp-date">
+                    <div class="upper-labels">MONTH/YEAR</div>
+                    <div class="date" title="01/17">{{ card.exp_month }}/{{ card.exp_year }}</div>
+                  </div>
+                </div>
+                <div class="name-on-card"></div>
+              </div>
+              <div class="lines-down"></div>
+              <div class="lines-up"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <div class="card">
+          <div class="card-header">
+            Update payment method
+          </div>
+          <div class="card-body">
+
+          </div>
+        </div>
+      </div>
+      <div class="col-sm">
+        <div class="card">
+          <div class="card-header">
+            Cancel subscription
+          </div>
+          <div class="card-body">
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm">
+        <div class="card">
+          <div class="card-header">
+            Invoices
+          </div>
+          <div class="card-body">
+
+            <table class="table">
+              <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">PDF</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for invoice in page %}
+                <tr>
+                  <td>{{ invoice.created }}</td>
+                  <td>{{ invoice.status }}</td>
+                  <td><a href="{{ invoice.invoice_pdf }}" class="link-primary" target="_blank">Download</a></td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

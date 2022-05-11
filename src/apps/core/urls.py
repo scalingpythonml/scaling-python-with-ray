@@ -3,6 +3,7 @@ from django.urls import path
 
 from apps.core.views import (
     AddDeviceView,
+    BillingView,
     CheckoutSessionView,
     CreateSubscriptionAPIView,
     DashboardView,
@@ -63,4 +64,5 @@ urlpatterns = [
         "create-subscription",
         login_required(CreateSubscriptionAPIView.as_view()),
     ),
+    path("billing", login_required(BillingView.as_view()), name="billing"),
 ]

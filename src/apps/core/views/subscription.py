@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views import View
 
 from constance import config
+from djstripe.models import Customer
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -56,6 +57,19 @@ class CreateSubscriptionAPIView(APIView):
         if serializer.is_valid():
             try:
                 data = serializer.validated_data
+
+                customer = Customer.objects.filter(
+                    id=data["customer_id"]
+                ).first()
+                subscription = customer.subscriptions.filter(
+                    plan__id=data["price_id"], status="active"
+                ).first()
+                if subscription:
+                    return Response(
+                        {"error": "Subscription already exist"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
                 stripe.PaymentMethod.attach(
                     data["payment_method_id"],
                     customer=data["customer_id"],

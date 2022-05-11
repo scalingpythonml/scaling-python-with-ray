@@ -1,4 +1,5 @@
 from .add_device import AddDeviceView
+from .billing import BillingView
 from .checkout_session import CheckoutSessionView
 from .dashboard import DashboardView
 from .index import IndexView

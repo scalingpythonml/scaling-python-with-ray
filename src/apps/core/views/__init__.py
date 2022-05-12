@@ -1,5 +1,6 @@
 from .add_device import AddDeviceView
 from .billing import *
+from .blocked_numbers import *
 from .checkout_session import CheckoutSessionView
 from .dashboard import DashboardView
 from .index import IndexView

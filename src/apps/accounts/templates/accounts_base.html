@@ -11,7 +11,7 @@
     <li class="nav-item">
       {% url 'core:replace-device' as device_url %}
       <a class="nav-link {% if request.path == device_url %}active{% endif %}"
-         href="{{ device_url }}">Replace device</a>
+         href="{{ device_url }}">Device</a>
     </li>
     <li class="nav-item">
       {% url "accounts:change-email" as change_email_url %}
@@ -22,6 +22,11 @@
       {% url 'accounts:change-password' as change_password_url %}
       <a class="nav-link {% if request.path == change_password_url %}active{% endif %}"
          href="{{ change_password_url }}">Change password</a>
+    </li>
+    <li class="nav-item">
+      {% url 'core:blocked-numbers' as blocked_numbers_url %}
+      <a class="nav-link {% if request.path == blocked_numbers_url %}active{% endif %}"
+         href="{{ blocked_numbers_url }}">Blocked numbers</a>
     </li>
   </ul>
 {% endblock %}

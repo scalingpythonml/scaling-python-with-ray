@@ -457,12 +457,6 @@ class Settings:
         True  # We recommend setting to True for new installations
     )
     DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
-    DJSTRIPE_TEST_DB_VENDOR = "postgres"
-    DJSTRIPE_TEST_DB_PORT = 5432
-    DJSTRIPE_TEST_DB_USER = "local"
-    DJSTRIPE_TEST_DB_NAME = "local"
-    DJSTRIPE_TEST_DB_PASS = "local"
-    DJSTRIPE_TEST_DB_HOST = "data"
 
     # CELERY EMAIL
     LIBS += ["djcelery_email"]

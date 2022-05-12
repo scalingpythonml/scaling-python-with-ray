@@ -54,4 +54,14 @@ urlpatterns = [
     path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
     path("delete-payment-method", DeletePaymentMethodAPIView.as_view()),
     path("cancel-subscription", CancelSubscriptionAPIView.as_view()),
+    path(
+        "blocked-numbers",
+        login_required(BlockedNumbersView.as_view()),
+        name="blocked-numbers",
+    ),
+    path(
+        "delete-blocked-number/<int:pk>",
+        login_required(DeleteBlockedNumberView.as_view()),
+        name="delete-blocked-number",
+    ),
 ]

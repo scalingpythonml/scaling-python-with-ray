@@ -51,6 +51,8 @@ class Settings:
             else:
                 setattr(self, "_%s" % e, val)
 
+        self._set_djstripe_test_db_params()
+
         if mv:
             msg_map = ""
             for e in mv:
@@ -75,6 +77,10 @@ class Settings:
             "STATIC_URL",
             "MEDIA_URL",
             "OUTSIDE_DATA_NETLOC",
+            "STRIPE_LIVE_SECRET_KEY",
+            "STRIPE_TEST_SECRET_KEY",
+            "STRIPE_LIVE_PUBLIC_KEY",
+            "STRIPE_TEST_PUBLIC_KEY",
         ]
 
     # INSTANCE CONFIGURATION
@@ -431,8 +437,6 @@ class Settings:
             "Plan price",
             "decimal_field",
         ),
-        "STRIPE_PUBLIC_KEY": ("", "Public API key"),
-        "STRIPE_PRIVATE_KEY": ("", "Private API key"),
         "STRIPE_PRICE_ID": ("", "Product price id"),
     }
 
@@ -450,19 +454,29 @@ class Settings:
 
     STRIPE_LIVE_SECRET_KEY = "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
     STRIPE_TEST_SECRET_KEY = "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
-    STRIPE_PUBLIC_KEY = "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
-    STRIPE_LIVE_MODE = False  # Change to True in production
+    STRIPE_LIVE_PUBLIC_KEY = "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
+    STRIPE_TEST_PUBLIC_KEY = "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
+    STRIPE_LIVE_MODE = DEBUG  # Change to True in production
     DJSTRIPE_WEBHOOK_SECRET = "whsec_d1e28f144fa2b70e468a8fb483937ed019f1c9ce60387eab505df34881253ea6"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
     DJSTRIPE_USE_NATIVE_JSONFIELD = (
         True  # We recommend setting to True for new installations
     )
+
+    def _set_djstripe_test_db_params(self):
+        import re
+
+        reg_exp = "(.*?)://(.*?):(.*?)@(.*?):(.*?)/(.*)"
+        vendor, user, password, host, port, name = re.match(
+            reg_exp, self._DATA_NETLOC
+        ).groups()
+        setattr(self, "DJSTRIPE_TEST_DB_VENDOR", vendor)
+        setattr(self, "DJSTRIPE_TEST_DB_PORT", port)
+        setattr(self, "DJSTRIPE_TEST_DB_USER", user)
+        setattr(self, "DJSTRIPE_TEST_DB_NAME", name)
+        setattr(self, "DJSTRIPE_TEST_DB_PASS", password)
+        setattr(self, "DJSTRIPE_TEST_DB_HOST", host)
+
     DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
-    DJSTRIPE_TEST_DB_VENDOR = "postgres"
-    DJSTRIPE_TEST_DB_PORT = 5432
-    DJSTRIPE_TEST_DB_USER = "local"
-    DJSTRIPE_TEST_DB_NAME = "local"
-    DJSTRIPE_TEST_DB_PASS = "local"
-    DJSTRIPE_TEST_DB_HOST = "data"
 
     # CELERY EMAIL
     LIBS += ["djcelery_email"]

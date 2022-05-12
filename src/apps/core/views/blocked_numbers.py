@@ -1,9 +1,8 @@
 from django import forms
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.views import View
-from django.views.generic import DeleteView
 
 from apps.core.models import BlockedNumber
 

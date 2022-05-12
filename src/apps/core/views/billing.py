@@ -9,11 +9,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.core.services.djstripe_data import get_plan_info_from_subscription
-from apps.utils.get_stripe import get_stripe
-
-
-stripe = get_stripe()
+from apps.utils.djstripe_data import (
+    get_card_info_from_payment_method,
+    get_plan_info_from_subscription,
+)
+from apps.utils.stripe import (
+    add_customer_payment_method,
+    delete_subscription,
+    detach_payment_method,
+    set_default_payment_method_for_customer,
+)
 
 
 class BillingView(View):
@@ -33,18 +38,11 @@ class BillingView(View):
             if subscription
             else None
         )
-        if customer.default_payment_method:
-            dc = customer.default_payment_method.card
-            card = {
-                "brand": dc["brand"],
-                "last4": dc["last4"],
-                "exp_month": dc["exp_month"]
-                if dc["exp_month"] >= 10
-                else f'0{dc["exp_month"]}',
-                "exp_year": str(dc["exp_year"])[-2:],
-            }
-        else:
-            card = None
+        card = (
+            get_card_info_from_payment_method(customer.default_payment_method)
+            if customer.default_payment_method
+            else None
+        )
         context = {
             "page": page,
             "card": card,
@@ -57,7 +55,7 @@ class BillingView(View):
         return {
             "title": "Billing",
             "navname": "Billing",
-            "stripe_api_key": settings.STRIPE_PUBLIC_KEY,
+            "stripe_api_key": settings.STRIPE_TEST_PUBLIC_KEY,
         }
 
 
@@ -78,18 +76,12 @@ class UpdatePaymentMethodAPIView(APIView):
                 user = request.user
                 customer = Customer.objects.get(id=user.customer_id)
                 if customer.default_payment_method:
-                    stripe.PaymentMethod.detach(
-                        customer.default_payment_method.id
-                    )
-                stripe.PaymentMethod.attach(
-                    data["payment_method_id"],
-                    customer=user.customer_id,
+                    detach_payment_method(customer.default_payment_method.id)
+                add_customer_payment_method(
+                    data["payment_method_id"], customer.id
                 )
-                stripe.Customer.modify(
-                    user.customer_id,
-                    invoice_settings={
-                        "default_payment_method": data["payment_method_id"],
-                    },
+                set_default_payment_method_for_customer(
+                    data["payment_method_id"], customer.id
                 )
                 return Response({"success": True}, status=status.HTTP_200_OK)
             except Exception as e:
@@ -108,10 +100,9 @@ class DeletePaymentMethodAPIView(APIView):
         try:
             user = request.user
             customer = Customer.objects.get(id=user.customer_id)
-            stripe.PaymentMethod.detach(customer.default_payment_method.id)
+            detach_payment_method(customer.default_payment_method.id)
             return Response({"success": True}, status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
             if hasattr(e, "user_message"):
                 error_message = e.user_message
         return Response(
@@ -127,10 +118,9 @@ class CancelSubscriptionAPIView(APIView):
         try:
             user = request.user
             subscription = user.customer_subscription
-            stripe.Subscription.delete(subscription.id)
+            delete_subscription(subscription.id)
             return Response({"success": True}, status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
             if hasattr(e, "user_message"):
                 error_message = e.user_message
         return Response(

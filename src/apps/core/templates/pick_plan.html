@@ -1,16 +1,11 @@
 {% extends 'onboarding_wizard.html' %}
 
-{% block title %} Pick Plan {% endblock %}
-
-{% block navname %} Pick Plan {% endblock %}
-
 {% block content %}
-  {{ block.super }}
   <div class="col-md-6 centered">
       <div class="card mb-3">
         <img class="card-img-top" src="{{ image }}" alt="plan-info">
         <div class="card-body">
-          <h5 class="card-title">{{ title }}</h5>
+          <h5 class="card-title">{{ plan_title }}</h5>
           <p class="card-text">{{ description }}</p>
           <p class="card-text"><small class="text-muted">{{ price }}$</small></p>
           <a class="btn btn-primary" href="{% url 'core:subscription' %}">Next</a>

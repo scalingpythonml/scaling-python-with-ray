@@ -3,7 +3,6 @@ import os
 from typing import Optional
 import uuid
 
-from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -11,15 +10,12 @@ from django.db.models import ExpressionWrapper, Q
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-
-from constance import config
 from django_countries.fields import CountryField
 from djstripe.models import Customer, Subscription
 from sorl.thumbnail import ImageField
-import stripe
 
+from apps.utils.stripe import create_customer
 
-stripe.api_key = config.STRIPE_PRIVATE_KEY
 
 __all__ = ("User",)
 
@@ -162,7 +158,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return False
 
     def create_customer_account(self):
-        return stripe.Customer.create(email=self.email, name=self.full_name)
+        return create_customer(self.email, self.full_name)
 
     @property
     def customer_id(self):
@@ -185,31 +181,26 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Active user subscription
         """
-        return (
-            self.customer.subscriptions.filter(status="active").first()
-            if self.customer
-            else None
-        )
+        return Subscription.objects.filter(
+            customer__email=self.email, status="active"
+        ).first()
 
     @property
     def have_any_subscription(self):
         """
         If user have any subscription its means what him complete onboarding wizard phase
         """
-        customer = self.customer
-        return customer.subscriptions.exists() if customer else False
+        return Subscription.objects.filter(customer__email=self.email).exists()
 
     @property
     def dont_have_active_subscriptions(self):
         """
         user have subscriptions but have not active subscriptions
         """
-        customer = self.customer
-        if not customer:
-            return False
-        return (
-            self.customer.subscriptions.exists()
-            and not self.customer.subscriptions.filter(
-                status="active"
-            ).exists()
-        )
+        have_subscription = Subscription.objects.filter(
+            customer__email=self.email
+        ).exists()
+        have_active_subscription = Subscription.objects.filter(
+            customer__email=self.email, status="active"
+        ).exists()
+        return have_subscription and not have_active_subscription

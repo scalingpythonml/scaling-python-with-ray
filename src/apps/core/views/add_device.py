@@ -36,15 +36,6 @@ class AddDeviceView(views.View):
     template = "onboarding_wizard_form.html"
     form_class = DeviceForm
 
-    @property
-    def base_context(self):
-        return {
-            "title": "Add device",
-            "navname": "Add device",
-            "action": reverse("core:add-device"),
-            "step": 3,
-        }
-
     def get(self, request):
         form = self.form_class()
         return render(
@@ -64,3 +55,12 @@ class AddDeviceView(views.View):
         return render(
             request, self.template, {"form": form, **self.base_context}
         )
+
+    @property
+    def base_context(self):
+        return {
+            "title": "Add device",
+            "navname": "Add device",
+            "action": reverse("core:add-device"),
+            "step": 3,
+        }

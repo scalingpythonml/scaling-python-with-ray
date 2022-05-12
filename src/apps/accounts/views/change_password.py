@@ -35,7 +35,6 @@ class ChangePasswordForm(forms.Form):
         cleaned_data = super(ChangePasswordForm, self).clean()
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
-        print(new_password, confirm_new_password)
         if new_password != confirm_new_password:
             self.add_error("confirm_new_password", "Passwords does not match")
 

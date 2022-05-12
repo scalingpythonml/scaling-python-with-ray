@@ -6,7 +6,7 @@ from apps.core.views import *
 
 app_name = "core"
 
-urlpatterns = [
+view_urlpatterns = [
     path("", IndexView.as_view(), name="index"),
     path("sign-up/", SignUpView.as_view(), name="sign-up"),
     path(
@@ -21,11 +21,6 @@ urlpatterns = [
     ),
     path(
         "pick-plan", login_required(PickPlanView.as_view()), name="pick-plan"
-    ),
-    path(
-        "checkout-session",
-        login_required(CheckoutSessionView.as_view()),
-        name="checkout-session",
     ),
     path(
         "payment-success",
@@ -46,14 +41,7 @@ urlpatterns = [
         login_required(SubscriptionView.as_view()),
         name="subscription",
     ),
-    path(
-        "create-subscription",
-        login_required(CreateSubscriptionAPIView.as_view()),
-    ),
-    path("billing", BillingView.as_view(), name="billing"),
-    path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
-    path("delete-payment-method", DeletePaymentMethodAPIView.as_view()),
-    path("cancel-subscription", CancelSubscriptionAPIView.as_view()),
+    path("billing", login_required(BillingView.as_view()), name="billing"),
     path(
         "blocked-numbers",
         login_required(BlockedNumbersView.as_view()),
@@ -65,3 +53,15 @@ urlpatterns = [
         name="delete-blocked-number",
     ),
 ]
+
+api_urlpatterns = [
+    path(
+        "create-subscription",
+        login_required(CreateSubscriptionAPIView.as_view()),
+    ),
+    path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
+    path("delete-payment-method", DeletePaymentMethodAPIView.as_view()),
+    path("cancel-subscription", CancelSubscriptionAPIView.as_view()),
+]
+
+urlpatterns = view_urlpatterns + api_urlpatterns

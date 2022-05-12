@@ -18,7 +18,9 @@ class ChangeEmailForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(ChangeEmailForm, self).clean()
-        email_occupied = User.objects.filter(email=cleaned_data["new_email"])
+        email_occupied = User.objects.filter(
+            email=cleaned_data["new_email"]
+        ).exists()
         if email_occupied:
             self.add_error("new_email", "User with this email exist")
 

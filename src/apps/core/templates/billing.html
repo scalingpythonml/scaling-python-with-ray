@@ -101,12 +101,17 @@
                 </tr>
                 </tbody>
               </table>
+            {% else %}
+              <p class="card-text">You have not plan now</p>
             {% endif %}
-
           </div>
           {% if plan %}
             <div class="btn-group">
               <button class="btn btn-danger" onclick="cancelSubscriptionConfirmation(true)">Cancel subscription</button>
+            </div>
+          {% else %}
+            <div class="btn-group">
+              <a class="btn btn-success" href="{% url 'core:pick-plan' %}">Subscribe</a>
             </div>
           {% endif %}
         </div>

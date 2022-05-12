@@ -1,9 +1,5 @@
-import json
-
 from django.conf import settings
-from django.http import JsonResponse
-from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.shortcuts import render
 from django.views import View
 
 from constance import config
@@ -13,39 +9,31 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.utils.get_stripe import get_stripe
-
-
-stripe = get_stripe()
+from apps.utils.stripe import (
+    STRIPE_PUBLIC_API_KEY,
+    add_customer_payment_method,
+    create_subscription,
+    set_default_payment_method_for_customer,
+)
 
 
 class SubscriptionView(View):
     template = "subscription.html"
 
     def get(self, request):
-        customer_id = request.user.customer_id
-        return render(
-            request,
-            self.template,
-            {
-                **self.base_context,
-                "customer_id": customer_id,
-                "price_id": config.STRIPE_PRICE_ID,
-            },
-        )
+        return render(request, self.template, self.base_context)
 
     @property
     def base_context(self):
         return {
             "title": "Subscription",
             "navname": "Subscription",
-            "stripe_api_key": settings.STRIPE_PUBLIC_KEY,
+            "stripe_api_key": STRIPE_PUBLIC_API_KEY,
+            "step": 5,
         }
 
 
 class CreateSubscriptionSerializer(serializers.Serializer):
-    customer_id = serializers.CharField(required=True)
-    price_id = serializers.CharField(required=True)
     payment_method_id = serializers.CharField(required=True)
 
 
@@ -60,11 +48,9 @@ class CreateSubscriptionAPIView(APIView):
             try:
                 data = serializer.validated_data
 
-                customer = Customer.objects.filter(
-                    id=data["customer_id"]
-                ).first()
+                customer = request.user.customer
                 subscription = customer.subscriptions.filter(
-                    plan__id=data["price_id"], status="active"
+                    plan__id=config.STRIPE_PRICE_ID, status="active"
                 ).first()
                 if subscription:
                     return Response(
@@ -72,21 +58,14 @@ class CreateSubscriptionAPIView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-                stripe.PaymentMethod.attach(
-                    data["payment_method_id"],
-                    customer=data["customer_id"],
+                add_customer_payment_method(
+                    data["payment_method_id"], customer.id
                 )
-                stripe.Customer.modify(
-                    data["customer_id"],
-                    invoice_settings={
-                        "default_payment_method": data["payment_method_id"],
-                    },
+                set_default_payment_method_for_customer(
+                    data["payment_method_id"], customer.id
                 )
-
-                subscription = stripe.Subscription.create(
-                    customer=data["customer_id"],
-                    items=[{"price": data["price_id"]}],
-                    expand=["latest_invoice.payment_intent"],
+                subscription = create_subscription(
+                    config.STRIPE_PRICE_ID, customer.id
                 )
                 return Response(subscription, status=status.HTTP_200_OK)
             except Exception as e:
@@ -95,3 +74,6 @@ class CreateSubscriptionAPIView(APIView):
         return Response(
             {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+__all__ = ["SubscriptionView", "CreateSubscriptionAPIView"]

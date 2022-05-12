@@ -65,7 +65,7 @@
 
     }
 
-    function createSubscription({customerId, paymentMethodId, priceId}) {
+    function createSubscription({paymentMethodId}) {
       return (
               fetch('/create-subscription', {
                 method: 'post',
@@ -74,9 +74,7 @@
                   'X-CSRFToken': "{{ csrf_token }}"
                 },
                 body: JSON.stringify({
-                  customerId: customerId,
                   paymentMethodId: paymentMethodId,
-                  priceId: priceId,
                 }),
               })
                       .then(res => res.json())
@@ -113,9 +111,7 @@
                   setLoading(false);
                 } else {
                   createSubscription({
-                    customerId: "{{ request.user.customer_id }}",
                     paymentMethodId: result.paymentMethod.id,
-                    priceId: "{{ price_id }}",
                   });
                 }
               });

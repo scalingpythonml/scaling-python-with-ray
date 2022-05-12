@@ -17,7 +17,7 @@ class DashboardView(View):
             user.twillion_number, "month"
         )
         yearly_message_count = get_user_message_count(
-            user.twillion_number, "month"
+            user.twillion_number, "year"
         )
         return render(
             request,

@@ -22,6 +22,9 @@ class LoginForm(forms.Form):
 
 
 def login_routing(user: User):
+    """
+    Select page based on profile status
+    """
     if user.have_any_subscription:
         return redirect(reverse("core:dashboard"))
     user = User.objects.onboarding_complete_annotate(id=user.id).first()

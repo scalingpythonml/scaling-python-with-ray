@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from typing import Optional
 import uuid
 
 from django.conf import settings
@@ -12,7 +13,7 @@ from django.utils import timezone
 
 from constance import config
 from django_countries.fields import CountryField
-from djstripe.models import Customer
+from djstripe.models import Customer, Subscription
 from sorl.thumbnail import ImageField, get_thumbnail
 import stripe
 
@@ -171,3 +172,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         customer_object = self.create_customer_account()
         return customer_object.get(id, None)
+
+    @property
+    def customer(self) -> Optional[Customer]:
+        return Customer.objects.filter(email=self.email).first()
+
+    @property
+    def customer_subscription(self) -> Optional[Subscription]:
+        return (
+            self.customer.subscriptions.filter(status="active").first()
+            if self.customer
+            else None
+        )

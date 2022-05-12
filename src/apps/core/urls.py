@@ -1,21 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
-from apps.core.views import (
-    AddDeviceView,
-    BillingView,
-    CheckoutSessionView,
-    CreateSubscriptionAPIView,
-    DashboardView,
-    IndexView,
-    LoginView,
-    PaymentSuccessView,
-    PersonalInfoView,
-    PickPlanView,
-    ReplaceDeviceView,
-    SignUpView,
-    SubscriptionView,
-)
+from apps.core.views import *
 
 
 app_name = "core"
@@ -64,5 +50,8 @@ urlpatterns = [
         "create-subscription",
         login_required(CreateSubscriptionAPIView.as_view()),
     ),
-    path("billing", login_required(BillingView.as_view()), name="billing"),
+    path("billing", BillingView.as_view(), name="billing"),
+    path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
+    path("delete-payment-method", DeletePaymentMethodAPIView.as_view()),
+    path("cancel-subscription", CancelSubscriptionAPIView.as_view()),
 ]

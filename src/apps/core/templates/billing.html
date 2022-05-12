@@ -3,10 +3,17 @@
 
 {% block extra_head %}
   <link rel="stylesheet" href="{% static 'core/credit-card.css' %}">
-
+  <link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
+  <script src="{% static 'core/js/loader.js' %}"></script>
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     .col-sm {
       margin: 10px;
+    }
+
+    .card {
+      height: 100%;
+      min-height: 300px;
     }
   </style>
 {% endblock %}
@@ -19,50 +26,89 @@
             Current payment method
           </div>
           <div class="card-body">
-            <div class="credit-card">
-              <div class="bank-name" title="BestBank">{{ card.brand }}</div>
-              <div class="chip">
-                <div class="side left"></div>
-                <div class="side right"></div>
-                <div class="vertical top"></div>
-                <div class="vertical bottom"></div>
-              </div>
-              <div class="data">
-                <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** **** {{ card.last4 }}</div>
-                <div class="first-digits"></div>
-                <div class="exp-date-wrapper">
-                  <div class="left-label">EXPIRES END</div>
-                  <div class="exp-date">
-                    <div class="upper-labels">MONTH/YEAR</div>
-                    <div class="date" title="01/17">{{ card.exp_month }}/{{ card.exp_year }}</div>
-                  </div>
+            {% if card %}
+              <div class="credit-card">
+                <div class="bank-name" title="BestBank">{{ card.brand }}</div>
+                <div class="chip">
+                  <div class="side left"></div>
+                  <div class="side right"></div>
+                  <div class="vertical top"></div>
+                  <div class="vertical bottom"></div>
                 </div>
-                <div class="name-on-card"></div>
+                <div class="data">
+                  <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** **** {{ card.last4 }}</div>
+                  <div class="first-digits"></div>
+                  <div class="exp-date-wrapper">
+                    <div class="left-label">EXPIRES END</div>
+                    <div class="exp-date">
+                      <div class="upper-labels">MONTH/YEAR</div>
+                      <div class="date"
+                           title="{{ card.exp_month }}/{{ card.exp_year }}">
+                        {{ card.exp_month }}/{{ card.exp_year }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="name-on-card"></div>
+                </div>
+                <div class="lines-down"></div>
+                <div class="lines-up"></div>
               </div>
-              <div class="lines-down"></div>
-              <div class="lines-up"></div>
+            {% endif %}
+          </div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-success" data-toggle="modal"
+                    data-target="#exampleModalCenter" onclick="updatePaymentMethodModal(true)">
+              {% if card %}
+                Update
+              {% else %}
+                Add
+              {% endif %}
+            </button>
+            {% if card %}
+              <button class="btn btn-danger" onclick="deletePaymentMethodConfirmation(true)">
+                Delete
+              </button>
+            {% endif %}
+          </div>
+
+        </div>
+
+      </div>
+      <div class="col-sm">
+        <div class="card">
+          <div class="card-header">
+            Current plan
+          </div>
+          <div class="card-body">
+            {% if plan %}
+              <table class="table">
+                <tbody>
+                <tr>
+                  <th scope="row">Product</th>
+                  <td>{{ plan.product_name }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Description</th>
+                  <td>{{ plan.product_description }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Price</th>
+                  <td>{{ plan.amount }} {{ plan.currency }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Interval</th>
+                  <td>{{ plan.interval_count }} {{ plan.interval }}</td>
+                </tr>
+                </tbody>
+              </table>
+            {% endif %}
+
+          </div>
+          {% if plan %}
+            <div class="btn-group">
+              <button class="btn btn-danger" onclick="cancelSubscriptionConfirmation(true)">Cancel subscription</button>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm">
-        <div class="card">
-          <div class="card-header">
-            Update payment method
-          </div>
-          <div class="card-body">
-
-          </div>
-        </div>
-      </div>
-      <div class="col-sm">
-        <div class="card">
-          <div class="card-header">
-            Cancel subscription
-          </div>
-          <div class="card-body">
-
-          </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -92,9 +138,272 @@
               {% endfor %}
               </tbody>
             </table>
+            <nav aria-label="Page navigation example">
+              <ul class="pagination">
+                {% if page.has_previous %}
+                  <li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
+                  </li>
+                {% endif %}
+                {% if page.has_next %}
+                  <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">Next</a></li>
+                {% endif %}
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <!-- UPDATE PAYMENT METHOD MODAL -->
+  <div class="modal fade" id="update-payment-method-modal" tabindex="-1" role="dialog"
+       aria-labelledby="exampleModalCenterTitle"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Add card</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="payment-form">
+
+          <div class="modal-body">
+            <div class="card-container">
+
+              <div id="card-element">
+                <!-- Elements will create input elements here -->
+              </div>
+            </div>
+
+            <!-- We'll put the error messages in this element -->
+            <div id="card-element-errors" role="alert"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+  <!-- DELETE PAYMENT METHOD CONFIRMATION MODAL -->
+  <div class="modal fade" id="delete-payment-method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure what you want delete payment method?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" id="delete-payment-method-button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANCEL PLAN CONFIRMATION MODAL -->
+  <div class="modal fade" id="cancel-subscription" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Cancel</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure what you want cancel you subscription?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" id="cancel-subscription-button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADER -->
+  <div id="loader-container">
+    <div class="loader-item spinner-border text-primary" role="status">
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+
+    const updatePaymentMethodModal = (show) => {
+      $('#update-payment-method-modal').modal(show ? 'show' : 'hide');
+    }
+  </script>
+  <script>
+    /********************
+     UPDATE PAYMENT METHOD
+     ********************/
+    let stripe = Stripe("{{ stripe_api_key }}");
+    let elements = stripe.elements();
+    let card = elements.create('card');
+
+
+    card.mount('#card-element');
+    card.on('change', function (event) {
+      displayError(event);
+    });
+
+
+    function setErrorText(text) {
+      let displayError = document.getElementById('card-element-errors');
+      displayError.textContent = text;
+    }
+
+    function displayError(event) {
+      if (event.error) {
+        setErrorText(event.error.message);
+      } else {
+        setErrorText("");
+      }
+    }
+
+    function updatePaymentMethod({paymentMethodId}) {
+      return (
+              fetch('/update-payment-method', {
+                method: 'post',
+                headers: {
+                  'Content-type': 'application/json',
+                  'X-CSRFToken': "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                  paymentMethodId: paymentMethodId,
+                }),
+              })
+                      .then(res => res.json())
+                      .then(res => {
+                        if (res.error) {
+                          setErrorText(res.error);
+                        } else if (res.success) {
+                          card.clear();
+                          updatePaymentMethodModal(false);
+                        } else {
+                          setErrorText("Update error")
+                        }
+                      })
+                      .catch(err => {
+                        console.log('catch', err)
+                      })
+                      .finally(() => setLoading(false))
+      );
+    }
+
+    function createPaymentMethod({card}) {
+      stripe
+              .createPaymentMethod({
+                type: 'card',
+                card: card,
+                billing_details: {
+                  name: "{{ request.user.full_name }}",
+                  email: "{{ request.user.email }}"
+                },
+              })
+              .then((result) => {
+                if (result.error) {
+                  displayError(result);
+                  setLoading(false);
+                } else {
+                  updatePaymentMethod({
+                    paymentMethodId: result.paymentMethod.id,
+                  });
+                }
+              });
+    }
+
+    const form = document.getElementById('payment-form');
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      setLoading(true);
+      createPaymentMethod({card});
+    });
+  </script>
+
+  <script>
+    /**********************
+     * DELETE PAYMENT METHOD
+     **********************/
+    const deletePaymentMethodConfirmation = (show) => {
+      $('#delete-payment-method').modal(show ? 'show' : 'hide');
+    }
+    const deletePaymentMethod = () => {
+      setLoading(true);
+      fetch('/delete-payment-method', {
+        method: 'delete',
+        headers: {
+          'Content-type': 'application/json',
+          'X-CSRFToken': "{{ csrf_token }}"
+        },
+      })
+              .then(res => res.json())
+              .then(res => {
+                if (res.error) {
+                  console.log(res);
+                } else if (res.success) {
+                  console.log(res);
+                }
+                console.log(res);
+              })
+              .finally(() => {
+                setLoading(false);
+                deletePaymentMethodConfirmation(false);
+              });
+    }
+
+    $('#delete-payment-method-button').click(() => {
+      deletePaymentMethod();
+    })
+  </script>
+
+  <script>
+    /**********************
+     * CANCEL SUBSCRIPTION
+     **********************/
+    const cancelSubscriptionConfirmation = (show) => {
+      $('#cancel-subscription').modal(show ? 'show' : 'hide');
+    }
+    const cancelSubscription = () => {
+      setLoading(true);
+      fetch('/cancel-subscription', {
+        method: 'post',
+        headers: {
+          'Content-type': 'application/json',
+          'X-CSRFToken': "{{ csrf_token }}"
+        },
+      })
+              .then(res => res.json())
+              .then(res => {
+                if (res.error) {
+                  console.log(res);
+                } else if (res.success) {
+                  console.log(res);
+                }
+                console.log(res);
+              })
+              .finally(() => {
+                setLoading(false);
+                cancelSubscriptionConfirmation(false);
+              });
+    }
+
+    $('#cancel-subscription-button').click(() => {
+      cancelSubscription();
+    })
+  </script>
 {% endblock %}

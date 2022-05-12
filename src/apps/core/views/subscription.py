@@ -9,6 +9,7 @@ from django.views import View
 from constance import config
 from djstripe.models import Customer
 from rest_framework import serializers, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -50,6 +51,7 @@ class CreateSubscriptionSerializer(serializers.Serializer):
 
 class CreateSubscriptionAPIView(APIView):
     serializer_class = CreateSubscriptionSerializer
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)

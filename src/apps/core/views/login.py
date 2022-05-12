@@ -22,14 +22,14 @@ class LoginForm(forms.Form):
 
 
 def login_routing(user: User):
+    if user.have_any_subscription:
+        return redirect(reverse("core:dashboard"))
     user = User.objects.onboarding_complete_annotate(id=user.id).first()
     if not user.have_personal_info:
         return redirect(reverse("core:personal-info"))
     if not user.user_have_device:
         return redirect(reverse("core:add-device"))
-    if not user.complete_onboarding:
-        return redirect(reverse("core:pick-plan"))
-    return redirect(reverse("core:index"))
+    return redirect(reverse("core:pick-plan"))
 
 
 class LoginView(View):

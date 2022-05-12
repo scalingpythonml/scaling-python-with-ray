@@ -9,12 +9,13 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.db.models import ExpressionWrapper, Q
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 
 from constance import config
 from django_countries.fields import CountryField
 from djstripe.models import Customer, Subscription
-from sorl.thumbnail import ImageField, get_thumbnail
+from sorl.thumbnail import ImageField
 import stripe
 
 
@@ -135,7 +136,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     company = models.CharField(max_length=100, blank=True, null=True)
     country = CountryField(blank=True, null=True)
-    complete_onboarding = models.BooleanField(default=False)
     twillion_number = models.CharField(max_length=100, null=True, blank=True)
     company_email = models.EmailField(null=True, blank=True)
 
@@ -173,14 +173,43 @@ class User(AbstractBaseUser, PermissionsMixin):
         customer_object = self.create_customer_account()
         return customer_object.get(id, None)
 
-    @property
+    @cached_property
     def customer(self) -> Optional[Customer]:
+        """
+        Stripe customer account
+        """
         return Customer.objects.filter(email=self.email).first()
 
     @property
     def customer_subscription(self) -> Optional[Subscription]:
+        """
+        Active user subscription
+        """
         return (
             self.customer.subscriptions.filter(status="active").first()
             if self.customer
             else None
+        )
+
+    @property
+    def have_any_subscription(self):
+        """
+        If user have any subscription its means what him complete onboarding wizard phase
+        """
+        customer = self.customer
+        return customer.subscriptions.exists() if customer else False
+
+    @property
+    def dont_have_active_subscriptions(self):
+        """
+        user have subscriptions but have not active subscriptions
+        """
+        customer = self.customer
+        if not customer:
+            return False
+        return (
+            self.customer.subscriptions.exists()
+            and not self.customer.subscriptions.filter(
+                status="active"
+            ).exists()
         )

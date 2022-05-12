@@ -30,6 +30,11 @@
   {% block extra_head %}  {% endblock %}
 </head>
 <body>
+{% if user.dont_have_active_subscriptions %}
+  <div class="alert alert-danger" role="alert">
+    You have not active subscription. Click <a href="{% url 'core:subscription' %}">here</a> to solve it.
+  </div>
+{% endif %}
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">

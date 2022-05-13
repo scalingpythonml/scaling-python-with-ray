@@ -3,6 +3,8 @@ from django.views import View
 
 from constance import config
 
+from apps.core.consts import OnboardingStepsEnum
+
 
 class PickPlanView(View):
     template = "pick_plan.html"
@@ -19,5 +21,5 @@ class PickPlanView(View):
             "image": f"/media/{config.IMAGE}",
             "description": config.DESCRIPTION,
             "price": config.PRICE,
-            "step": 4,
+            "step": OnboardingStepsEnum.PICK_PLAN.value,
         }

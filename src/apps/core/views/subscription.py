@@ -1,14 +1,13 @@
-from django.conf import settings
 from django.shortcuts import render
 from django.views import View
 
 from constance import config
-from djstripe.models import Customer
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.consts import OnboardingStepsEnum
 from apps.utils.stripe import (
     STRIPE_PUBLIC_API_KEY,
     add_customer_payment_method,
@@ -29,7 +28,7 @@ class SubscriptionView(View):
             "title": "Subscription",
             "navname": "Subscription",
             "stripe_api_key": STRIPE_PUBLIC_API_KEY,
-            "step": 5,
+            "step": OnboardingStepsEnum.PAYMENT.value,
         }
 
 

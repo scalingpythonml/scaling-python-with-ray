@@ -1,14 +1,10 @@
-from django import forms
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
 
+from apps.core.forms import BlockedNumberForm
 from apps.core.models import BlockedNumber
-
-
-class BlockedNumberForm(forms.Form):
-    number = forms.CharField(required=True)
 
 
 class BlockedNumbersView(View):

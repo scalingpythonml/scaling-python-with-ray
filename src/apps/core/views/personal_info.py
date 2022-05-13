@@ -1,21 +1,13 @@
-from django import forms, views
+from django import views
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from django_countries.widgets import CountrySelectWidget
+from apps.core.consts import OnboardingStepsEnum
+from apps.core.forms import PersonalInfoForm
 
 
 User = get_user_model()
-
-
-class PersonalInfoForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ["full_name", "company", "country"]
-        widgets = {
-            "country": CountrySelectWidget(attrs={"class": "form-select"})
-        }
 
 
 class PersonalInfoView(views.View):
@@ -44,5 +36,5 @@ class PersonalInfoView(views.View):
             "title": "Personal Info",
             "navname": "Personal Info",
             "action": reverse("core:personal-info"),
-            "step": 2,
+            "step": OnboardingStepsEnum.DETAILS.value,
         }

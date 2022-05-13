@@ -1,30 +1,11 @@
-from django import forms
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 
 from templated_email import send_templated_mail
 
-
-User = get_user_model()
-
-
-class ChangeEmailForm(forms.Form):
-    new_email = forms.EmailField(
-        widget=forms.EmailInput(attrs={"placeholder": "Enter new email"})
-    )
-
-    def clean(self):
-        cleaned_data = super(ChangeEmailForm, self).clean()
-        email_occupied = User.objects.filter(
-            email=cleaned_data["new_email"]
-        ).exists()
-        if email_occupied:
-            self.add_error("new_email", "User with this email exist")
-
-        return cleaned_data
+from apps.accounts.forms import ChangeEmailForm
 
 
 class ChangeEmailView(View):

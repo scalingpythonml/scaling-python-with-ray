@@ -1,44 +1,12 @@
-from django import forms
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 
 from templated_email import send_templated_mail
 
-
-User = get_user_model()
-
-
-class ChangePasswordForm(forms.Form):
-    old_password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"placeholder": "Enter your password"}
-        ),
-        required=True,
-    )
-    new_password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"placeholder": "Create new password"}
-        ),
-        required=True,
-    )
-    confirm_new_password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"placeholder": "Confirm new password"}
-        ),
-        required=True,
-    )
-
-    def clean(self):
-        cleaned_data = super(ChangePasswordForm, self).clean()
-        new_password = cleaned_data.get("new_password")
-        confirm_new_password = cleaned_data.get("confirm_new_password")
-        if new_password != confirm_new_password:
-            self.add_error("confirm_new_password", "Passwords does not match")
-
-        return cleaned_data
+from apps.accounts.forms import ChangePasswordForm
 
 
 class ChangePasswordView(View):

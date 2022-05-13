@@ -1,35 +1,10 @@
-from django import forms, views
+from django import views
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from apps.core.consts import OnboardingStepsEnum
+from apps.core.forms import DeviceForm
 from apps.core.models import Device
-
-
-class DeviceForm(forms.Form):
-    serial_number = forms.CharField(
-        max_length=100,
-        widget=forms.TextInput(
-            attrs={"placeholder": "Serial number of your device"}
-        ),
-        required=True,
-    )
-    nickname = forms.CharField(
-        max_length=100,
-        widget=forms.TextInput(
-            attrs={"placeholder": "Choose nickname for your device"}
-        ),
-        required=True,
-    )
-
-    def clean(self):
-        cleaned_data = super(DeviceForm, self).clean()
-        serial_number = cleaned_data["serial_number"]
-        serial_number_is_valid = Device.objects.can_register_device(
-            serial_number
-        )
-        if not serial_number_is_valid:
-            self.add_error("serial_number", "Invalid serial number")
-        return cleaned_data
 
 
 class AddDeviceView(views.View):
@@ -62,5 +37,5 @@ class AddDeviceView(views.View):
             "title": "Add device",
             "navname": "Add device",
             "action": reverse("core:add-device"),
-            "step": 3,
+            "step": OnboardingStepsEnum.ADD_DEVICE.value,
         }

@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.views import View
 
+from apps.core.consts import OnboardingStepsEnum
+
 
 class PaymentSuccessView(View):
     template = "payment_success.html"
@@ -13,5 +15,5 @@ class PaymentSuccessView(View):
         return {
             "title": "Payment Success",
             "navname": "Payment Success",
-            "step": 6,
+            "step": OnboardingStepsEnum.ACTIVATION.value,
         }

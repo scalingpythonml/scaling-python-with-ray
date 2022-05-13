@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 import socket
 import sys
 import urllib.parse
@@ -81,6 +82,7 @@ class Settings:
             "STRIPE_TEST_SECRET_KEY",
             "STRIPE_LIVE_PUBLIC_KEY",
             "STRIPE_TEST_PUBLIC_KEY",
+            "DJSTRIPE_WEBHOOK_SECRET",
         ]
 
     # INSTANCE CONFIGURATION
@@ -452,19 +454,33 @@ class Settings:
     # DJANGO-STRIPE
     LIBS += ["djstripe"]
 
-    STRIPE_LIVE_SECRET_KEY = "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
-    STRIPE_TEST_SECRET_KEY = "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
-    STRIPE_LIVE_PUBLIC_KEY = "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
-    STRIPE_TEST_PUBLIC_KEY = "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
     STRIPE_LIVE_MODE = DEBUG  # Change to True in production
     DJSTRIPE_WEBHOOK_SECRET = "whsec_d1e28f144fa2b70e468a8fb483937ed019f1c9ce60387eab505df34881253ea6"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
     DJSTRIPE_USE_NATIVE_JSONFIELD = (
         True  # We recommend setting to True for new installations
     )
 
-    def _set_djstripe_test_db_params(self):
-        import re
+    @property
+    def STRIPE_LIVE_SECRET_KEY(self):
+        return self._STRIPE_LIVE_SECRET_KEY
 
+    @property
+    def STRIPE_TEST_SECRET_KEY(self):
+        return self._STRIPE_TEST_SECRET_KEY
+
+    @property
+    def STRIPE_LIVE_PUBLIC_KEY(self):
+        return self._STRIPE_LIVE_PUBLIC_KEY
+
+    @property
+    def STRIPE_TEST_PUBLIC_KEY(self):
+        return self._STRIPE_TEST_PUBLIC_KEY
+
+    @property
+    def DJSTRIPE_WEBHOOK_SECRET(self):
+        return self._DJSTRIPE_WEBHOOK_SECRET
+
+    def _set_djstripe_test_db_params(self):
         reg_exp = "(.*?)://(.*?):(.*?)@(.*?):(.*?)/(.*)"
         vendor, user, password, host, port, name = re.match(
             reg_exp, self._DATA_NETLOC

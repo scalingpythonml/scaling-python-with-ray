@@ -23,13 +23,13 @@ services:
       DOMAIN: 0.0.0.0:8000
       SSL: 'off'
       DATA_NETLOC: postgresql://local:local@data:5432/local
-      OUTSIDE_DATA_NETLOC: mysql+pymysql://root:root@outside_db:3306/test
       CACHE_NETLOC: redis://cache:6379/0
       BROKER_NETLOC: amqp://broker:5672
       STATIC_URL: /static/
       MEDIA_URL: /media/
       SENTRY_DSN_BACKEND: ""
       SENTRY_DSN_FRONTEND: ""
+      OUTSIDE_DATA_NETLOC: mysql+pymysql://root:root@outside_db:3306/test
       STRIPE_LIVE_SECRET_KEY: "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
       STRIPE_TEST_SECRET_KEY: "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
       STRIPE_LIVE_PUBLIC_KEY: "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"

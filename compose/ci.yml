@@ -4,6 +4,7 @@ volumes:
   data: {}
   broker: {}
   cache: {}
+  outside_db: {}
 
 services:
   app:
@@ -30,9 +31,17 @@ services:
       BROKER_NETLOC: ${BROKER_NETLOC}
       STATIC_URL: ${STATIC_URL}
       MEDIA_URL: ${MEDIA_URL}
+      OUTSIDE_DATA_NETLOC: ${OUTSIDE_DATA_NETLOC}
+      STRIPE_LIVE_SECRET_KEY: ${STRIPE_LIVE_SECRET_KEY}
+      STRIPE_TEST_SECRET_KEY: ${STRIPE_TEST_SECRET_KEY}
+      STRIPE_LIVE_PUBLIC_KEY: ${STRIPE_LIVE_PUBLIC_KEY}
+      STRIPE_TEST_PUBLIC_KEY: ${STRIPE_TEST_PUBLIC_KEY}
+      DJSTRIPE_WEBHOOK_SECRET: ${DJSTRIPE_WEBHOOK_SECRET}
     expose:
       - "8000"
     depends_on:
+      - outside_db
+      - stripe
       - data
       - broker
       - cache
@@ -61,3 +70,24 @@ services:
     environment:
       MAX_MEMORY: 300mb
       MAX_MEMORY_POLICY: allkeys-lru
+
+
+  outside_db:
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${OUTSIDE_DB_PASSWORD}
+      MYSQL_DATABASE: ${OUTSIDE_DB_DATABASE}
+    ports:
+      - '3306:3306'
+    volumes:
+      - outside_db:/var/lib/mysql
+      - ./outside_db/sms_item_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  
+  stripe:
+    image: stripe/stripe-cli:v1.7.4
+    command: listen --forward-to http://app:8000/djstripe/webhook/
+    environment:
+      - STRIPE_API_KEY=${STRIPE_TEST_SECRET_KEY}
+      - STRIPE_DEVICE_NAME=djstripe_docker

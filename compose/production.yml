@@ -134,7 +134,14 @@ services:
       AWS_MEDIA_LOCATION: media
       STATIC_URL: ${STATIC_URL}
       MEDIA_URL: ${MEDIA_URL}
+      OUTSIDE_DATA_NETLOC: ${OUTSIDE_DATA_NETLOC}
+      STRIPE_LIVE_SECRET_KEY: ${STRIPE_LIVE_SECRET_KEY}
+      STRIPE_TEST_SECRET_KEY: ${STRIPE_TEST_SECRET_KEY}
+      STRIPE_LIVE_PUBLIC_KEY: ${STRIPE_LIVE_PUBLIC_KEY}
+      STRIPE_TEST_PUBLIC_KEY: ${STRIPE_TEST_PUBLIC_KEY}
+      DJSTRIPE_WEBHOOK_SECRET: ${DJSTRIPE_WEBHOOK_SECRET}
     depends_on:
+      - stripe
       - data
       - broker
       - cache
@@ -222,6 +229,27 @@ services:
     environment:
       MAX_MEMORY: 300mb
       MAX_MEMORY_POLICY: allkeys-lru
+    deploy:
+      <<: *default-update
+      <<: *default-rollback
+      <<: *default-restart
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=false"
+    networks:
+      - internal
+    logging:
+      <<: *default-logging
+
+  stripe:
+    image: stripe/stripe-cli:v1.7.4
+    command: listen --forward-to http://app:8000/djstripe/webhook/
+    environment:
+      - STRIPE_API_KEY=${STRIPE_TEST_SECRET_KEY}
+      - STRIPE_DEVICE_NAME=djstripe_docker
     deploy:
       <<: *default-update
       <<: *default-rollback

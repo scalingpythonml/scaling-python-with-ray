@@ -244,7 +244,9 @@ services:
     networks:
       - internal
     logging:
-      <<: *default-loggingoutside_db:
+      <<: *default-logging
+      
+  outside_db:
     image: mysql:8.0
     restart: always
     command: --default-authentication-plugin=mysql_native_password

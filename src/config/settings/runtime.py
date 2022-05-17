@@ -133,7 +133,7 @@ class Runtime(Settings, Configuration):
 
     @property
     def ALLOWED_HOSTS(self):
-        return super(Runtime, self).ALLOWED_HOSTS() + ["app"]
+        return super(Runtime, self).ALLOWED_HOSTS + ["app"]
 
     @property
     def INSTALLED_APPS(self):

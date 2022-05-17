@@ -30,11 +30,11 @@ services:
       SENTRY_DSN_BACKEND: ""
       SENTRY_DSN_FRONTEND: ""
       OUTSIDE_DATA_NETLOC: mysql+pymysql://root:root@outside_db:3306/test
-      STRIPE_LIVE_SECRET_KEY: "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
-      STRIPE_TEST_SECRET_KEY: "sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2"
-      STRIPE_LIVE_PUBLIC_KEY: "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
-      STRIPE_TEST_PUBLIC_KEY: "pk_test_51KvJetEF3XiLBT0F1yX2IJSlMCy28feVhA3goiYVpcgdqkUc2S2faJaFUZdizkPKiXTouAjknI1tB0I7AsahoxLa004PFa05fQ"
-      DJSTRIPE_WEBHOOK_SECRET: "whsec_d1e28f144fa2b70e468a8fb483937ed019f1c9ce60387eab505df34881253ea6" 
+      STRIPE_LIVE_SECRET_KEY: "sk_test_51L0TbIEteaLPKQxIHpYbrPvbEifBxUUF5hvd5mQRYKDYkQva1OizXalzZEDTJx2ktNz5EELbgLIwqgatxzdE99at00GsOOSOa8"
+      STRIPE_TEST_SECRET_KEY: "sk_test_51L0TbIEteaLPKQxIHpYbrPvbEifBxUUF5hvd5mQRYKDYkQva1OizXalzZEDTJx2ktNz5EELbgLIwqgatxzdE99at00GsOOSOa8"
+      STRIPE_LIVE_PUBLIC_KEY: "pk_test_51L0TbIEteaLPKQxIgGS4Xt728yADpXphrx8EdF0Fno0pFOEj5q4b7qM7kpFf6pj1lVxd8CQ0BR2iRwAhtsTk35ag00KjUbgSI6"
+      STRIPE_TEST_PUBLIC_KEY: "pk_test_51L0TbIEteaLPKQxIgGS4Xt728yADpXphrx8EdF0Fno0pFOEj5q4b7qM7kpFf6pj1lVxd8CQ0BR2iRwAhtsTk35ag00KjUbgSI6"
+      DJSTRIPE_WEBHOOK_SECRET: "whsec_080623b05d6e6f38ef6498392eaaacbae1308f5b652838d0a1cf3a0477274ed8" 
     ports:
       - "8000:8000"
       - "9000:9000"
@@ -87,5 +87,5 @@ services:
     image: stripe/stripe-cli:v1.7.4
     command: listen --forward-to http://app:8000/djstripe/webhook/
     environment:
-      - STRIPE_API_KEY=sk_test_51KvJetEF3XiLBT0FWhc1Sayds9yq57hUabcjM3IPLSoiTN18Y9NsuRzIOzdIeRitYV8CVwHjmYA2KNCTPxFBAznj00LetZpBv2
+      - STRIPE_API_KEY=sk_test_51L0TbIEteaLPKQxIHpYbrPvbEifBxUUF5hvd5mQRYKDYkQva1OizXalzZEDTJx2ktNz5EELbgLIwqgatxzdE99at00GsOOSOa8
       - STRIPE_DEVICE_NAME=djstripe_docker

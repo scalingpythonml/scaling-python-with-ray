@@ -24,15 +24,18 @@ def get_user_message_count(
     twillion_number: str, period: Literal["day", "month", "year"]
 ):
     period_condition = getattr(timezone.now(), period)
-    with Session() as session:
-        count = (
-            session.query(SmsItem)
-            .where(
-                user_messages_filter(twillion_number),
-                extract(period, SmsItem.sms_date) == period_condition,
+    try:
+        with Session() as session:
+            count = (
+                session.query(SmsItem)
+                .where(
+                    user_messages_filter(twillion_number),
+                    extract(period, SmsItem.sms_date) == period_condition,
+                )
+                .count()
             )
-            .count()
-        )
-        session.close()
+            session.close()
 
-    return count
+        return count
+    except:
+        return 0

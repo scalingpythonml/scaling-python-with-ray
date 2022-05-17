@@ -85,7 +85,7 @@ services:
         read_only: true
         consistency: consistent
       - type: volume
-        source: certs
+        source: /.certs
         target: /certs
         consistency: consistent
     deploy:

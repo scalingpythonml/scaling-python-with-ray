@@ -145,7 +145,6 @@ services:
       - data
       - broker
       - cache
-      - stripe
       - outside_db
     deploy:
       <<: *default-update

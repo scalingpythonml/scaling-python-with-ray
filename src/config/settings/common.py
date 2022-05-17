@@ -215,7 +215,7 @@ class Settings:
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
             # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
-            "DIRS": [],
+            "DIRS": ["templates"],
             "OPTIONS": {
                 "debug": DEBUG,
                 "loaders": [
@@ -235,6 +235,8 @@ class Settings:
                     "django.template.context_processors.static",
                     "django.template.context_processors.tz",
                     "django.contrib.messages.context_processors.messages",
+                    "sekizai.context_processors.sekizai",
+                    "cms.context_processors.cms_settings",
                 ],
                 "libraries": {},
                 "builtins": [
@@ -305,6 +307,7 @@ class Settings:
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.staticfiles",
+        "djangocms_admin_style",
         "django.contrib.admin",
     ]
 
@@ -444,11 +447,7 @@ class Settings:
 
     CONSTANCE_CONFIG_FIELDSETS = {
         "Plan options": ("TITLE", "IMAGE", "DESCRIPTION", "PRICE"),
-        "Stripe setup": (
-            "STRIPE_PUBLIC_KEY",
-            "STRIPE_PRIVATE_KEY",
-            "STRIPE_PRICE_ID",
-        ),
+        "Stripe setup": ("STRIPE_PRICE_ID",),
     }
 
     # DJANGO-STRIPE
@@ -537,6 +536,50 @@ class Settings:
     CELERY_TASK_DEFAULT_EXCHANGE_TYPE = "direct"
     CELERY_TASK_DEFAULT_DELIVERY_MODE = "persistent"
 
+    # DJANGO CMS
+    # _______________________________________________________________________
+
+    LIBS += ["django.contrib.sites"]
+    LIBS += ["cms"]
+    LIBS += ["menus"]
+    LIBS += ["treebeard"]
+    LIBS += ["sekizai"]
+    MIDDLEWARE.append("cms.middleware.user.CurrentUserMiddleware")
+    MIDDLEWARE.append("cms.middleware.page.CurrentPageMiddleware")
+    MIDDLEWARE.append("cms.middleware.toolbar.ToolbarMiddleware")
+    MIDDLEWARE.append("cms.middleware.language.LanguageCookieMiddleware")
+    CMS_TEMPLATES = [
+        ("home.html", "Home page template"),
+    ]
+    X_FRAME_OPTIONS = "SAMEORIGIN"
+
+    # DJANGO FILLER
+
+    LIBS += ["filer"]
+    LIBS += ["easy_thumbnails"]
+    LIBS += ["mptt"]
+
+    THUMBNAIL_HIGH_RESOLUTION = True
+
+    THUMBNAIL_PROCESSORS = (
+        "easy_thumbnails.processors.colorspace",
+        "easy_thumbnails.processors.autocrop",
+        "filer.thumbnail_processors.scale_and_crop_with_subject_location",
+        "easy_thumbnails.processors.filters",
+    )
+
+    # DJANGO CMS CKEDITOR
+    # -----------------------------------------------------------------------
+    LIBS += ["djangocms_text_ckeditor"]
+
+    # DJANGO CMS LINK
+    # -----------------------------------------------------------------------
+    LIBS += ["djangocms_link"]
+
+    # DJANGO CMS PICTURE
+    # -----------------------------------------------------------------------
+    LIBS += ["djangocms_picture"]
+
     # OUTSIDE DATABASE
     # -----------------------------------------------------------------------
     def OUTSIDE_DATA_NETLOC(self):
@@ -557,8 +600,12 @@ class Settings:
     # ~~~~
     APPS += ["apps.core.apps.Config"]
 
+    # PAGES
+    # ~~~~~~~~
+    APPS += ["apps.pages.apps.Config"]
+
     # -----------------------------------------------------------------------
-    INSTALLED_APPS = FRAMEWORK + LIBS + APPS
+    INSTALLED_APPS = FRAMEWORK + APPS + LIBS
     # -----------------------------------------------------------------------
 
     # LOGGING CONFIGURATION

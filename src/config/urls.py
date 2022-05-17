@@ -22,7 +22,6 @@ handler403 = "config.errors.forbidden"
 handler400 = "rest_framework.exceptions.bad_request"
 handler500 = "rest_framework.exceptions.server_error"
 
-
 admin.site.login = ratelimit(
     key="ip", method=ratelimit.ALL, rate="3/m", block=True
 )(admin.site.login)
@@ -45,6 +44,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("djstripe/", include("djstripe.urls", namespace="djstripe")),
     path("", include("apps.urls")),
+    path("cms-settings/", include("cms.urls")),
 ]
 
 if settings.DEBUG:

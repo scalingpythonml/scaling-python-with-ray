@@ -291,5 +291,6 @@ services:
     networks:
       - internal
       - proxy
+      - external
     logging:
       <<: *default-logging

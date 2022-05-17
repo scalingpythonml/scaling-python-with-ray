@@ -275,7 +275,7 @@ services:
 
   stripe:
     image: stripe/stripe-cli:v1.7.4
-    command: listen --forward-to http://app:8000/djstripe/webhook/
+    command: listen --forward-to http://app:80/djstripe/webhook/
     environment:
       - STRIPE_API_KEY=${STRIPE_TEST_SECRET_KEY}
       - STRIPE_DEVICE_NAME=djstripe_docker

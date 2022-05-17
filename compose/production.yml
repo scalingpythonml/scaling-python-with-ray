@@ -5,6 +5,7 @@ volumes:
   broker: {}
   cache: {}
   certs: {}
+  outside_db: {}
 
 networks:
   proxy:
@@ -145,6 +146,7 @@ services:
       - data
       - broker
       - cache
+      - outside_db
     deploy:
       <<: *default-update
       <<: *default-rollback
@@ -243,6 +245,34 @@ services:
       - internal
     logging:
       <<: *default-logging
+
+  outside_db:
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${OUTSIDE_DB_PASSWORD}
+      MYSQL_DATABASE: ${OUTSIDE_DB_DATABASE}
+    ports:
+      - '3306:3306'
+    volumes:
+      - outside_db:/var/lib/mysql
+      - ./outside_db/sms_item_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    deploy:
+      <<: *default-update
+      <<: *default-rollback
+      <<: *default-restart
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=false"
+    networks:
+      - internal
+    logging:
+      <<: *default-logging
+
 
   stripe:
     image: stripe/stripe-cli:v1.7.4

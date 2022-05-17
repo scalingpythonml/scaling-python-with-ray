@@ -288,7 +288,7 @@ services:
         constraints:
           - node.role == manager
       labels:
-        - "traefik.enable=false"
+        - "traefik.enable=true"
     networks:
       - internal
     logging:

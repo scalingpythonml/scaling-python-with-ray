@@ -132,6 +132,10 @@ class Runtime(Settings, Configuration):
     SELECT2_CACHE_PREFIX = "default"
 
     @property
+    def ALLOWED_HOSTS(self):
+        return super(Runtime, self).ALLOWED_HOSTS() + ["app"]
+
+    @property
     def INSTALLED_APPS(self):
         base_apps = super().INSTALLED_APPS
         base_apps.insert(

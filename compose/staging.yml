@@ -146,6 +146,7 @@ services:
       - broker
       - cache
       - outside_db
+      - stripe
     deploy:
       <<: *default-update
       <<: *default-rollback

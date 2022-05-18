@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.views import View
 
@@ -18,7 +19,7 @@ class PickPlanView(View):
             "title": "Pick Plan",
             "navname": "Pick Plan",
             "plan_title": config.TITLE,
-            "image": f"/media/{config.IMAGE}",
+            "image": f"{settings.MEDIA_URL}{config.IMAGE}",
             "description": config.DESCRIPTION,
             "price": config.PRICE,
             "step": OnboardingStepsEnum.PICK_PLAN.value,

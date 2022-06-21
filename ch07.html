@@ -45,7 +45,7 @@ class Converter:
            return {"Unknown conversion code" : request.query_params["type"]}</pre>
           </div>
           <p>The implementation is decorated by a <code>@serve.deployment</code> annotation, which tells Ray that this is a deployment. This deployment implements a single method: <code>__call__</code>. This method has a special meaning in deployment - it is invoked via HTTP (see below). It is a class method taking a <a href="https://www.starlette.io/requests/">Starlette Request</a>, which provides a convenient interface for the incoming HTTP request. In the case of temperature controller, the request contains two parameters - temperature itself and conversion type.</p>
-          <p>Once the deployment is defined, you need to deploy it using the following code <code>Converter.deploy(), similar to .remote() when deploying an actor</code>.</p>
+          <p>Once the deployment is defined, you need to deploy it using the following code <code>Converter.deploy()</code>, similar to <code>.remote()</code> when deploying an actor.</p>
           <p>Once deployed, you can immediately access it via an HTTP interface (<a data-type="xref" href="#ch07_ex2">#ch07_ex2</a>).</p>
           <div data-type="example" id="ch07_ex2">
             <h5>Accessing Converter over HTTP</h5>

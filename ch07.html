@@ -33,16 +33,16 @@
           <div data-type="example" id="ch07_ex1">
             <h5>Temperature controller deployment</h5>
             <pre data-type="programlisting">@serve.deployment
-<em>class Converter:</em>
-<em>   def __call__(self, request):</em>
-<em>        if request.query_params["type"] == 'CF' :</em>
-<em>        </em><em>    </em><em>return {"Fahrenheit temperature":</em>
-<em>               </em><em>    </em><em>9.0/5.0 * float(request.query_params["temp"]) + 32.0}</em>
-<em>        elif request.query_params["type"] == 'FC' :</em>
-<em>            </em><em>return {"Celsius temperature":</em>
-<em>                   </em><em> </em><em>(float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }</em>
-<em>       else:</em>
-<em>           return {"Unknown conversion code" : request.query_params["type"]}</em></pre>
+class Converter:
+   def __call__(self, request):
+        if request.query_params["type"] == 'CF' :
+            return {"Fahrenheit temperature":
+                   9.0/5.0 * float(request.query_params["temp"]) + 32.0}
+        elif request.query_params["type"] == 'FC' :
+            return {"Celsius temperature":
+                    (float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
+       else:
+           return {"Unknown conversion code" : request.query_params["type"]}</pre>
           </div>
           <p>The implementation is decorated by a <code>@serve.deployment</code> annotation, which tells Ray that this is a deployment. This deployment implements a single method: <code>__call__</code>. This method has a special meaning in deployment - it is invoked via HTTP (see below). It is a class method taking a <a href="https://www.starlette.io/requests/">Starlette Request</a>, which provides a convenient interface for the incoming HTTP request. In the case of temperature controller, the request contains two parameters - temperature itself and conversion type.</p>
           <p>Once the deployment is defined, you need to deploy it using the following code <code>Converter.deploy(), similar to .remote() when deploying an actor</code>.</p>
@@ -438,7 +438,7 @@ class Speculative:
            return {"result": "0", "methods": zeros}</pre>
           </div>
           <p>The constructor of this deployment is creating handles for all of your deployments implementing individual models. Note that here we are creating async handles that allow parallel execution of each deployment.</p>
-          <p>The <code>__call__</code> method gets the payload and starts execution of all three models in parallel and then waits for all of them to complete (see this great <a href="https://hynek.me/articles/waiting-in-asyncio/">article</a> on using <code>asyncio</code> for the execution of many coroutines and running them concurrently). Once you have all the results, you implement the consensus calculations and return the result (along with methods that voted for it) back.<span data-type="footnote">You can also implement different policies for waiting for the model's execution. If you want, for example, use at least one model’s result you can use <code>asyncio.wait(tasks). return_when=asyncio.FIRST_COMPLETED)</code><em> </em>or just wait for a given time interval <code>asyncio.wait(tasks, interval)</code>. </span></p>
+          <p>The <code>__call__</code> method gets the payload and starts execution of all three models in parallel and then waits for all of them to complete (see this great <a href="https://hynek.me/articles/waiting-in-asyncio/">article</a> on using <code>asyncio</code> for the execution of many coroutines and running them concurrently). Once you have all the results, you implement the consensus calculations and return the result (along with methods that voted for it) back.<span data-type="footnote">You can also implement different policies for waiting for the model's execution. If you want, for example, use at least one model’s result you can use <code>asyncio.wait(tasks). return_when=asyncio.FIRST_COMPLETED)</code> or just wait for a given time interval <code>asyncio.wait(tasks, interval)</code>. </span></p>
         </section>
       </section>
       <section data-type="sect1" id="conclusion">

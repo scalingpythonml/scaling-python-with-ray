@@ -1,0 +1,449 @@
+<section data-type="chapter" id="implementing_microservices" xmlns="http://www.w3.org/1999/xhtml">
+      <h1>Implementing Microservices</h1>
+      
+      <aside data-type="sidebar"><h5>A Note for Early Release Readers</h5>
+        <p>With Early Release ebooks, you get books in their earliest form—the author's raw and unedited content as they write—so you can take advantage of these technologies long before the official release of these titles.</p>
+        
+        <p>This will be the seventh chapter of the final book. Please note that the GitHub repo will be made active later on.</p>
+        
+        <p>If you have comments about how we might improve the content and/or examples in this book, or if you notice missing material within this chapter, please reach out to the editor at vwilson@oreilly.com.</p>
+        </aside>
+
+      <p>Initially, Ray was created as a framework for implementing <a href="https://en.wikipedia.org/wiki/Reinforcement_learning">Reinforcement Learning</a> but gradually morphed into a full-fledged serverless platform. Similarly, initially introduced as a <a href="https://medium.com/distributed-computing-with-ray/machine-learning-serving-is-broken-f59aff2d607f">better way to serve ML models</a>, <a href="https://docs.ray.io/en/master/serve/index.html">Ray Serve</a> has recently evolved into a full-fledged microservices framework. In this chapter, you will learn how you can use Ray Serve for implementing a general-purpose microservice framework and how to use this framework for model serving.</p>
+      <p>Complete code of all examples used in this chapter can be found on <a href="https://github.com/scalingpythonml/scalingpythonml/tree/master/ray_examples/serving">Github</a>.</p>
+      <section data-type="sect1" id="microservice_architecture_in_ray">
+        <h1>Microservice architecture in Ray</h1>
+        <p>Ray microservice architecture (Ray Serve) is implemented on top of Ray by leveraging <a href="https://docs.ray.io/en/master/actors.html#actor-guide">Ray actors</a>. There are three kinds of actors that are created to make up a Serve instance:</p>
+        <ul>
+          <li>
+            <p><strong>Controller</strong>: A global actor unique to each Serve instance that manages the control plane. It is responsible for creating, updating, and destroying other actors. Serve API calls like creating or getting a deployment to make remote calls to the Controller.</p>
+          </li>
+          <li>
+            <p><strong>Router</strong>: There is one router per node. Each router is a <a href="https://www.uvicorn.org/">Uvicorn HTTP server</a> that accepts incoming requests, forwards them to replicas, and responds once they are completed.</p>
+          </li>
+          <li>
+            <p><strong>Worker Replica</strong>: Worker replicas execute the user-defined code in response to a request. Each replica processes individual requests from the routers.</p>
+          </li>
+        </ul>
+        <p>A user-defined code is implemented using a Ray <a href="https://docs.ray.io/en/master/serve/core-apis.html">deployment</a> - an extension of a Ray Actor with additional features. </p>
+        <p>We will start by examining the deployment itself.</p>
+        <section data-type="sect2" id="deployment">
+          <h2>Deployment</h2>
+          <p>The central concept in Ray Serve is deployment, defining business logic that will handle incoming requests and the way this logic is exposed over HTTP or in Python. Let’s start with a very simple deployment implementing a temperature controller (<a data-type="xref" href="#ch07_ex1">#ch07_ex1</a>).</p>
+          <div data-type="example" id="ch07_ex1">
+            <h5>Temperature controller deployment</h5>
+            <pre data-type="programlisting">@serve.deployment
+<em>class Converter:</em>
+<em>   def __call__(self, request):</em>
+<em>        if request.query_params["type"] == 'CF' :</em>
+<em>        </em><em>    </em><em>return {"Fahrenheit temperature":</em>
+<em>               </em><em>    </em><em>9.0/5.0 * float(request.query_params["temp"]) + 32.0}</em>
+<em>        elif request.query_params["type"] == 'FC' :</em>
+<em>            </em><em>return {"Celsius temperature":</em>
+<em>                   </em><em> </em><em>(float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }</em>
+<em>       else:</em>
+<em>           return {"Unknown conversion code" : request.query_params["type"]}</em></pre>
+          </div>
+          <p>The implementation is decorated by a <code>@serve.deployment</code> annotation, which tells Ray that this is a deployment. This deployment implements a single method: <code>__call__</code>. This method has a special meaning in deployment - it is invoked via HTTP (see below). It is a class method taking a <a href="https://www.starlette.io/requests/">Starlette Request</a>, which provides a convenient interface for the incoming HTTP request. In the case of temperature controller, the request contains two parameters - temperature itself and conversion type.</p>
+          <p>Once the deployment is defined, you need to deploy it using the following code <code>Converter.deploy(), similar to .remote() when deploying an actor</code>.</p>
+          <p>Once deployed, you can immediately access it via an HTTP interface (<a data-type="xref" href="#ch07_ex2">#ch07_ex2</a>).</p>
+          <div data-type="example" id="ch07_ex2">
+            <h5>Accessing Converter over HTTP</h5>
+            <pre data-type="programlisting">print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&amp;type=CF").text)
+print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&amp;type=FC").text)
+print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&amp;type=CC").text)</pre>
+          </div>
+          <p>Note here that we are using URL parameters (query strings) to specify parameters. Also because the services are exposed externally via HTTP the requester can run anywhere, including code that is running outside of Ray.</p>
+          <p>The results of this invocation are presented below (<a data-type="xref" href="#ch07_ex3">#ch07_ex3</a>).</p>
+          <div data-type="example" id="ch07_ex3">
+            <h5>Results of HTTP invocations of deployment</h5>
+            <pre data-type="programlisting">{
+  "Fahrenheit temperature": 212.0
+}
+{
+  "Celsius temperature": 37.77777777777778
+}
+{
+  "Unknown conversion code": "CC"
+}</pre>
+          </div>
+          <p>In addition to being able to invoke a deployment over HTTP, you can also invoke it directly using Python. In order to do this, you need to get a <code>handle</code> to the deployment and then use it for invocation (<a data-type="xref" href="#ch07_ex4">#ch07_ex4</a>).</p>
+          <div data-type="example" id="ch07_ex4">
+            <h5>Invoking a deployment via a handle</h5>
+            <pre data-type="programlisting">handle = Converter.get_handle()
+print(ray.get(handle.remote(Request({"type": "http", "query_string": b"temp=100.0&amp;type=CF"}))))
+print(ray.get(handle.remote(Request({"type": "http", "query_string": b"temp=100.0&amp;type=FC"}))))
+print(ray.get(handle.remote(Request({"type": "http", "query_string": b"temp=100.0&amp;type=CC"}))))</pre>
+          </div>
+          <p>Note that in the code above we are manually creating <code>starlette</code> requests by specifying the request type and a query string.</p>
+          <p>Once executed, this code returns the same results as above (<a data-type="xref" href="#ch07_ex3">#ch07_ex3</a>). This example is using the same method <code>__call__</code> for both HTTP and Python requests. Although this works, the <a href="https://docs.ray.io/en/master/serve/http-servehandle.html#servehandle-calling-deployments-from-python">best practice</a> is to implement additional methods for Python invocation to avoid the usage of <code>Request</code> objects in the Python invocation. In our example, we can extend our initial deployment (<a data-type="xref" href="#ch07_ex1">#ch07_ex1</a>) with additional methods for Python invocations (<a data-type="xref" href="#ch07_ex5">#ch07_ex5</a>).</p>
+          <div data-type="example" id="ch07_ex5">
+            <h5>Implementing additional methods for Python invocation</h5>
+            <pre data-type="programlisting">@serve.deployment
+class Converter:
+   def __call__(self, request):
+        if request.query_params["type"] == 'CF' :
+   	return {"Fahrenheit temperature":
+               	9.0/5.0 * float(request.query_params["temp"]) + 32.0}
+        elif request.query_params["type"] == 'FC' :
+   	return {"Celsius temperature":
+               	(float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
+       else:
+           return {"Unknown conversion code" : request.query_params["type"]}
+   def celsius_fahrenheit(self, temp):
+       return 9.0/5.0 * temp + 32.0
+  
+   def fahrenheit_celsius(self, temp):
+       return (temp - 32.0) * 5.0/9.0</pre>
+          </div>
+          <p>With these additional methods in place, Python invocations can be significantly simplified (<a data-type="xref" href="#ch07_ex6">#ch07_ex6</a>).</p>
+          <div data-type="example" id="ch07_ex6">
+            <h5>Using additional methods for handle-based invocation</h5>
+            <pre data-type="programlisting">print(ray.get(handle.celcius_fahrenheit.remote(100.0)))
+print(ray.get(handle.fahrenheit_celcius.remote(100.0)))</pre>
+          </div>
+          <p>Note that here, unlike <a data-type="xref" href="#ch07_ex4">#ch07_ex4</a>, which is using the default method <code>__call__</code>, invoke methods are explicitly specified (instead of putting request type in the request itself, request type here is implicit - it’s a method name).</p>
+          <p>Ray offers two types of handles: synchronous and asynchronous. <code>Sync</code> flag <code>Deployment.get_handle(..., sync=True|False)</code> can be used to specify a handle type. </p>
+          <ul>
+            <li>
+              <p>The default handle is synchronous. In this case, calling <code>handle.remote()</code> returns a Ray <code>ObjectRef</code>.</p>
+            </li>
+            <li>
+              <p>To create an asynchronous handle set <code>sync=False</code>. Async handle invocation is asynchronous and you will have to use <code>await</code> to get a Ray <code>ObjectRef</code>. To use <code>await</code>, you have to run <code>deployment.get_handle</code> and <code>handle.remote</code> in the Python <code>asyncio</code> event loop.</p>
+            </li>
+          </ul>
+          <p>We will demonstrate the usage of async handles later in this chapter.</p>
+          <p>Finally, deployments can be updated by simply modifying the code or configuration options and calling deploy() again.</p>
+          <p>In addition to HTTP and direct Python invocation, described here, you can also use the Python APIs for invoking deployment using Kafka (see chapter 6 for Kafka integration approach).</p>
+          <p>Now that you know the basics of Deployment, let’s take a look at additional capabilities available for deployments.</p>
+        </section>
+        <section data-type="sect2" id="additional_deployment_capabilities">
+          <h2>Additional deployment capabilities</h2>
+          <p>Additional deployment capabilities are provided in three different ways:</p>
+          <ul>
+            <li>
+              <p>Adding parameters to annotations</p>
+            </li>
+            <li>
+              <p>Using FastAPI HTTP Deployments</p>
+            </li>
+            <li>
+              <p>Via Deployment composition</p>
+            </li>
+          </ul>
+          <p>Of course, you can combine all three to achieve your goals. Let’s take a close look at the options provided by each of the approaches.</p>
+          <section data-type="sect3" id="adding_parameters_to_annotations">
+            <h3>Adding parameters to annotations</h3>
+            <p>The <code>@serve.deployment</code> annotation can take several <a href="https://docs.ray.io/en/master/serve/core-apis.html">parameters</a>, the most widely used being the number of replicas and resource requirements.</p>
+            <section data-type="sect4" id="improving_scalability_with_resource_replicas">
+              <h4>Improving scalability with resource replicas</h4>
+              <p>By default, deployment.deploy() creates a single instance of a deployment. By specifying the number of replicas in <code>@serve.deployment</code> you can scale out a deployment to many processes. When the requests are sent to such a replicated deployment, Ray uses round-robin scheduling to invoke individual replicas. You can modify <a data-type="xref" href="#ch07_ex1">#ch07_ex1</a> to add a number of replicas and ID for individual instances (<a data-type="xref" href="#ch07_ex7">#ch07_ex7</a>).</p>
+              <div data-type="example" id="ch07_ex7">
+                <h5>Scaling deployment </h5>
+                <pre data-type="programlisting">@serve.deployment(num_replicas=3)
+class Converter:
+   def __init__(self):
+       from uuid import uuid4
+       self.id = str(uuid4())
+   def __call__(self, request):
+       if request.query_params["type"] == 'CF' :
+           return {"Deployment": self.id, "Fahrenheit temperature": 
+9.0/5.0 * float(request.query_params["temp"]) + 32.0}
+       elif request.query_params["type"] == 'FC' :
+           return {"Deployment": self.id, "Celsius temperature": 
+(float(request.query_params["temp"]) - 32.0) * 5.0/9.0 }
+       else:
+           return {"Deployment": self.id, "Unknown conversion code" : request.query_params["type"]}</pre>
+              </div>
+              <p>Now the usage of either HTTP or handle based invocation produces the following result (<a data-type="xref" href="#ch07_ex8">#ch07_ex8</a>).</p>
+              <div data-type="example" id="ch07_ex8">
+                <h5>Invoking scaled deployment </h5>
+                <pre data-type="programlisting">{'Deployment': '1dcb0b5b-b4ec-49cc-9673-ffbd57362a0d', 'Fahrenheit temperature': 212.0}
+{'Deployment': '4dc103c8-d43c-4391-92e0-4e501d01aab9', 'Celsius temperature': 37.77777777777778}
+{'Deployment': '0022de58-4e28-41a1-8073-85cdb4193daa', 'Unknown conversion code': 'CC'}</pre>
+              </div>
+              <p>Looking at this result you can see that every request is processed by a different deployment instance (different ID). </p>
+              <p>This is manual scaling of deployment. What about autoscaling? Similar to the autoscaling of Kafka listeners (discussed in the previous chapter ), Ray's approach to autoscaling is different from the one taken by Kubernetes natively (see, for example, <a href="https://knative.dev/docs/">Knative</a>). Instead of creating a new instance, Ray’s auto-scaling approach is to create more nodes and redistribute deployments appropriately.</p>
+              <p>If your deployments begin to exceed ~3k requests per second you should also scale the HTTP ingress to Ray. By default, the ingress HTTP server is only started on the head node, but you can also start an HTTP_server on every node using <code>serve.start(http_options={“location”: “EveryNode”})</code>. If you scale the number of HTTP ingress, you will also need to deploy a load balancer, available from your cloud provider or installed locally.</p>
+            </section>
+            <section data-type="sect4" id="resource_requirements_for_deployments">
+              <h4>Resource requirements for deployments</h4>
+              <p>You can request specific resource requirements in <code>@serve.deployment</code>. For example, two cpus and 1 GPU would be: </p>
+
+                <pre data-type="programlisting">@serve.deployment(ray_actor_options={"num_cpus": 2, "num_gpus": 1})</pre>
+
+              <p>Another very useful parameter of <code>@serve.deployment</code> is <code>route_prefix</code>. As you can see from the HTTP access example (<a data-type="xref" href="#ch07_ex2">#ch07_ex2</a>) the default prefix is the name of the Python class used in this deployment. Using <code>route_prefix</code>, for example:</p>
+
+                <pre data-type="programlisting">@serve.deployment(route_prefix="/converter")</pre>
+
+              <p>allows you to explicitly specify a prefix used by HTTP requests.</p>
+              <p>Additional configuration parameters are described <a href="https://docs.ray.io/en/master/serve/core-apis.html">here</a>.</p>
+            </section>
+          </section>
+          <section data-type="sect3" id="implementing_request_routing_with_fastapi_http">
+            <h3>Implementing Request Routing with FastAPI HTTP</h3>
+            <p>Although the initial example of a temperature converter deployment (<a data-type="xref" href="#ch07_ex1">#ch07_ex1</a>) works fine, it is not very convenient to use. The issue is that you need to specify the transformation type with every request. A better approach is to have two separate endpoints (URLs) for the API - one for Celsius to Fahrenheit transformation and one for Fahrenheit to Celsius transformation. You can achieve this by leveraging serve <a href="https://docs.ray.io/en/master/serve/http-servehandle.html">integration</a> with <a href="https://fastapi.tiangolo.com/">FastAPI</a>. With this, you can rewrite your temperature converter (<a data-type="xref" href="#ch07_ex1">#ch07_ex1</a>) as follows (<a data-type="xref" href="#ch07_ex9">#ch07_ex9</a>).</p>
+            <div data-type="example" id="ch07_ex9">
+              <h5>Implementing multiple HTTP APIs in a deployment</h5>
+              <pre data-type="programlisting">@serve.deployment(route_prefix="/converter")
+@serve.ingress(app)
+class Converter:
+   @app.get("/cf")
+   def celcius_fahrenheit(self, temp):
+       return {"Fahrenheit temperature": 9.0/5.0 * float(temp) + 32.0}
+  
+   @app.get("/fc")
+   def fahrenheit_celcius(self, temp):
+       return {"Celsius temperature": (float(temp) - 32.0) * 5.0/9.0}</pre>
+            </div>
+            <p>Note that here, we have introduced two different HTTP accessible APIs with two different URLs (effectively converting the second query string parameter to a set of URLs) - one per conversion type (we also leverage the <code>route_prefix</code> parameter described above). This can simplify HTTP access (<a data-type="xref" href="#ch07_ex10">#ch07_ex10</a>) compared to the original one (<a data-type="xref" href="#ch07_ex2">#ch07_ex2</a>).</p>
+            <div data-type="example" id="ch07_ex10">
+              <h5>Invoking deployment with multiple HTTP endpoints</h5>
+              <pre data-type="programlisting">print(requests.get("http://127.0.0.1:8000/converter/cf?temp=100.0&amp;").text)
+print(requests.get("http://127.0.0.1:8000/converter/fc?temp=100.0").text)</pre>
+            </div>
+            <p>Additional features provided through FastAPI implementation include variable routes, automatic type validation, dependency injection (e.g., for database connections), <a href="https://fastapi.tiangolo.com/tutorial/security/">security support</a>, and more. Refer to FastAPI <a href="https://fastapi.tiangolo.com/">documentation</a> on how to use these features. </p>
+          </section>
+          <section data-type="sect3" id="deployment_composition">
+            <h3>Deployment composition</h3>
+            <p>Deployments can be built as a composition of other deployments. This allows for building very powerful deployment pipelines.</p>
+            <p>Let's take a look at the specific example - <a href="https://harness.io/blog/continuous-verification/blue-green-canary-deployment-strategies/">canary deployment</a>. In this deployment strategy, you deploy a new version of your code/model in a limited fashion to see how it behaves. You can easily build this type of deployment using deployment composition. We will start by defining and deploying two very simple deployments (<a data-type="xref" href="#ch07_ex11">#ch07_ex11</a>).</p>
+            <div data-type="example" id="ch07_ex11">
+              <h5>Basic deployments used for canary deployment</h5>
+              <pre data-type="programlisting">@serve.deployment
+def version_one(data):
+   return {"result": "version1"}
+model_one.deploy()
+  
+@serve.deployment
+def version_two(data):
+   return {"result": "version2"}
+model_two.deploy()</pre>
+            </div>
+            <p>Those deployments take any data and return a string - <code>"result": "version1"</code> for deployment one and <code>"result": “version2"</code> for deployment two. You can combine these two deployments by implementing a canary deployment (<a data-type="xref" href="#ch07_ex12">#ch07_ex12</a>).</p>
+            <div data-type="example" id="ch07_ex12">
+              <h5>Canary deployment</h5>
+              <pre data-type="programlisting">@serve.deployment(route_prefix="/versioned")
+class Canary:
+   def __init__(self, canary_percent):
+       from random import random
+       self.version_one = version_one.get_handle()
+       self.version_two = version_two.get_handle()
+       self.canary_percent = canary_percent
+  
+   # This method can be called concurrently!
+   async def __call__(self, request):
+       data = await request.body()
+       if(random() &lt; self.canary_percent):
+           return await self.version_one.remote(data=data)
+       else:
+           return await self.version_two.remote(data=data)</pre>
+            </div>
+            <p>This deployment illustrates several things. First, it demonstrates a constructor with parameters, which is very useful for deployment, allowing a single definition to be deployed with different parameters. The other thing that we did here is defining __call__ function as async, to process queries concurrently. The implementation of the <code>__call__</code> function is very simple - generate a new random number and, depending on its value and a value of <code>canary_percent</code>, you will invoke either version1 or version2 deployment.</p>
+            <p>Once the Canary model is deployed (using command: <code>Canary.deploy(.3)</code>, you can invoke it using HTTP. The result of invoking canary deployment ten times is shown in the <a data-type="xref" href="#ch07_ex13">#ch07_ex13</a>.</p>
+            <div data-type="example" id="ch07_ex13">
+              <h5>Results of the Canary deployment invocation</h5>
+              <pre data-type="programlisting">{'result': 'version2'}
+{'result': 'version2'}
+{'result': 'version1'}
+{'result': 'version2'}
+{'result': 'version1'}
+{'result': 'version2'}
+{'result': 'version2'}
+{'result': 'version1'}
+{'result': 'version2'}
+{'result': 'version2'}</pre>
+            </div>
+            <p>As you can see here, the canary model works fairly well and does exactly what you need.</p>
+            <p>Now that you know how to build and use Ray-based microservices, let’s see how you can use them for model serving.</p>
+          </section>
+        </section>
+      </section>
+      <section data-type="sect1" id="using_ray_serve_for_model_serving">
+        <h1>Using Ray Serve for model serving</h1>
+        <p>In a nutshell, serving a model is no different than any other microservice (we will talk about specific model serving requirements later in this chapter). As long as you can get a machine-learning generated model in some shape or form (<a href="https://docs.python.org/3/library/pickle.html">pickle format</a>, straight Python code, binary format along with Python library for its processing, etc) compatible with Ray’s runtime, you can use this model to process inference requests. Let’s start with a simple example of model serving.</p>
+        <section data-type="sect2" id="simple_model_service_example">
+          <h2>Simple model service example</h2>
+          <p>One of the popular model learning applications is red wine quality prediction, based on this <a href="https://www.kaggle.com/uciml/red-wine-quality-cortez-et-al-2009">Kaggle dataset</a>. There are numerous publications using this dataset to build ML implementation of wine quality, for example <a href="https://www.analyticsvidhya.com/blog/2021/04/wine-quality-prediction-using-machine-learning/">here</a>, <a href="https://towardsdatascience.com/red-wine-quality-prediction-using-regression-modeling-and-machine-learning-7a3e2c3e1f46">here</a>, and <a href="https://towardsdatascience.com/predicting-wine-quality-with-several-classification-techniques-179038ea6434">here</a>. For our example we have built several classification models for the red wine quality dataset, following this <a href="https://towardsdatascience.com/predicting-wine-quality-with-several-classification-techniques-179038ea6434">article</a> (the actual code is in <a href="https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/serving/modelserving/wine_quality.py">Github</a>). The code uses several different techniques for building a classification model of the red wine quality including:</p>
+          <ul>
+            <li>
+              <p><a href="https://en.wikipedia.org/wiki/Decision_tree">Decision trees</a> </p>
+            </li>
+            <li>
+              <p><a href="https://en.wikipedia.org/wiki/Random_forest">Random forest</a> </p>
+            </li>
+            <li>
+              <p><a href="https://en.wikipedia.org/wiki/AdaBoost">Ada boost</a> </p>
+            </li>
+            <li>
+              <p><a href="https://en.wikipedia.org/wiki/Gradient_boosting">Gradient boost</a> </p>
+            </li>
+            <li>
+              <p><a href="https://en.wikipedia.org/wiki/XGBoost">XGBoost</a> </p>
+            </li>
+          </ul>
+          <p>All implementations leverage the Scikit-learn Python library, which allows you to generate a model and export it using Pickle. When validating the models we saw the best results from Random forest, Gradient boost, and XGBoost, so we saved only these models locally (generated models are available in <a href="https://github.com/scalingpythonml/scalingpythonml/tree/master/ray_examples/serving/modelserving">Github</a>). With the models in place, you can use a simple deployment that allows serving red wine quality model using Random forest classification (<a data-type="xref" href="#ch07_ex14">#ch07_ex14</a>).</p>
+          <div data-type="example" id="ch07_ex14">
+            <h5>Implementing model serving using Random forest classification </h5>
+            <pre data-type="programlisting">@serve.deployment(route_prefix="/randomforest")
+class RandomForestModel:
+   def __init__(self, path):
+       with open(path, "rb") as f:
+           self.model = pickle.load(f)
+  
+   async def __call__(self, request):
+       payload = await request.json()
+       return self.serve(payload)
+  
+   def serve(self, request):
+       input_vector = [
+           request["fixed acidity"],
+           request["volatile acidity"],
+           request["citric acid"],
+           request["residual sugar"],
+           request["chlorides"],
+           request["free sulfur dioxide"],
+           request["total sulfur dioxide"],
+           request["density"],
+           request["pH"],
+           request["sulphates"],
+           request["alcohol"],
+       ]
+       prediction = self.model.predict([input_vector])[0]
+       return {"result": str(prediction)}</pre>
+          </div>
+          <p>This deployment has three methods:</p>
+          <ul>
+            <li>
+              <p><code>Constructor</code>, which loads a model and stores it locally. Note that here we are using model location as a parameter so that we can redeploy this deployment when a model changes</p>
+            </li>
+            <li>
+              <p><code>__call__</code> method invoked by HTTP requests. This method retrieves the features (as a dictionary) and invokes the serve method for the actual processing. By defining it as async, it can process multiple requests simultaneously.</p>
+            </li>
+            <li>
+              <p><code>Serve</code> method that can be used to invoke deployment via a handle. It converts the incoming dictionary into a vector and calls the underlying model for inference.</p>
+            </li>
+          </ul>
+          <p>Once the implementation is deployed, it can be used for model serving. If invoked via HTTP, it takes a JSON string as a payload, for invocation using handle request is submitted via dictionary. Implementations for <a href="https://github.com/scalingpythonml/scalingpythonml/blob/master/serving/modelserving/model_server_xgboost.py">XGBoost</a> and <a href="https://github.com/scalingpythonml/scalingpythonml/blob/master/serving/modelserving/model_server_grboost.py">Gradient boost</a> look pretty much the same, with the exception that a generated model in these cases takes a two-dimensional array instead of a vector, so you need to do this transformation before invoking the model.</p>
+          <p>Additionally, you can take a look at Ray's documentation for serving other types of models - <a href="https://docs.ray.io/en/master/serve/tutorials/tensorflow.html">Tensorflow</a>, <a href="https://docs.ray.io/en/master/serve/tutorials/pytorch.html">PyTorch</a>, etc. </p>
+          <p>Now that you know how to build a simple model serving implementation, the question is whether Ray-based microservices are a good platform for model serving.</p>
+        </section>
+        <section data-type="sect2" id="considerations_for_model_serving_implementations">
+          <h2>Considerations for model serving implementations </h2>
+          <p>When it comes to model serving, there are a few specific requirements that are important in this case. A good definition of model serving specific requirements can be found <a href="https://learning.oreilly.com/library/view/kubeflow-for-machine/9781492050117/">here</a>. : </p>
+          <ol>
+            <li>
+              <p>The implementation has to be flexible. It should allow for your training to be implementation-agnostic (i.e TensorFlow versus PyTorch, vs Scikit-Learn). For an inference service invocation, it should not matter if the underlying model was trained using PyTorch, Scikit-learn, or TensorFlow - the service interface should be shared so that the user’s API remains consistent.</p>
+            </li>
+            <li>
+              <p>It is sometimes advantageous to be able to batch requests in a variety of settings in order to realize better throughput. The implementation should make it simple to support batching of model serving requests.</p>
+            </li>
+            <li>
+              <p>The implementation should provide the ability to leverage hardware optimizers that match the needs of the algorithm. Sometimes in the evaluation phase, you would benefit from hardware optimizers like GPUs to infer the models.</p>
+            </li>
+            <li>
+              <p>The implementation should be able to seamlessly include additional components of an <a href="https://docs.seldon.io/projects/seldon-core/en/v1.1.0/graph/inference-graph.html">inference graph</a>. An inference graph could comprise feature transformers, predictors, explainers, and drift detectors.</p>
+            </li>
+            <li>
+              <p>Implementation should allow scaling of serving instances, both explicitly and using auto scalers, regardless of the underlying hardware. </p>
+            </li>
+            <li>
+              <p>It should be possible to expose model serving functionality via different protocols including HTTP, Kafka, etc.</p>
+            </li>
+            <li>
+              <p>ML models traditionally do not extrapolate well outside of the training data distribution. As a result, if data drift occurs, the model performance can deteriorate, and it should be retrained and redeployed. Implementation should support an easy redeployment of models.</p>
+            </li>
+            <li>
+              <p>Flexible deployment strategy implementations (including Canary deployment, Blue-Green deployments, and A/B testing) are required, to ensure that new versions of models will not behave worse than the existing ones.</p>
+            </li>
+          </ol>
+          <p>Let’s see how these requirements are satisfied by Ray’s microservice framework.</p>
+          <ol>
+            <li>
+              <p>Ray’s deployment cleanly separates deployment APIs from model APIs. Thus, Ray “standardizes” deployment APIs and provides support for converting incoming data to the format required for the model. See <a data-type="xref" href="#ch07_ex14">#ch07_ex14</a> for an example.</p>
+            </li>
+            <li>
+              <p>Ray’s deployment makes it easy to implement request batching. Refer to this <a href="https://docs.ray.io/en/master/serve/tutorials/batch.html">tutorial</a> for details on how to implement and deploy a Ray Serve deployment that accepts batches, configure the batch size, and query the model in Python.</p>
+            </li>
+            <li>
+              <p>As described earlier in this chapter deployments support configurations that allow specifying hardware resources (CPU/GPU) required for its execution.</p>
+            </li>
+            <li>
+              <p>Deployment composition described earlier in this chapter allows for easy creation of the model serving graphs, mixing and matching plain python code and existing deployments. We will present an additional example of deployment compositions later in this chapter </p>
+            </li>
+            <li>
+              <p>As described earlier in this chapter, deployments support setting the number of replicas, thus easily scaling deployments. Coupled with Ray’s auto-scaling and the ability to define the number of HTTP servers, the microservice framework allows for very efficient scaling of model serving.</p>
+            </li>
+            <li>
+              <p>As described above, deployments can be exposed via HTTP or straight Python. The latter option allows for integration with any required transport.</p>
+            </li>
+            <li>
+              <p>As described earlier in this chapter, a simple redeployment of deployment allows you to update models without restarting the Ray cluster and interrupting applications that are leveraging model serving.</p>
+            </li>
+            <li>
+              <p>As shown in the canary deployment example (<a data-type="xref" href="#ch07_ex12">#ch07_ex12</a>), usage of deployment composition allows for easy implementation of any deployment strategy.</p>
+            </li>
+          </ol>
+          <p>As we have shown here, the Ray microservice framework is a very solid foundation for model serving that satisfies all of the main requirements for model serving.</p>
+          <p>The last thing that you are going to learn in this chapter is the implementation of one of the advanced model serving techniques - <a href="https://www.lightbend.com/blog/akka-speculative-model-serving">speculative model serving</a> - using the Ray microservices framework.</p>
+        </section>
+        <section data-type="sect2" id="implementing_speculative_model_serving_using_ray_m">
+          <h2>Implementing Speculative Model serving using Ray microservice framework</h2>
+          <p>Speculative model serving is an application of <a href="https://en.wikipedia.org/wiki/Speculative_execution">speculative execution</a> - an optimization technique where a computer system performs some task that may not be needed. In a nutshell, speculative execution is about performing some task that may not be needed. The work is done before knowing whether it is actually required. This allows getting results upfront, so if they are actually needed they will be available with no delay. Speculative execution is important in model serving because it provides the following features for machine-serving applications:</p>
+          <ul>
+            <li>
+              <p>Guaranteed execution time. Assuming that you have several models, with the fastest providing fixed execution time, it is possible to provide a model serving implementation with a fixed upper limit on execution time, as long as that time is larger than the execution time of the simplest model.</p>
+            </li>
+            <li>
+              <p>Consensus-based model serving. Assuming that you have several models, you can implement model serving where prediction is the one returned by the majority of the models.</p>
+            </li>
+            <li>
+              <p>Quality-based model serving. Assuming that you have a metric allowing you to evaluate the quality of model serving results, this approach allows you to pick the result with the best quality. </p>
+            </li>
+          </ul>
+          <p>Here you will learn how to implement a consensus-based model serving using Ray’s microservice framework. </p>
+          <p>You have learned earlier in this chapter how to implement red wine quality scoring using three different models: random forest, gradient boost, and XGBoost. Now let's try to produce an implementation that returns the result on which at least 2 models agree. The basic implementation looks as follows (<a data-type="xref" href="#ch07_ex15">#ch07_ex15</a>).</p>
+          <div data-type="example" id="ch07_ex15">
+            <h5>Consensus-based model serving</h5>
+            <pre data-type="programlisting">@serve.deployment(route_prefix="/speculative")
+class Speculative:
+   def __init__(self):
+       self.rfhandle = RandomForestModel.get_handle(sync=False)
+       self.xgboosthandle = XGBoostModel.get_handle(sync=False)
+       self.grboosthandle = GRBoostModel.get_handle(sync=False)
+   async def __call__(self, request):
+       payload = await request.json()
+       f1, f2, f3 = await asyncio.gather(self.rfhandle.serve.remote(payload),
+                self.xgboosthandle.serve.remote(payload), self.grboosthandle.serve.remote(payload))
+       rfresurlt = ray.get(f1)['result']
+       xgresurlt = ray.get(f2)['result']
+       grresult = ray.get(f3)['result']
+       ones = []
+       zeros = []
+       if rfresurlt == "1":
+           ones.append("Random forest")
+       else:
+           zeros.append("Random forest")
+       if xgresurlt == "1":
+           ones.append("XGBoost")
+       else:
+           zeros.append("XGBoost")
+       if grresult == "1":
+           ones.append("Gradient boost")
+       else:
+           zeros.append("Gradient boost")
+       if len(ones) &gt;= 2:
+           return {"result": "1", "methods": ones}
+       else:
+           return {"result": "0", "methods": zeros}</pre>
+          </div>
+          <p>The constructor of this deployment is creating handles for all of your deployments implementing individual models. Note that here we are creating async handles that allow parallel execution of each deployment.</p>
+          <p>The <code>__call__</code> method gets the payload and starts execution of all three models in parallel and then waits for all of them to complete (see this great <a href="https://hynek.me/articles/waiting-in-asyncio/">article</a> on using <code>asyncio</code> for the execution of many coroutines and running them concurrently). Once you have all the results, you implement the consensus calculations and return the result (along with methods that voted for it) back.<span data-type="footnote">You can also implement different policies for waiting for the model's execution. If you want, for example, use at least one model’s result you can use <code>asyncio.wait(tasks). return_when=asyncio.FIRST_COMPLETED)</code><em> </em>or just wait for a given time interval <code>asyncio.wait(tasks, interval)</code>. </span></p>
+        </section>
+      </section>
+      <section data-type="sect1" id="conclusion">
+        <h1>Conclusion</h1>
+        <p>In this chapter, you have learned Ray’s implementation of the microservice framework and how this framework can be used by model serving. We started by describing a basic microservices deployment and extensions allowing for better control, scale, and extending of the deployment’s execution. We then showed an example of how this framework can be used to implement model serving, analyzed typical model serving requirements, and showed how they can be satisfied by Ray. Finally, you have learned how to implement an advanced model serving example - consensus-based model serving, allowing to improve the quality of individual model serving methods. An interesting <a href="https://www.anyscale.com/blog/building-highly-available-and-scalable-online-applications-on-ray-at-ant">blog post</a> shows how to bring together the basic building blocks described here into more complex implementations.</p>
+        <p>In the next chapter, you will learn about workflows implementation in Ray and how to use them for automating your application execution.</p>
+      </section>
+    </section>

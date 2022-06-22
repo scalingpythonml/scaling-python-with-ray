@@ -1,0 +1,64 @@
+auth:
+  ssh_private_key: /Users/boris/Downloads/id.rsa.ray-boris
+  ssh_user: root
+available_node_types:
+  ray_head_default:
+    max_workers: 10
+    min_workers: 0
+    node_config:
+      boot_volume_capacity: 100
+      image_id: r006-dd164da8-c4d9-46ba-87c4-03c614f0532c
+      instance_profile_name: bx2d-8x32
+      key_id: r006-d6d823da-5c41-4e92-a6b6-6e98dcc90c8e
+      resource_group_id: 5f6b028dc4ef41b9b8189bbfb90f2a79
+      security_group_id: r006-c8e44f9c-7159-4041-a7ab-cf63cdb0dca7
+      subnet_id: 0737-213b5b33-cee3-41d0-8d25-95aef8e86470
+      volume_tier_name: general-purpose
+      vpc_id: r006-50485f78-a76f-4401-a742-ce0a748b46f9
+    resources:
+      CPU: 8
+cluster_name: ray
+cluster_synced_files: []
+docker: {}
+file_mounts: {}
+file_mounts_sync_continuously: false
+head_node: {}
+head_node_type: ray_head_default
+head_setup_commands: []
+head_start_ray_commands:
+- ray stop --force --verbose
+- ulimit -n 65536; ray start --head --port=6379 --object-manager-port=8076 --autoscaling-config=~/ray_bootstrap_config.yaml
+  --dashboard-host=$RAY_HEAD_IP
+idle_timeout_minutes: 5
+initialization_commands: []
+max_workers: 10
+provider:
+  cache_stopped_nodes: false
+  endpoint: https://us-south.iaas.cloud.ibm.com
+  iam_api_key: u2M-HDcwPEkdikeA0FJjo-fy2MzC1jLG639YvYd6TdwX
+  module: gen2.node_provider.Gen2NodeProvider
+  region: us-south
+  type: external
+  use_hybrid_ips: true
+  zone_name: us-south-3
+rsync_exclude: []
+rsync_filter: []
+setup_commands:
+- sleep 30 && apt update && apt install python3.8 -y && curl https://bootstrap.pypa.io/get-pip.py
+  -o get-pip.py && python3.8 get-pip.py
+- test -d ~/.venv || (pip install virtualenv && virtualenv -p /usr/bin/python3.8 ~/.venv
+  && echo source ~/.venv/bin/activate >> ~/.bashrc && echo "source ~/.venv/bin/activate"
+  | cat - ~/.bashrc | tee ~/.bashrc)
+- pip install git+https://github.com/kpavel/vpc-python-sdk@bug_fix ibm_platform_services
+  ibm_cloud_sdk_core
+- apt install libgl1-mesa-glx -y && pip install pandas tabulate gym tensorboardX dm_tree
+  opencv-python starlette uvicorn
+- echo alias python=\'python3\'>>~/.bash_aliases
+- which ray || pip install ray[default]
+- pip install gen2-connector
+upscaling_speed: 1.0
+worker_nodes: {}
+worker_setup_commands: []
+worker_start_ray_commands:
+- ray stop --force --verbose
+- ulimit -n 65536; ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076

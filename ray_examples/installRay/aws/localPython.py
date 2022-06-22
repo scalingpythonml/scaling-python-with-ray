@@ -34,7 +34,7 @@ def wait_for_nodes(expected):
 
 
 def main():
-    wait_for_nodes(3)
+    wait_for_nodes(1)
 
     # Check that objects can be transferred from each node to each other node.
     for i in range(10):
@@ -51,5 +51,5 @@ def main():
 
 if __name__ == "__main__":
     print(f'Using Ray version {ray.__version__}')
-    ray.init(address='ray://3.95.161.244:10001')
+    ray.init(address='ray://52.118.80.225:10001')
     main()

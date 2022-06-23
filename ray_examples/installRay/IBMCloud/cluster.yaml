@@ -9,7 +9,7 @@ available_node_types:
       boot_volume_capacity: 100
       image_id: r006-dd164da8-c4d9-46ba-87c4-03c614f0532c
       instance_profile_name: bx2-4x16
-      key_id: key
+      key_id: r006-d6d823da-5c41-4e92-a6b6-6e98dcc90c8e
       resource_group_id: 5f6b028dc4ef41b9b8189bbfb90f2a79
       security_group_id: r006-c8e44f9c-7159-4041-a7ab-cf63cdb0dca7
       subnet_id: 0737-213b5b33-cee3-41d0-8d25-95aef8e86470
@@ -24,7 +24,7 @@ available_node_types:
       boot_volume_capacity: 100
       image_id: r006-dd164da8-c4d9-46ba-87c4-03c614f0532c
       instance_profile_name: bx2-8x32
-      key_id: key
+      key_id: r006-d6d823da-5c41-4e92-a6b6-6e98dcc90c8e
       resource_group_id: 5f6b028dc4ef41b9b8189bbfb90f2a79
       security_group_id: r006-c8e44f9c-7159-4041-a7ab-cf63cdb0dca7
       subnet_id: 0737-213b5b33-cee3-41d0-8d25-95aef8e86470

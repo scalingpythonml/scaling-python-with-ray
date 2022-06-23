@@ -35,7 +35,7 @@ max_workers: 10
 provider:
   cache_stopped_nodes: false
   endpoint: https://us-south.iaas.cloud.ibm.com
-  iam_api_key: u2M-HDcwPEkdikeA0FJjo-fy2MzC1jLG639YvYd6TdwX
+  iam_api_key: [API key]
   module: gen2.node_provider.Gen2NodeProvider
   region: us-south
   type: external

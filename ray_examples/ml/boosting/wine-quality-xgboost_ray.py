@@ -25,6 +25,7 @@ X = StandardScaler().fit_transform(X)
 # Splitting the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.25, random_state=0)
 
+#tag::ray[]
 start = time.time()
 model = RayXGBClassifier(
 #    n_jobs=10,  # In XGBoost-Ray, n_jobs sets the number of actors
@@ -33,5 +34,6 @@ model = RayXGBClassifier(
 
 model.fit(X=X_train, y=y_train, ray_params=RayParams(num_actors=3))
 print(f"executed XGBoost in {time.time() - start}")
+#end::ray[]
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))

@@ -7,6 +7,7 @@ from sklearn.metrics import classification_report
 
 import lightgbm as lgb
 
+#tag::train[]
 # Get data
 df = pd.read_csv("winequality-red.csv", delimiter=";")
 print(f"Rows, columns: {str(df.shape)}")
@@ -42,3 +43,4 @@ for i in range(len(y_pred)):
     else:
         y_pred[i] = 0
 print(classification_report(y_test, y_pred))
+#end::train[]

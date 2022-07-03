@@ -7,6 +7,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
+#tag::skex[]
 # Get data
 df = pd.read_csv("winequality-red.csv", delimiter=";")
 print(f"Rows, columns: {str(df.shape)}")
@@ -40,3 +41,4 @@ print(f"executed in {time.time() - start}, nodes {model.best_estimator_.tree_.no
 
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))
+#end::skex[]

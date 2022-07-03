@@ -103,6 +103,7 @@ RandomForestModel.deploy(RANDOM_FOREST_MODEL_PATH)
 XGBoostModel.deploy(XGBOOST_MODEL_PATH)
 GRBoostModel.deploy(GRBOOST_MODEL_PATH)
 
+#tag::spec_serve[]
 @serve.deployment(route_prefix="/speculative")
 class Speculative:
     def __init__(self):
@@ -135,6 +136,7 @@ class Speculative:
             return {"result": "1", "methods": ones}
         else:
             return {"result": "0", "methods": zeros}
+#end::spec_serve[]
 
 Speculative.deploy()
 

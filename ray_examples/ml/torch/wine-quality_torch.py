@@ -16,6 +16,7 @@ from torch.nn import BCELoss
 from torch.nn.init import kaiming_uniform_
 from torch.nn.init import xavier_uniform_
 
+#tag::dataset[]
 # Dataset
 class WineQualityDataset(Dataset):
     # load the dataset
@@ -51,7 +52,9 @@ class WineQualityDataset(Dataset):
         train_size = len(self.X) - test_size
         # calculate the split
         return random_split(self, [train_size, test_size])
+#end::dataset[]
 
+#tag::model[]
 # model definition
 class WineQualityModel(Module):
     # define model elements
@@ -82,7 +85,9 @@ class WineQualityModel(Module):
         X = self.hidden3(X)
         X = self.act3(X)
         return X
+#end::model[]
 
+#tag::train[]
 # ensure reprodusability
 torch.manual_seed(42)
 # load the dataset
@@ -134,3 +139,4 @@ predictions, actuals = vstack(predictions), vstack(actuals)
 # calculate accuracy
 acc = accuracy_score(actuals, predictions)
 print("Model accuracy", acc)
+#end::train[]

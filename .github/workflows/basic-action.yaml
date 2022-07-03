@@ -38,6 +38,9 @@ jobs:
       run: |
         conda info
         conda list
+    - name: Install requirements
+      run: |
+        pip install -r requirements.txt
     # Run the tests.
     - name: Run tests
       run: ls

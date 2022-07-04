@@ -2,6 +2,7 @@ from .add_device import AddDeviceView
 from .billing import *
 from .blocked_numbers import *
 from .dashboard import DashboardView
+from .device_owner import DeviceOwnerApiView
 from .index import IndexView
 from .login import LoginView
 from .payment_success import PaymentSuccessView

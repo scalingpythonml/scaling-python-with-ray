@@ -62,6 +62,7 @@ api_urlpatterns = [
     path("update-payment-method", UpdatePaymentMethodAPIView.as_view()),
     path("delete-payment-method", DeletePaymentMethodAPIView.as_view()),
     path("cancel-subscription", CancelSubscriptionAPIView.as_view()),
+    path("device-owner", DeviceOwnerApiView.as_view()),
 ]
 
 urlpatterns = view_urlpatterns + api_urlpatterns

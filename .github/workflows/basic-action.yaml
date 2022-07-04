@@ -36,7 +36,10 @@ jobs:
         python-version: 3.8
     - name: Activate
       run: |
+        echo `which python`
+        conda init bash
         conda activate
+        echo `which python`
     - name: Install requirements
       run: |
         pip install -r requirements.txt

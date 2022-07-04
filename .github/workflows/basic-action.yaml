@@ -34,14 +34,14 @@ jobs:
       with:
         miniconda-version: "latest"
         python-version: 3.8
+    - name: Install requirements
+      run: |
+        pip install -r requirements.txt
     - name: Check conda setup
       run: |
         conda info
         conda list
-        find / |grep conda
-    - name: Install requirements
-      run: |
-        pip install -r requirements.txt
+        find / |grep nose
     # Run the tests.
     - name: Run tests
       run: nosetest -vs .

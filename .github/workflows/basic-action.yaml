@@ -34,11 +34,12 @@ jobs:
       with:
         miniconda-version: "latest"
         python-version: 3.8
-    - name: Activate
+    - name: Activate conda env
       run: |
         echo `which python`
         conda init bash
-        conda activate
+        source ~/.bashrc
+        conda activate test
         echo `which python`
     - name: Install requirements
       run: |

@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+package ca.pigscanfly.proto;
+
+message MessageDataPB {
+  required uint32 version = 1;
+  repeated Message message = 2;
+  required bool from_device = 3;
+}
+
+message Message {
+  required string text = 1;
+  required string to = 3; //TODO change from_or_to to `to`
+
+  required Protocol protocol = 5;
+}
+
+enum Protocol {
+  UNKNOWN = 0;
+  EMAIL = 1;
+  SMS = 2;
+  TWITTER = 3;
+}
+

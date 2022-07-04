@@ -43,4 +43,4 @@ jobs:
         pip install -r requirements.txt
     # Run the tests.
     - name: Run tests
-      run: ls
+      run: nosetest -vs .

@@ -1,27 +1,34 @@
 import asyncio
 import ray
-from pprint import pprint
+import logging
 import base64
-import json
 import requests
 from . import settings
-from .internal_types import *
-from .utils import *
+from .internal_types import CombinedMessage
+from . import utils
 
 # Seperate out the logic from the actor implementation so we can sub-class
 # since you can not directly sub-class actors.
+
+
 class SateliteClientBase():
     """
     Base client class for talking to the swarm.space APIs.
     """
+
     def __init__(self, idx, poolsize):
         self.idx = idx
         self.poolsize = poolsize
-        self.user_pool = LazyNamedPool("user", poolsize)
+        # Make sure we get enough messages for pool magic but also not too many
+        self._page_request_size = max(
+            min(50, 10 * poolsize),
+            poolsize)
+        self.user_pool = utils.LazyNamedPool("user", poolsize)
         self.max_internal_retries = 100
         self.session = requests.Session()
         self.delay = 60
-        self._loginHeaders = {'Content-Type': 'application/x-www-form-urlencoded'}
+        self._loginHeaders = {
+            'Content-Type': 'application/x-www-form-urlencoded'}
         self._loginParams = settings.swarm_login_params
         self._hdrs = {'Accept': 'application/json'}
         self._hiveBaseURL = settings.hiveBaseURL
@@ -37,7 +44,7 @@ class SateliteClientBase():
                 self._login()
                 while True:
                     await asyncio.sleep(self.delay)
-                    await self.check_msgs(s)
+                    await self.check_msgs()
             except Exception as e:
                 print(f"Error {e}, retrying")
                 internal_retries = internal_retries + 1
@@ -51,19 +58,29 @@ class SateliteClientBase():
             headers=self._loginHeaders)
         if res.status_code != 200:
             raise Exception(f"Login failure, exiting actor {res}")
-            
+
     async def check_msgs(self):
-        res = self.session.get(getMessageURL, headers=hdrs, params={'count': 10, 'status': 0})
+        # TODO: Add message type
+        res = self.session.get(
+            self.getMessageURL,
+            headers=self.hdrs,
+            params={'count': self._page_request_size, 'status': 0})
         messages = res.json()
         for item in messages:
             # Is this a message we are responsible for
-            if int(item["messageId"]) % poolsize == idx:
-                await self._process_mesage(item)
-                self.session.post(ackMessageURL.format(item['packetId']), headers=hdrs)
+            if int(item["messageId"]) % self.poolsize == self.idx:
+                try:
+                    await self._process_mesage(item)
+                except Exception as e:
+                    logging.error(f"Error {e} processing {item}")
+                self.session.post(
+                    self._ackMessageURL.format(item['packetId']),
+                    headers=self.hdrs)
 
-    async def _process_message(item):
+    async def _process_message(self, item):
         raw_msg_data = item["data"]
-        messagedata = MessageDataPB()
+        # temp hack, fix once we add the PB
+        messagedata = MessageDataPB()  # noqa
         messagedata.ParseFromString(base64.b64decode(raw_msg_data))
         for message in messagedata.message:
             cm = CombinedMessage(
@@ -71,7 +88,10 @@ class SateliteClientBase():
                 deviceid=item["deviceId"]
             )
             # TODO: Update the count and check user
-            self.user_pool.get_pool().submit(lambda actor, msg: actor.send_msg, cm)
+            self.user_pool.get_pool().submit(
+                lambda actor,
+                msg: actor.send_msg, cm)
+
 
 @ray.remote(max_restarts=-1, lifetime="detached")
 class SateliteClient(SateliteClientBase):

@@ -1,23 +1,25 @@
 import unittest
 import ray
 import os
-from .test_utils import *
+from . import test_utils
 
 os.environ["hivebaseurl"] = "http://www.farts.com"
 
-from .satelite import *
+from . import satelite  # noqa: E402
 
 
 class StandaloneSateliteTests(unittest.TestCase):
     def test_login_fails(self):
-        s = SateliteClientBase(0, 1)
+        s = satelite.SateliteClientBase(0, 1)
         self.assertRaises(Exception, s._login)
 
+
 @ray.remote
-class SateliteClientForTesting(SateliteClientBase):
+class SateliteClientForTesting(satelite.SateliteClientBase):
     def __init__(self, idx, poolsize):
-        SateliteClientBase.__init__(self, idx, poolsize)
-        self.user_pool = FakeLazyNamedPool("user", 1)
+        satelite.SateliteClientBase.__init__(self, idx, poolsize)
+        self.user_pool = test_utils.FakeLazyNamedPool("user", 1)
+
 
 class RaySateliteTests(unittest.TestCase):
     """
@@ -31,8 +33,8 @@ class RaySateliteTests(unittest.TestCase):
     def tearDownClass(cls):
         ray.shutdown()
 
-    def test_satelite_client_test_construct(self):
-        satelite = SateliteClientForTesting.remote(0, 1)
+    def test_satelite_client_construct(self):
+        mysatelite = satelite.SateliteClient.remote(0, 1)  # noqa: F841
 
     def test_satelite_client_test_construct(self):
-        satelite = SateliteClientForTesting.remote(0, 1)
+        mysatelite = SateliteClientForTesting.remote(0, 1)  # noqa: F841

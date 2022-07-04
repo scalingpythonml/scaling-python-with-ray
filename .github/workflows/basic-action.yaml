@@ -51,3 +51,6 @@ jobs:
     # Run the tests.
     - name: Run tests
       run: nosetests -vs .
+    # Verify the style
+    - name: Style check
+      run: flake8 .

@@ -2,17 +2,20 @@ import ray
 from ray.util import ActorPool
 import time
 
+
 def flat_map(f, xs):
     ys = []
     for x in xs:
         ys.extend(f(x))
     return ys
 
+
 class LazyNamedPool:
     """
     Lazily constructed pool by name.
     """
-    def __init__(self, name, size, min_size = 1):
+
+    def __init__(self, name, size, min_size=1):
         self._actors = []
         self.name = name
         self.size = size
@@ -40,7 +43,7 @@ class LazyNamedPool:
         # If we got more actors
         if (len(new_actors) > len(self._actors)):
             self._actors = new_actors
-            self._pool = ActorPool(new_actors)            
+            self._pool = ActorPool(new_actors)
         return self._pool
 
 

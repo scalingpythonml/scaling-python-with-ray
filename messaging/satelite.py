@@ -1,44 +1,42 @@
+import asyncio
 import ray
 from pprint import pprint
 import base64
 import json
 import requests
-from settings import *
-from internal_types import *
-from utils import *
+from . import settings
+from .internal_types import *
+from .utils import *
 
-
-ray.init()
-
-@ray.remote(max_restarts=-1, lifetime="detached")
-class SateliteClient():
+# Seperate out the logic from the actor implementation so we can sub-class
+# since you can not directly sub-class actors.
+class SateliteClientBase():
     """
-    Connects to swam.space API.
+    Base client class for talking to the swarm.space APIs.
     """
-    loginHeaders = {'Content-Type': 'application/x-www-form-urlencoded'}
-    hdrs = {'Accept': 'application/json'}
-    hiveBaseURL = 'https://bumblebee.hive.swarm.space/hive'
-    loginURL = hiveBaseURL + '/login'
-    getMessageURL = hiveBaseURL + '/api/v1/messages'
-    ackMessageURL = hiveBaseURL + '/api/v1/messages/rxack/{}'
-
     def __init__(self, idx, poolsize):
         self.idx = idx
         self.poolsize = poolsize
         self.user_pool = LazyNamedPool("user", poolsize)
         self.max_internal_retries = 100
         self.session = requests.Session()
+        self.delay = 60
+        self._loginHeaders = {'Content-Type': 'application/x-www-form-urlencoded'}
+        self._loginParams = settings.swarm_login_params
+        self._hdrs = {'Accept': 'application/json'}
+        self._hiveBaseURL = settings.hiveBaseURL
+        self._loginURL = self._hiveBaseURL + '/login'
+        self._getMessageURL = self._hiveBaseURL + '/api/v1/messages'
+        self._ackMessageURL = self._hiveBaseURL + '/api/v1/messages/rxack/{}'
         print(f"Starting actor {idx}")
-        asyncio.run(self.dowork())
-        print("Done!")
 
-    async def workloop(self):
+    async def run(self):
         internal_retries = 0
         while True:
             try:
                 self._login()
                 while True:
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(self.delay)
                     await self.check_msgs(s)
             except Exception as e:
                 print(f"Error {e}, retrying")
@@ -47,10 +45,12 @@ class SateliteClient():
                     raise e
 
     def _login(self):
-        res = self.session.post(loginURL, data=loginParams, headers=loginHeaders)
+        res = self.session.post(
+            self._loginURL,
+            data=self._loginParams,
+            headers=self._loginHeaders)
         if res.status_code != 200:
-            print(f"Login failure, exiting actor {res}")
-            exit(1)
+            raise Exception(f"Login failure, exiting actor {res}")
             
     async def check_msgs(self):
         res = self.session.get(getMessageURL, headers=hdrs, params={'count': 10, 'status': 0})
@@ -71,13 +71,13 @@ class SateliteClient():
                 deviceid=item["deviceId"]
             )
             # TODO: Update the count and check user
-            self.user_pool.get_pool().submit(lambda smtp_actor, msg: smtp_actor.send_msg, cm)
-        
+            self.user_pool.get_pool().submit(lambda actor, msg: actor.send_msg, cm)
 
-def make_actor(idx):
-    return (SateliteClient.options(name=f"satelite_{idx}")
-            .remote(idx, actor_count))
-actor_count = 10
-actor_idx = list(range(0, actor_count))
-actors = list(map(make_actor, actor_idx))
-satelite_pool = ActorPool(actors)
+@ray.remote(max_restarts=-1, lifetime="detached")
+class SateliteClient(SateliteClientBase):
+    """
+    Connects to swarm.space API.
+    """
+
+    def __init__(self, idx, poolsize):
+        SateliteClientBase.__init__(idx, poolsize)

@@ -38,6 +38,7 @@ jobs:
       run: |
         conda info
         conda list
+        find / |grep conda
     - name: Install requirements
       run: |
         pip install -r requirements.txt

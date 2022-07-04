@@ -34,6 +34,9 @@ jobs:
       with:
         miniconda-version: "latest"
         python-version: 3.8
+    - name: Activate
+      run: |
+        conda activate
     - name: Install requirements
       run: |
         pip install -r requirements.txt

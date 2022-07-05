@@ -6,6 +6,7 @@ import requests
 from . import settings
 from .internal_types import CombinedMessage
 from . import utils
+from .proto.MessageDataPB_pb2 import MessageDataPB
 
 # Seperate out the logic from the actor implementation so we can sub-class
 # since you can not directly sub-class actors.

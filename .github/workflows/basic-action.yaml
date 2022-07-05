@@ -53,4 +53,7 @@ jobs:
       run: nosetests -vs .
     # Verify the style
     - name: Style check
-      run: flake8 .
+      run: flake8 . --max-line-length=100  --exclude "*/proto/*"
+    # Check the types
+    - name: Type check
+      run: mypy . --exclude "/proto/"

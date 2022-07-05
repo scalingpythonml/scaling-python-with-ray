@@ -1,5 +1,8 @@
-ray==1.13.0
+https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-3.0.0.dev0-cp38-cp38-manylinux2014_x86_64.whl
 protobuf<4.0.0,>=3.15.3
 nose
 coverage
 flake8
+mypy
+types-protobuf
+types-requests

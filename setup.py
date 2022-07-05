@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup  # type: ignore
 
 setup(
     name='message-backend-ray',
@@ -12,7 +12,7 @@ setup(
     long_description='',
     install_requires=[
         'unittest2',
-        'ray==1.13.0',
+        'ray',
         'protobuf<4.0.0,>=3.15.3'
     ]
 )

@@ -6,7 +6,10 @@ import requests
 from . import settings
 from .internal_types import CombinedMessage
 from . import utils
-from .proto.MessageDataPB_pb2 import MessageDataPB
+from google.protobuf import text_format
+from .proto.MessageDataPB_pb2 import MessageDataPB  # type: ignore
+from typing import AsyncIterator, List
+
 
 # Seperate out the logic from the actor implementation so we can sub-class
 # since you can not directly sub-class actors.
@@ -17,7 +20,7 @@ class SateliteClientBase():
     Base client class for talking to the swarm.space APIs.
     """
 
-    def __init__(self, idx, poolsize):
+    def __init__(self, idx: int, poolsize: int):
         self.idx = idx
         self.poolsize = poolsize
         # Make sure we get enough messages for pool magic but also not too many
@@ -36,7 +39,7 @@ class SateliteClientBase():
         self._loginURL = self._hiveBaseURL + '/login'
         self._getMessageURL = self._hiveBaseURL + '/api/v1/messages'
         self._ackMessageURL = self._hiveBaseURL + '/api/v1/messages/rxack/{}'
-        print(f"Starting actor {idx}")
+        logging.info(f"Starting actor {idx}")
 
     async def run(self):
         internal_retries = 0
@@ -47,7 +50,7 @@ class SateliteClientBase():
                     await asyncio.sleep(self.delay)
                     await self.check_msgs()
             except Exception as e:
-                print(f"Error {e}, retrying")
+                logging.info(f"Error {e}, retrying")
                 internal_retries = internal_retries + 1
                 if (internal_retries > self.max_internal_retries):
                     raise e
@@ -78,23 +81,45 @@ class SateliteClientBase():
                     self._ackMessageURL.format(item['packetId']),
                     headers=self.hdrs)
 
-    async def _process_message(self, item):
+    async def _decode_message(self, item: dict) -> AsyncIterator[CombinedMessage]:
+        """
+        Decode a message. Note: result is not serializable.
+        """
         raw_msg_data = item["data"]
+        logging.info(f"msg: {raw_msg_data}")
         # temp hack, fix once we add the PB
         messagedata = MessageDataPB()  # noqa
-        messagedata.ParseFromString(base64.b64decode(raw_msg_data))
+        bin_data = base64.b64decode(raw_msg_data)
+        # Note: this really does no validation, so if it gets a message instead
+        # of MessageDataPb it just gives back nothing
+        messagedata.ParseFromString(bin_data)
+        logging.info(f"Formatted: {text_format.MessageToString(messagedata)}")
+        if (len(messagedata.message) < 1):
+            logging.warn(f"Received {raw_msg_data} with no messages?")
         for message in messagedata.message:
-            cm = CombinedMessage(
+            yield CombinedMessage(
                 text=message.text, to=message.to, protocol=message.protocol,
                 deviceid=item["deviceId"]
             )
-            # TODO: Update the count and check user
+
+    async def _ser_decode_message(self, item: dict) -> List[CombinedMessage]:
+        """
+        Decode a message. Serializeable but blocking
+        """
+        gen = self._decode_message(item)
+        # See PEP-0530
+        return [i async for i in gen]
+
+    async def _process_message(self, item: dict):
+        messages = self._decode_message(item)
+        # TODO: Update the count and check user
+        async for message in messages:
             self.user_pool.get_pool().submit(
-                lambda actor,
-                msg: actor.send_msg, cm)
+                lambda actor, msg: actor.send_msg,
+                message)
 
 
-@ray.remote(max_restarts=-1, lifetime="detached")
+@ray.remote(max_restarts=-1)
 class SateliteClient(SateliteClientBase):
     """
     Connects to swarm.space API.

@@ -6,3 +6,5 @@ flake8
 mypy
 types-protobuf
 types-requests
+aiosmtplib
+aiosmtpd

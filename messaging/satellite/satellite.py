@@ -3,11 +3,11 @@ import ray
 import logging
 import base64
 import requests
-from . import settings
-from .internal_types import CombinedMessage
-from . import utils
+from messaging.settings import settings
+from messaging.internal_types import CombinedMessage
+from messaging.utils import utils
 from google.protobuf import text_format
-from .proto.MessageDataPB_pb2 import MessageDataPB  # type: ignore
+from messaging.proto.MessageDataPB_pb2 import MessageDataPB  # type: ignore
 from typing import AsyncIterator, List
 
 
@@ -15,7 +15,7 @@ from typing import AsyncIterator, List
 # since you can not directly sub-class actors.
 
 
-class SateliteClientBase():
+class SatelliteClientBase():
     """
     Base client class for talking to the swarm.space APIs.
     """
@@ -99,7 +99,7 @@ class SateliteClientBase():
         for message in messagedata.message:
             yield CombinedMessage(
                 text=message.text, to=message.to, protocol=message.protocol,
-                deviceid=item["deviceId"]
+                msg_from=item["deviceId"], from_device=True
             )
 
     async def _ser_decode_message(self, item: dict) -> List[CombinedMessage]:
@@ -115,15 +115,12 @@ class SateliteClientBase():
         # TODO: Update the count and check user
         async for message in messages:
             self.user_pool.get_pool().submit(
-                lambda actor, msg: actor.send_msg,
+                lambda actor, msg: actor.handle_message,
                 message)
 
 
 @ray.remote(max_restarts=-1)
-class SateliteClient(SateliteClientBase):
+class SatelliteClient(SatelliteClientBase):
     """
     Connects to swarm.space API.
     """
-
-    def __init__(self, idx, poolsize):
-        SateliteClientBase.__init__(idx, poolsize)

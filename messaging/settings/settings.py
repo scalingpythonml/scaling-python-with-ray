@@ -6,3 +6,7 @@ hiveBaseURL = os.getenv(
     "hivebaseurl", 'https://bumblebee.hive.swarm.space/hive')
 
 swarm_login_params = {'username': swarm_username, 'password': swarm_password}
+
+mail_server = os.getenv("mail_server")
+mail_username = os.getenv("mail_username")
+mail_password = os.getenv("mail_password")

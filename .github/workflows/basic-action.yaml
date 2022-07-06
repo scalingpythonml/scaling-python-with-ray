@@ -50,10 +50,7 @@ jobs:
         conda list
     # Run the tests.
     - name: Run tests
-      run: nosetests -vs .
+      run: nosetests -vs --traverse-namespace messaging
     # Verify the style
     - name: Style check
-      run: flake8 . --max-line-length=100  --exclude "*/proto/*"
-    # Check the types
-    - name: Type check
-      run: mypy . --exclude "/proto/"
+      run: flake8 messaging --max-line-length=100  --exclude "*/proto/*"

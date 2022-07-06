@@ -1,3 +1,4 @@
+import ray
 from ray.util import ActorPool
 from .satelite import SateliteClient
 
@@ -14,3 +15,9 @@ actors = list(map(make_satelite_actor, actor_idx))
 for actor in actors:
     actor.run.remote()
 satelite_pool = ActorPool(actors)
+# Schedule some of the mail actors, since Kube services doesn't let us dynamically
+# bind different ports we only want to do one per-host, but we avoid STRICT_SPREAD
+# because of the automatic placement restrictions.
+mail_pg = ray.util.placement_group.placement_group(
+    strategy="SPREAD",
+    lifetime="detached")

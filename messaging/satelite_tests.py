@@ -80,4 +80,4 @@ class RaySateliteTests(unittest.TestCase):
         msgs_ref = mysatelite._ser_decode_message.remote(raw_msg_item)
         msgs = ray.get(msgs_ref)
         self.assertEquals(len(msgs), 1)
-        self.assertEquals(msgs[0].deviceid, 1)
+        self.assertEquals(msgs[0].msg_from, 1)

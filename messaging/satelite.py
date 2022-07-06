@@ -99,7 +99,7 @@ class SateliteClientBase():
         for message in messagedata.message:
             yield CombinedMessage(
                 text=message.text, to=message.to, protocol=message.protocol,
-                deviceid=item["deviceId"]
+                msg_from=item["deviceId"], from_device=True
             )
 
     async def _ser_decode_message(self, item: dict) -> List[CombinedMessage]:
@@ -115,7 +115,7 @@ class SateliteClientBase():
         # TODO: Update the count and check user
         async for message in messages:
             self.user_pool.get_pool().submit(
-                lambda actor, msg: actor.send_msg,
+                lambda actor, msg: actor.handle_message,
                 message)
 
 

@@ -3,11 +3,11 @@ import ray
 import logging
 import base64
 import requests
-from . import settings
-from .internal_types import CombinedMessage
-from . import utils
+from messaging.settings import settings
+from messaging.internal_types import CombinedMessage
+from messaging.utils import utils
 from google.protobuf import text_format
-from .proto.MessageDataPB_pb2 import MessageDataPB  # type: ignore
+from messaging.proto.MessageDataPB_pb2 import MessageDataPB  # type: ignore
 from typing import AsyncIterator, List
 
 
@@ -15,7 +15,7 @@ from typing import AsyncIterator, List
 # since you can not directly sub-class actors.
 
 
-class SateliteClientBase():
+class SatelliteClientBase():
     """
     Base client class for talking to the swarm.space APIs.
     """
@@ -120,10 +120,7 @@ class SateliteClientBase():
 
 
 @ray.remote(max_restarts=-1)
-class SateliteClient(SateliteClientBase):
+class SatelliteClient(SatelliteClientBase):
     """
     Connects to swarm.space API.
     """
-
-    def __init__(self, idx, poolsize):
-        SateliteClientBase.__init__(idx, poolsize)

@@ -3,10 +3,10 @@ import ray
 import logging
 import requests
 from typing import Optional
-from . import utils
+from messaging.utils.utils import LazyNamedPool
 import os
-from .internal_types import CombinedMessage
-from .proto.MessageDataPB_pb2 import Protocol  # type: ignore
+from messaging.internal_types import CombinedMessage
+from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
 
 
 class MailServerActorBase():
@@ -14,10 +14,11 @@ class MailServerActorBase():
     Base server mail actor class
     """
 
-    def __init__(self, idx: int, poolsize: int, port: int, hostname: str, label: Optional[str]):
+    def __init__(self, idx: int, poolsize: int, port: int, hostname: str,
+                 label: Optional[str] = None):
         self.idx = idx
         self.poolsize = poolsize
-        self.user_pool = utils.LazyNamedPool("user", poolsize)
+        self.user_pool = LazyNamedPool("user", poolsize)
         self.server = Controller(
             handler=self,
             hostname=hostname,
@@ -29,11 +30,11 @@ class MailServerActorBase():
 
     def apply_label(self):
         # See https://stackoverflow.com/questions/36147137/kubernetes-api-add-label-to-pod
-        patch_json = f"""[
- {
- "op": "add", "path": "/metadata/labels/{self.label}", "value": "present"
- }
-]"""
+        label = self.label
+        patch_json = (
+            "[{" +
+            f""" "op": "add", "path": "/metadata/labels/{label}", "value": "present" """ +
+            "}]")
         kube_host = os.getenv("KUBERNETES_SERVICE_HOST")
         kube_port = os.getenv("KUBERNETES_PORT_443_TCP_PORT", "443")
         pod_namespace = os.getenv("POD_NAMESPACE")

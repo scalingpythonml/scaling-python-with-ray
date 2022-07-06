@@ -2,17 +2,13 @@ import ray
 import aiosmtplib
 from email.message import EmailMessage
 import logging
-from . import settings
+from messaging.settings import settings
 
 
 class MailClientActorBase(object):
     """
     Base mail client actor class
     """
-
-    def __init__(self, idx: int, poolsize: int):
-        self.idx = idx
-        self.poolsize = poolsize
 
     async def send_msg(self, msg_from: str, msg_to: str, data: str):
         message = EmailMessage()

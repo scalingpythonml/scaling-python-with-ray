@@ -28,6 +28,7 @@ class MailServerActorBase():
             port=port)
         self.server.start()
         self.label = label
+        self.hostname = hostname
         if label is not None:
             self.apply_label()
 

@@ -4,6 +4,7 @@ from os.path import exists
 # Start Ray
 ray.init()
 
+#tag::persistent_actor[]
 @ray.remote
 class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str, basedir: str = '.'):
@@ -51,6 +52,8 @@ class Account:
         bytes = ray.cloudpickle.dumps({'balance' : self.balance, 'minimal' : self.minimal})
         with open(self.basedir + '/' + self.key, "wb") as f:
             f.write(bytes)
+#end::persistent_actor[]
+
 
 account_actor = Account.options(name='Account')\
     .remote(balance=100.,minimal_balance=20., account_key='1234567')

@@ -3,6 +3,7 @@ import asyncio
 
 ray.init()
 
+#tag::actor[]
 @ray.remote
 class AsyncActor:
     async def computation(self, num):
@@ -11,6 +12,7 @@ class AsyncActor:
             await asyncio.sleep(1)
             print(f'Actor slept for {x+1} sec')
         return num
+#end::actor[]
 
 actor = AsyncActor.options(max_concurrency=5).remote()
 

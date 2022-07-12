@@ -67,7 +67,8 @@ class MailServerActorBase():
         parsed_email = message_from_bytes(envelope.content, policy=policy.SMTPUTF8)
         text = ""
         if "subject" in parsed_email:
-            text = text + parsed_email["subject"]
+            subject = parsed_email["subject"]
+            text = f"{subject}\n"
         body = None
         # You would think "get_body" would give us the body but... maybe not? ugh
         try:
@@ -85,7 +86,7 @@ class MailServerActorBase():
                     # not multipart - i.e. plain text, no attachments, keeping fingers crossed
             else:
                 body = parsed_email.get_payload(decode=True)
-        text = text + body
+        text = f"{text}{body}"
         text = text.replace("\r\n", "\n").rstrip("\n")
         for rcpt in envelope.rcpt_tos:
             message = CombinedMessage(

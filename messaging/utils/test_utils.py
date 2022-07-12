@@ -8,7 +8,8 @@ class FakeLazyNamedPool():
 
 
 class FakePool():
-    submitted: list = []
+    def __init__(self):
+        self.submitted: list = []
 
     def submit(self, *params):
         self.submitted.append(params)

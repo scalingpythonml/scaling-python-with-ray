@@ -33,3 +33,19 @@ class StandaloneMailServerActorTests(unittest.TestCase):
         self.assertEquals(self.pool.submitted[0][1].text, msg_text)
         self.assertEquals(self.pool.submitted[0][1].protocol, EMAIL_PROTOCOL)
         self.assertEquals(self.pool.submitted[0][1].from_device, False)
+
+    def test_smpt_emailmessage_send(self):
+        from email.message import EmailMessage
+
+        client = Client("localhost", self.port)
+        msg = EmailMessage()
+        msg_text = "Hi Boop, this is farts."
+        msg_subject = "Maximum farts?"
+        msg.set_content(msg_text)
+        msg['From'] = "farts@farts.com"
+        msg['To'] = "boop@spacebeaver.com"
+        msg['Subject'] = msg_subject
+        client.send_message(msg)
+        self.assertEquals(self.pool.submitted[0][1].text, f"{msg_subject}\n{msg_text}")
+        self.assertEquals(self.pool.submitted[0][1].protocol, EMAIL_PROTOCOL)
+        self.assertEquals(self.pool.submitted[0][1].from_device, False)

@@ -230,7 +230,7 @@ If you're aggregating by partition key, Dask can compute the aggregation without
 
 The first way to speed up your aggregations is to reduce the columns that you are aggregating on, since the fastest data to process is no data. Finally, when possible, doing multiple aggregations at the same time reduces the number of times the same data needs to be shuffled, meaning if you need to compute the average and the max you should compute both at the same time. 
 
-<<max_mean>>
+[[max_mean]]
 .Dask DataFrame Max Mean Together
 ====
 [source, python]
@@ -267,7 +267,7 @@ In some cases, like a pure summation, you don't need to do any post-processing o
 Not all aggregations must be "byKey"; you can also compute aggregations across all rows. Dask's custom aggregation interface, however, is only exposed with "byKey" operations. 
 Dask's built-in full DataFrame aggregations use a lower-level interface called `apply_contact_apply`, for partial aggregations. Rather than learn two different APIs for partial aggregations, we prefer to do a static `groupby` by providing a constant grouping function. This way we only have to know one interface for aggregations. You can use this to see what the aggregate COVID-19 numbers are across the DataFrame as shown in <<agg_entire>>.
 
-<<agg_entire>>
+[[agg_entire]]
 .Dask DataFrame Aggregate Entire DataFrame
 ====
 [source, python]

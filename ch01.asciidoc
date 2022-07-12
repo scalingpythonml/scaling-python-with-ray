@@ -1,4 +1,14 @@
+[role="pagenumrestart"]
 == What Is Ray?
+
+.A Note for Early Release Readers
+****
+With Early Release ebooks, you get books in their earliest form&mdash;the authors' raw and unedited content as they write—so you can take advantage of these technologies long before the official release of these titles.
+
+This will be the first chapter of the final book. Please note that the GitHub repo will be made active later on.
+
+If you have comments about how we might improve the content and/or examples in this book, or if you notice missing material within this chapter, please reach out to the editor at vwilson@oreilly.com.
+****
 
 Ray is primarily a Python toolfootnote:[You can also use Ray from Java. Like many Python applications, under the hood there is a lot C++ and some Fortran. Ray streaming also has some Java components.] for "Fast and Simple Distributed Computing."
 The same labfootnote:[Not exactly the same, but the subsequent iteration of. Its name is the https://rise.cs.berkeley.edu[RISE Lab].] at University of California Berkeley that created the initial software that eventually became Apache Spark also created the first version of Ray. The researchers from that lab have started a company, Anyscale, to continue developing and offer products and services around Ray.

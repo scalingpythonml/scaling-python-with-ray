@@ -1,15 +1,15 @@
 class FakeLazyNamedPool():
     def __init__(self, name, size, min_size=1):
-        self.pool = FakePool()
         pass
 
     def get_pool(self):
-        return self.pool
+        return FakePool()
 
 
 class FakePool():
-    submitted: list = []
+    def __init__(self):
+        self.called = []
 
     def submit(self, *params):
-        self.submitted.append(params)
+        self.called.append(params)
         return True

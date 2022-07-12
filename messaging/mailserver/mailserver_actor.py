@@ -1,3 +1,4 @@
+from email import message_from_bytes, policy
 from aiosmtpd.controller import Controller
 import ray
 import logging
@@ -19,11 +20,13 @@ class MailServerActorBase():
         self.idx = idx
         self.poolsize = poolsize
         self.user_pool = LazyNamedPool("user", poolsize)
+        self.domain = "spacebeaver.com"
         self.server = Controller(
             handler=self,
             hostname=hostname,
             ident="SpaceBeaver (PCFLabsLLC)",
             port=port)
+        self.server.start()
         self.label = label
         if label is not None:
             self.apply_label()
@@ -49,7 +52,7 @@ class MailServerActorBase():
         Call back for RCPT. This only accept e-mail for us, no relaying.
         """
         logging.info(f"RCPT to with {address} received.")
-        if not address.endswith(f"@{self.hostname}"):
+        if not address.endswith(f"@{self.domain}"):
             return '550 not relaying to that domain'
         # Do we really want to support multiple e-mails? idk.
         envelope.rcpt_tos.append(address)
@@ -61,7 +64,29 @@ class MailServerActorBase():
         """
         logging.info(f"Received message {envelope}")
         print('Message for %s' % envelope.rcpt_tos)
-        text = envelope.subject + envelope.content.decode('utf-8')
+        parsed_email = message_from_bytes(envelope.content, policy=policy.SMTPUTF8)
+        text = ""
+        if "subject" in parsed_email:
+            text = text + parsed_email["subject"]
+        body = None
+        # You would think "get_body" would give us the body but... maybe not? ugh
+        try:
+            body = parsed_email.get_body(preferencelist=('plain', 'html',)).get_content()
+        except Exception:
+            if parsed_email.is_multipart():
+                for part in parsed_email.walk():
+                    ctype = part.get_content_type()
+                    cdispo = str(part.get('Content-Disposition'))
+
+                    # skip any text/plain (txt) attachments
+                    if ctype == 'text/plain' and 'attachment' not in cdispo:
+                        body = part.get_payload(decode=True)  # decode
+                        break
+                    # not multipart - i.e. plain text, no attachments, keeping fingers crossed
+            else:
+                body = parsed_email.get_payload(decode=True)
+        text = text + body
+        text = text.replace("\r\n", "\n").rstrip("\n")
         for rcpt in envelope.rcpt_tos:
             message = CombinedMessage(
                 text=text, to=rcpt, msg_from=envelope.mail_from, from_device=False,

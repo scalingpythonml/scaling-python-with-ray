@@ -202,7 +202,7 @@ While understanding shuffles is important for performance, feel free to skip thi
 
 One situation which can trigger the need for a shuffle is a rolling window, where at the edges of a partition your function needs some records from its neighbors. Dask Dataframe has a special `map_overlap` function where you can specify a "look-after"footnote:[ Sometimes also called a look-ahead] and "look-before"footnote:[ Sometimes also called a look-back] window of rows to transfer (either an integer or a time delta). The simplest example taking advantage of this is a rolling average.
 
-<<rolling_date_ex>>
+[[rolling_date_ex]]
 .Dask DataFrame rolling average 
 ====
 [source, python]
@@ -465,9 +465,9 @@ Unlike Ray, Dask is generally lazy, meaning it does not evaluate data until forc
 https://modin.readthedocs.io/en/stable/[Modin], like Dask DataFrame, is designed to largely be a plug-in replacement for pandas DataFrame. Modin DataFrames follow the same general performance as Dask DataFrames, with a few caveats. Modin offers less control over internals, which can limit performance for some applications. Since Modin and Dask DataFrame are sufficiently similar we won't cover it here except to say it's another option if Dask doesn't meet your needs.
 
 .Modin
-====
+****
 Modin is a new library designed to accelerate Pandas by automatically distributing the computation across all of the system’s available CPU cores. With that, Modin claims to be able to get nearly linear speedup to the number of CPU cores on your system for Pandas DataFrames of any size.
-====
+****
 
 Since Modin on Ray is so similar to Dask DataFrame we've decided to skip repeating the examples from Dask on Ray as they would not change substantially.
  

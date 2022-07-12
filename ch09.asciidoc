@@ -92,6 +92,7 @@ include::examples/ray_examples/data/Ray-DataSets.py[tags=wc_write]
 ====
 
 If Ray does not have I/O support for your desired format or filesystem, you should check and see if any of the other tools that Ray supports does. Then, as covered in the next section, you can convert your DataSet from/to the desired tool.
+
 === Using Ray Datasets with Different Tools
 
 Ray has built-in tooling to share data between the different data tools running on Ray.  Most of these tools have their own internal representations of the data, but Ray handles converting the data as needed. Before you first use a Dataset with Spark or Dask you need to run a bit of "setup" code so that they delegate their execution to Ray, as shown in <<ex_setup_dask>> and <<ex_setup_spark>>.
@@ -183,7 +184,7 @@ Indexing into a DataFrame is one of the powerful features of pandas, but comes w
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=index_covid_data]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=index_covid_data]
 ----
 ====
 
@@ -206,7 +207,7 @@ One situation which can trigger the need for a shuffle is a rolling window, wher
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=rolling_date_ex]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=rolling_date_ex]
 ----
 ====
 
@@ -235,7 +236,7 @@ The first way to speed up your aggregations is to reduce the columns that you ar
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=max_mean]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=max_mean]
 ----
 ====
 
@@ -256,7 +257,7 @@ The fastest way to understand how to use partial aggregation is by looking at an
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=custom_agg]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=custom_agg]
 ----
 ====
 
@@ -272,7 +273,7 @@ Dask's built-in full DataFrame aggregations use a lower-level interface called `
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=agg_entire]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=agg_entire]
 ----
 ====
 
@@ -283,7 +284,7 @@ If built-in aggregations exist they will likely be better than anything we may b
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=custom_agg_hyperloglog]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=custom_agg_hyperloglog]
 ----
 ====
 
@@ -322,7 +323,7 @@ If you plan to use rolling windows, you will likely need to ensure you have the 
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=set_index_with_rolling_window]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=set_index_with_rolling_window]
 ----
 ====
 
@@ -338,7 +339,7 @@ So far you've had to specify the number of partitions, or the specific divisions
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=repartition]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=repartition]
 ----
 ====
 
@@ -360,7 +361,7 @@ As you've seen at the start of this chapter when writing DataFrame, each partiti
 ====
 [source, python]
 ----
-include:./examples/dask/Dask-Ch4-DataFrames.py[tags=filna_ex]
+include::/examples/dask/Dask-Ch4-DataFrames.py[tags=filna_ex]
 ----
 ====
 

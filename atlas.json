@@ -5,7 +5,7 @@
     "titlepage.html",
     "copyright.html",
     "toc.html",
-    "preface.asciidoc",  
+    "preface.asciidoc",
     "ch01.asciidoc",
     "ch02.asciidoc",
     "ch03.asciidoc",
@@ -13,6 +13,7 @@
     "ch05.asciidoc",
     "ch06.asciidoc",
     "ch07.html",
+    "ch09.asciidoc",
     "author_bio.html"
   ],
   "formats": {

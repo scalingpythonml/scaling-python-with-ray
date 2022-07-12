@@ -30,6 +30,7 @@ As you saw in <<ds_hello>>, you can create Datasets from local collections by ca
 .Apache Arrow
 ****
 Apache Arrow defines a language-independent columnar memory format for flat and hierarchical data. The key components of Arrow include:
+
 *  Rich data type sets covering both SQL and JSON types, such as int, BigInt, decimal, varchar, map, struct, and array.
 *  Uses columnar in-memory representations allowing to support an arbitrarily complex record structure built on top of the defined data types.
 *  Support for data structures including pick-lists,footnote:[Like an enum] hash tables and queues.
@@ -40,7 +41,7 @@ Apache Arrow defines a language-independent columnar memory format for flat and 
 *  Memory persistence tools for short-term persistence through non-volatile memory, SSD or HDD.
 ****
 
-	Ray uses https://arrow.apache.org/[Apache Arrow]  to load external data into Datasets, which supports a number of different file formats and file systems. The formats, at present, are csv, json, parquet, numpy, text, and raw binary. The functions for loading data follow the `read_[format]` pattern and are in the `ray.data` module.
+Ray uses https://arrow.apache.org/[Apache Arrow]  to load external data into Datasets, which supports a number of different file formats and file systems. The formats, at present, are csv, json, parquet, numpy, text, and raw binary. The functions for loading data follow the `read_[format]` pattern and are in the `ray.data` module.
 
 .Load Local Data
 [[load_csv_local_fs]]
@@ -81,7 +82,7 @@ include::examples/ray/data/Ray-Datasets.py[tags=load_from_https]
 At present, the protocol is incorrectly stripped off, so you need to put it in twice, for example when loading data from an https website you would load from `https://https://[someurlhere].com`.
 ====
 
-	Ray has the ability to write in all of the formats it can read from. The writing functions, like the read functions, follow a pattern of `write_[format]`. There are a few minor differences between the read path and the write path. Instead of taking in a `parallelism` parameter, the write path always writes with the parallelism of the input DataSet.
+Ray has the ability to write in all of the formats it can read from. The writing functions, like the read functions, follow a pattern of `write_[format]`. There are a few minor differences between the read path and the write path. Instead of taking in a `parallelism` parameter, the write path always writes with the parallelism of the input DataSet.
 
 ====
 [source, python]
@@ -90,10 +91,10 @@ include::examples/ray/data/Ray-Datasets.py[tags=wc_write]
 ----
 ====
 
-	If Ray does not have I/O support for your desired format or filesystem, you should check and see if any of the other tools that Ray supports does. Then, as covered in the next section, you can convert your DataSet from/to the desired tool.
+If Ray does not have I/O support for your desired format or filesystem, you should check and see if any of the other tools that Ray supports does. Then, as covered in the next section, you can convert your DataSet from/to the desired tool.
 === Using Ray Datasets with Different Tools
 
-	Ray has built-in tooling to share data between the different data tools running on Ray.  Most of these tools have their own internal representations of the data, but Ray handles converting the data as needed. Before you first use a Dataset with Spark or Dask you need to run a bit of "setup" code so that they delegate their execution to Ray, as shown in <<ex_setup_dask>> and <<ex_setup_spark>>.
+Ray has built-in tooling to share data between the different data tools running on Ray.  Most of these tools have their own internal representations of the data, but Ray handles converting the data as needed. Before you first use a Dataset with Spark or Dask you need to run a bit of "setup" code so that they delegate their execution to Ray, as shown in <<ex_setup_dask>> and <<ex_setup_spark>>.
 
 [[ex_setup_dask]]
 .Setup Dask on Ray
@@ -123,16 +124,13 @@ include::examples/ray/data/Ray-Datasets.py[tags=to_dask]
 ----
 ====
 
-
-
 .Some of the different tools you can connect with Arrow and Ray
-
 image::images/fig0901.png[]
 
 
 [NOTE]
 ====
-Datasets do not use Ray's runtime environments for dependencies, so  you must have your desired tools installed in your worker image, see <<appa_deploying>>. This is more involved  for Spark as it requires the JVM and other non-Python components.
+Datasets do not use Ray's runtime environments for dependencies, so  you must have your desired tools installed in your worker image, see XREF HERE. This is more involved  for Spark as it requires the JVM and other non-Python components.
 ====
 
 You are not limited to the tools that are built into Ray. If you have a new tool that supports Apache Arrow, and https://arrow.apache.org/docs/python/api/datatypes.html[you are using Apache Arrow supported types], `to_arrow_refs()` gives you a zero copy Arrow representation of your dataset. Many tools and languages support Arrow including Tensorflow, R, and even Matlab. You can then use this list of Ray Arrow objects to pass into your tool, be it model training or any other purpose. You will learn more about this in the "Built-in Ray DataSet operations" section.
@@ -147,9 +145,9 @@ Dask and Spark both have non-DataFrame collections (Bags, Arrays, and RDDs) whic
 This section assumes you have a good understanding of the data wrangling tools you're going to use with ray, either pandas or Apache Spark. Pandas is ideal for users scaling Python analytics, and Spark is well suited for users connecting to big data tools. If you're not familiar with the Pandas APIs, you should check out Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython by Wes McKinney. New Spark users should check out Learning Spark, and if you want to go super deep Holden recommends High Performance Spark by Holden and Rachel.footnote:[ Note: this is like a ford dealer recommending a ford, so take the advice here with a grain of salt.]
 
 .Partitioning
-====
+****
 Partitioning gives you the ability to control the number of tasks used to process your data. If you have billions of rows, using a single task, to process it can take forever. On another hand, using one task for each row would spend more time scheduling the tasks than the work itself. As a result, proper data partitioning is one of the fundamental requirements for its efficient processing. Usage of  Ray Datasets allows you to efficiently split your data into partitions or chunks so that you can parallelize computation while keeping the overhead of scheduling a task at the acceptable level. As the number of partitions increases the maximum parallelism increases but so does the scheduling and communication overhead.
-====
+****
 
 
 
@@ -163,20 +161,22 @@ Portions of this section are based on the DataFrame chapter in Scaling Python wi
 ====
 
 .Dask
-====
+****
 Dask is a parallel computing library that scales the existing Python ecosystem. You can think of Dask at a high and a low level
+
 * High level collections: Dask provides high-level Array, Bag, and DataFrame collections that mimic NumPy, lists, and Pandas but can operate in parallel on datasets that don’t fit into memory. Dask’s high-level collections are alternatives to NumPy and Pandas for large datasets.
 * Low Level schedulers: Dask provides dynamic task schedulers that execute task graphs in parallel. These execution engines power the high-level collections above but can also power custom, user-defined workloads. 
 
 Here we focus on Dask's high level DataFrame collection as Ray has its own techniques for low-level scheduling.
-====
+****
 
 Dask on Ray benefits from using Ray's per-node/container shared memory storage for data. This is especially important when doing operations like broadcast joins, in Dask the same data will need to be stored in each worker process.footnote:[Operations in native code can avoid this problem in Dask using multi-threading, but the details are beyond the scope of this book.] However, in Ray, it only needs to be stored once per-node/container.
 
-	Most of the distributed components of Dask's DataFrames use the three core building blocks `map_partitions`, `reduction`, and `rolling`. You mostly won't need to call these functions directly, instead you will use higher level APIs, but understanding them and how they work is important to understanding how Dask works. `shuffle` is a critical building block of distributed DataFrames for re-organizing your data. Unlike the other building blocks, you may use it directly more frequently as Dask is unable to abstract away partitioning
+Most of the distributed components of Dask's DataFrames use the three core building blocks `map_partitions`, `reduction`, and `rolling`. You mostly won't need to call these functions directly, instead you will use higher level APIs, but understanding them and how they work is important to understanding how Dask works. `shuffle` is a critical building block of distributed DataFrames for re-organizing your data. Unlike the other building blocks, you may use it directly more frequently as Dask is unable to abstract away partitioning
 
 ==== Indexing
-	Indexing into a DataFrame is one of the powerful features of pandas, but comes with some restrictions when moving into a distributed system like Dask. Since Dask does not, by default, track the size of each partition, positional indexing by row is not supported. You can use positional indexing into columns, as well as label indexing for columns or rows. Indexing is frequently used to filter the data to only have the components you need. We did this for the San Francisco Covid data by looking at just the case rates for people of all vaccine statuses, as shown in <<index_covid_data>>.
+
+Indexing into a DataFrame is one of the powerful features of pandas, but comes with some restrictions when moving into a distributed system like Dask. Since Dask does not, by default, track the size of each partition, positional indexing by row is not supported. You can use positional indexing into columns, as well as label indexing for columns or rows. Indexing is frequently used to filter the data to only have the components you need. We did this for the San Francisco Covid data by looking at just the case rates for people of all vaccine statuses, as shown in <<index_covid_data>>.
 
 [[index_covid_data]]
 .Dask DataFrame Indexing
@@ -188,6 +188,7 @@ include:./examples/dask/Dask-Ch4-DataFrames.py[tags=index_covid_data]
 ====
 
 If you truly need positional indexing by row, you can implement your own by computing the size of each partition and using this to select the desired partition subsets. This is very inefficient, so Dask avoids implementing directly so you make an intentional choice before doing this.
+
 ==== Shuffles
 As mentioned in the previous chapter, shuffles are expensive. The primary causes of the expensive nature of shuffles are the comparative slowness of network speed to reading data from memory and serialization overhead. These costs scale as the amount of data being shuffled increases, so Dask has some techniques to reduce the amount of data being shuffled. These techniques depend on certain data properties or on the operation being performed.
 
@@ -195,8 +196,10 @@ As mentioned in the previous chapter, shuffles are expensive. The primary causes
 ====
 While understanding shuffles is important for performance, feel free to skip this section if your code is working well enough.
 ====
+
 ===== Rolling Windows and map_overlap
-	One situation which can trigger the need for a shuffle is a rolling window, where at the edges of a partition your function needs some records from its neighbors. Dask Dataframe has a special `map_overlap` function where you can specify a "look-after"footnote:[ Sometimes also called a look-ahead] and "look-before"footnote:[ Sometimes also called a look-back] window of rows to transfer (either an integer or a time delta). The simplest example taking advantage of this is a rolling average.
+
+One situation which can trigger the need for a shuffle is a rolling window, where at the edges of a partition your function needs some records from its neighbors. Dask Dataframe has a special `map_overlap` function where you can specify a "look-after"footnote:[ Sometimes also called a look-ahead] and "look-before"footnote:[ Sometimes also called a look-back] window of rows to transfer (either an integer or a time delta). The simplest example taking advantage of this is a rolling average.
 
 <<rolling_date_ex>>
 .Dask DataFrame rolling average 
@@ -213,6 +216,7 @@ This allows Dask to transfer only the data needed. For this implementation to wo
 ====
 Dask's Rolling Windows will not cross multiple partitions. If your DataFrame is partitioned in such a way that the look-after or look-back is greater than the length of the neighbor's partition, the results will either fail or be incorrect. Dask validates this for timedelta look-after, but no such checks are performed for look-backs or integer look-after.
 ====
+
 ===== Aggregations
 
 Aggregations are another special case that can reduce the amount of data that needs to be transferred over the network. Aggregations are anything where you combine records. If you are coming from a map/reduce or Spark background, reduceByKey, is the classic aggregation. Aggregations can either be "by key" or global across an entire DataFrame.
@@ -235,7 +239,7 @@ include:./examples/dask/Dask-Ch4-DataFrames.py[tags=max_mean]
 ----
 ====
 
-	For distributed systems like Dask, if an aggregation can be partially evaluated and then merged you can potentially combine some records pre-shuffle. Not all partial aggregations are created equal. What matters with partial aggregations is how much data is reduced when merging values with the same key. 
+For distributed systems like Dask, if an aggregation can be partially evaluated and then merged you can potentially combine some records pre-shuffle. Not all partial aggregations are created equal. What matters with partial aggregations is how much data is reduced when merging values with the same key. 
 
 The most efficient aggregations take a sub-linear amount of space regardless of the number of records. Some of these can take constant space such as sum, count, first, minimum, maximum, mean, and standard deviation. For more complicated tasks, like quantiles and distinct counts, there are also sub-linear approximation options. These approximation options can be great, as exact answers can require linear growth in storage.
 
@@ -290,6 +294,7 @@ Slow/inefficient aggregationsfootnote:[ Or very likely to cause an out of memory
 ====
 Dask is unable to apply partial aggregations when you use the `apply` function.
 ====
+
 ===== Full Shuffles and Partitioning
 
 Sorting is inherently expensive in distributed systems because it, most often, requires a full shuffle. Full shuffles are sometimes an unavoidable part of working in Dask. Counter-intuitively, while full shuffles are themselves slow, you can use them to speed up future operations that are all happening on the same grouping key(s). As mentioned in the aggregation section, one of the ways a full shuffle is triggered is by using the `apply` method when partitioning is not aligned.
@@ -345,6 +350,7 @@ Dask's set_index has a similar `partition_size` parameter, but as of the writing
 
 
 As you've seen at the start of this chapter when writing DataFrame, each partition is given its own file, but sometimes this can result in files that are too big or too small. Some tools can only accept one file as input, so you need to repartition everything into a single partition. Other times, the data storage system is optimized for certain file sizes, like HDFS' default block size of 128mb. The good news is you can use `repartition` or `set_index` to get your desired output structure.
+
 ==== Embarrassingly Parallel Operations
 
 `map_partitions` applies a function to each of the partitions underlying pandas DataFrames and the result is also a pandas DataFrame. Functions implemented with `map_partitions` are embarrassingly parallelfootnote:[ Embarrassingly parallel problems are ones where the overhead of distributed computing and communication is low. See https://en.wikipedia.org/wiki/Embarrassingly_parallel[].] since they don't require any inter-worker transfer of data. `map_partitions` implements `map`, and many row-wise operations. If there is a row-wise operation that you want to use that you find missing you can implement it yourself, as shown with <<filna_ex>>.
@@ -357,6 +363,7 @@ As you've seen at the start of this chapter when writing DataFrame, each partiti
 include:./examples/dask/Dask-Ch4-DataFrames.py[tags=filna_ex]
 ----
 ====
+
 You aren't limited to calling pandas's built-ins as in the above example. Provided that your function takes and returns a DataFrame, you can do pretty much anything you want inside of `map_partitions`.
 
 The full pandas API is too long to cover in the scope of this chapter, but if a function can operate on a row-by-row basis without any knowledge of the rows before or after, it may already be implemented in Dask Dataframes using map_partitions. If not you can also implement it yourself using the pattern from the <<filna_ex>> example.
@@ -368,6 +375,7 @@ When using `map_partitions` on a DataFrame you can change anything about each ro
 ====
 Incorrect partitioning information can result in incorrect results, not just exceptions, as Dask may miss relevant data.
 ====
+
 ==== Working with Multiple DataFrames
 
 Pandas and Dask have four common functions for combining DataFrames. At the root is the concat function, which allows joining DataFrames on any axis. Concatenating DataFrames is generally slower in Dask since it involves inter-worker communication. The other three functions are join, merge, and append, which all implement special cases for common situations on top of concat, and have slightly different performance considerations. Having good divisions/partitioning, in terms of key selection and number of partitions, make a huge difference when working on multiple DataFrames.
@@ -419,19 +427,21 @@ Sometimes the API is just missing small parts as both pandas and Dask are under 
 Some libraries do not parallelize as well as others. In these cases, a common approach is to try and filter or aggregate the data down enough that it can be represented locally and then apply the local libraries to the data. For example, with graphing it's common to pre-aggregate the counts or take a random sample and graph the result.
 
 While much of the Pandas DataFrame API will work out-of-the-box, before you swap in Dask DataFrame it's important to make sure you have good test coverage to catch the situations where it does not.
+
 ==== What's Slower
 
-	Usually, using Dask DataFrames will improve performance, but not always. Generally, smaller datasets will perform better in local pandas. As discussed, anything involving shuffles is generally slower in a distributed system than in a local one. Iterative algorithms can also produce large graphs of operations, which are slow to evaluate in Dask compared to traditional greedy evaluation. 
+Usually, using Dask DataFrames will improve performance, but not always. Generally, smaller datasets will perform better in local pandas. As discussed, anything involving shuffles is generally slower in a distributed system than in a local one. Iterative algorithms can also produce large graphs of operations, which are slow to evaluate in Dask compared to traditional greedy evaluation. 
 
 Some problems are generally unsuitable for data-parallel computing. For example, writing out to a data store with a single lock that has more parallel writers will increase the lock contention and may make it slower than if a single thread was doing the writing. In these situations, you can sometimes repartition your data or write individual partitions to avoid lock contention.
 
 ==== Handling Recursive Algorithms
 
-	Dask's lazy evaluation, powered by its lineage graph, is normally beneficial allowing it to combine steps automatically. However, when the graph gets too large Dask can struggle to manage it which often shows up as a slow driver process or notebook, and sometimes an out of memory exception. Thankfully, you can work around this by writing your DataFrame out and reading it back in. Generally, Parquet is the best format for doing this as it is space-efficient and self-describing so no schema inference is required.
+Dask's lazy evaluation, powered by its lineage graph, is normally beneficial allowing it to combine steps automatically. However, when the graph gets too large Dask can struggle to manage it which often shows up as a slow driver process or notebook, and sometimes an out of memory exception. Thankfully, you can work around this by writing your DataFrame out and reading it back in. Generally, Parquet is the best format for doing this as it is space-efficient and self-describing so no schema inference is required.
 
 ==== What other functions are different
 
-	For performance reasons, various parts of Dask DataFrames behave a little differently than local Dataframes.
+For performance reasons, various parts of Dask DataFrames behave a little differently than local Dataframes.
+
 reset_index:: The index will start back over at zero on each partition
 kurtosis:: Does not filter out NaNs, uses scipy defaults
 concat:: Instead of coercing category types, each category type is expanded to the union of all of the categories it is concatenated with.
@@ -448,6 +458,7 @@ If you are interested in going deeper with Dask there are several Dask focused b
 ====
 Unlike Ray, Dask is generally lazy, meaning it does not evaluate data until forced. This can make debugging a challenge as errors may appear several lines removed from their root cause.
 ====
+
 ==== Pandas Like DataFrames with Modin
 
 https://modin.readthedocs.io/en/stable/[Modin], like Dask DataFrame, is designed to largely be a plug-in replacement for pandas DataFrame. Modin DataFrames follow the same general performance as Dask DataFrames, with a few caveats. Modin offers less control over internals, which can limit performance for some applications. Since Modin and Dask DataFrame are sufficiently similar we won't cover it here except to say it's another option if Dask doesn't meet your needs.
@@ -471,12 +482,13 @@ Unlike Ray, Spark is generally lazy, meaning it does not evaluate data until for
 ==== Working with Local Tools
 
 Some tools are not well suited to distributed operation. Thankfully, provided your DataSet is filtered down small enough, you can convert your DataSet into a variety of local in-process formats. If the entire DataSet can fit in memory, the `to_pandas` and `to_arrow` are the simplest way to convert a DataSet to a local object. For larger sized objects, where each partition may fit in memory but the entire DataSet may not, the `iter_batches` function will give you a generator/iterator where you can consume one partition at a time. `iter_batches` takes a `batch_format` parameter to switch between `pandas` or `pyarrow`. If possible, `pyarrow` is generally more efficient than `pandas`.
+
 === Built-in Ray DataSet operations
 
-	In addition to allowing you to move data between different tools, Ray also has some built in operations. Ray Datasets do not attempt to match any particular existing API, but rather expose basic building blocks you can use when the existing libraries do not meet your needs.
+In addition to allowing you to move data between different tools, Ray also has some built in operations. Ray Datasets do not attempt to match any particular existing API, but rather expose basic building blocks you can use when the existing libraries do not meet your needs.
 
 
-	Ray's DataSet has support for a number of basic data operations. Ray Datasets do not aim to expose a pandas like API, rather it focuses on providing basic primitives to build on top of. The dataset API is functionally inspired, along with partition-oriented functions. Ray also recently added groupBys and aggregates.
+Ray's DataSet has support for a number of basic data operations. Ray Datasets do not aim to expose a pandas like API, rather it focuses on providing basic primitives to build on top of. The dataset API is functionally inspired, along with partition-oriented functions. Ray also recently added groupBys and aggregates.
 
 The core building block of most of the DataSet operations is `map_batches`. By default `map_batches` executes the function you provide across the blocks/batches that make up a Dataset and uses the results to make a new Dataset. `map_batches` is used to implement `filter`, `flat_map`, and `map`. You can see the flexibility of `map_batches` by looking at the wordcount example rewritten to directly use `map_batches` and also drop any word that only shows up once. 
 
@@ -545,20 +557,21 @@ Ray does not currently take advantage of the concept of "known partitioning" to 
 
 
 
-=== How Ray Datasets are implemented
+=== How Ray Datasets are Implemented
 
-	Ray Datasets are built using the tools you have been working with in the previous chapters. Ray splits each DataSet into many smaller components. These smaller components are called both blocks and partitions inside of the Ray code. Each partition contains an Arrow DataSet representing a slice of the entire Ray DataSet. Since Arrow does not support all of the types from Ray, if you have non-supported types each partition also contains a list of the non-supported types.
+Ray Datasets are built using the tools you have been working with in the previous chapters. Ray splits each DataSet into many smaller components. These smaller components are called both blocks and partitions inside of the Ray code. Each partition contains an Arrow DataSet representing a slice of the entire Ray DataSet. Since Arrow does not support all of the types from Ray, if you have non-supported types each partition also contains a list of the non-supported types.
 
-	The data inside of each dataset is stored in the standard Ray object store. Each partition is stored as a separate object, since Ray is not able to split up individual objects. This also means that you can use the underlying Ray objects as parameters to Ray remote functions and actors. The Dataset contains references to these objects as well as schema information. 
+The data inside of each dataset is stored in the standard Ray object store. Each partition is stored as a separate object, since Ray is not able to split up individual objects. This also means that you can use the underlying Ray objects as parameters to Ray remote functions and actors. The Dataset contains references to these objects as well as schema information. 
 
 [TIP]
 ====
 Since the Dataset contains the schema information, loading a dataset blocks on the first partition so that the schema information can be determined. The remainder of the partitions are eagerly loaded, but in a non-blocking fashion like the rest of Ray's operations.
 ====
 
-	In keeping with the rest of Ray, Datasets are immutable. When you want to do an operation on a dataset you apply a transformation, like `filter`, `join`, or `map` and Ray returns a new DataSet with the result.
+In keeping with the rest of Ray, Datasets are immutable. When you want to do an operation on a dataset you apply a transformation, like `filter`, `join`, or `map` and Ray returns a new DataSet with the result.
 
-	Ray Datasets can use either tasks (aka remote functions) or actors for processing transformations. Some libraries built on top of Ray Datasets, like Modin, depend on using actor processing so they can implement certain ML tasks involving state.
+Ray Datasets can use either tasks (aka remote functions) or actors for processing transformations. Some libraries built on top of Ray Datasets, like Modin, depend on using actor processing so they can implement certain ML tasks involving state.
+
 === Conclusion
 
-	Ray's transparent handling of moving data between tools makes it an excellent choice for building end-to-end machine learning pipelines when compared with traditional techniques where the communication barrier between tools is much higher. Two separate frameworks, Modin and Dask, both offer a "pandas like" experience on top of Ray Datasets making it easy to scale existing Data Science workflows. Spark on Ray (known as Ray DP) provides an easy integration path for those working in organizations with existing big-data tools. In this chapter, you have learned how to effectively process data with Ray to power your machine learning and other needs. In the next chapter, you will learn how you can use Ray to power machine learning.
+Ray's transparent handling of moving data between tools makes it an excellent choice for building end-to-end machine learning pipelines when compared with traditional techniques where the communication barrier between tools is much higher. Two separate frameworks, Modin and Dask, both offer a "pandas like" experience on top of Ray Datasets making it easy to scale existing Data Science workflows. Spark on Ray (known as Ray DP) provides an easy integration path for those working in organizations with existing big-data tools. In this chapter, you have learned how to effectively process data with Ray to power your machine learning and other needs. In the next chapter, you will learn how you can use Ray to power machine learning.

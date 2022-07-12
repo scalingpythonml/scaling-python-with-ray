@@ -59,7 +59,7 @@ get_ipython().system('wget http://gender-pay-gap.service.gov.uk/viewing/download
 if local:
     #tag::load_csv_local_fs[]
     ds = ray.data.read_csv("2021")
-    #end::looad_csv_local_fs[]
+    #end::load_csv_local_fs[]
 
 
 # In[ ]:

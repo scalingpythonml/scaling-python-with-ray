@@ -6,7 +6,7 @@ psycopg2-binary==2.9.3
 redis==4.2.2
 boto3==1.20.37
 olefile==0.46
-pillow==9.1.0
+pillow==9.1.1
 phonenumbers==8.12.40
 attrs==21.4.0
 requests[security,socks]==2.27.1

@@ -48,7 +48,7 @@ Ray uses https://arrow.apache.org/[Apache Arrow]  to load external data into Dat
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=load_csv_local_fs]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=load_csv_local_fs]
 ----
 ====
 
@@ -73,7 +73,7 @@ Arrow, and by extension Ray, also uses fsspec which supports a wider array of fi
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=load_from_https]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=load_from_https]
 ----
 ====
 
@@ -87,7 +87,7 @@ Ray has the ability to write in all of the formats it can read from. The writing
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=wc_write]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=wc_write]
 ----
 ====
 
@@ -101,7 +101,7 @@ Ray has built-in tooling to share data between the different data tools running 
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=enable_dask]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=enable_dask]
 ----
 ====
 
@@ -110,7 +110,7 @@ include::examples/ray_examples/data/Ray-Datasets.py[tags=enable_dask]
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=enable_spark]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=enable_spark]
 ----
 ====
 
@@ -120,7 +120,7 @@ As with functions to read/load datasets, transfer-to-ray functions are defined o
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=to_dask]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=to_dask]
 ----
 ====
 
@@ -497,7 +497,7 @@ The core building block of most of the DataSet operations is `map_batches`. By d
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=ray_wordcount_on_ds_filter_only_once_with_batches]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=ray_wordcount_on_ds_filter_only_once_with_batches]
 ----
 ====
 
@@ -511,7 +511,7 @@ include::examples/ray_examples/data/Ray-Datasets.py[tags=ray_wordcount_on_ds_fil
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=batch_op_on_pandas]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=batch_op_on_pandas]
 ----
 ====
 
@@ -528,7 +528,7 @@ Ray Datasets do not have a built-in way to specify additional libraries to be in
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=more_awesome_wordcount_with_batches]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=more_awesome_wordcount_with_batches]
 ----
 ====
 
@@ -539,7 +539,7 @@ For operations needing shuffles Ray has a `GroupedDataset`, which behaves a bit 
 ====
 [source, python]
 ----
-include::examples/ray_examples/data/Ray-Datasets.py[tags=agg]
+include::examples/ray_examples/data/Ray-DataSets.py[tags=agg]
 ----
 ====
 

@@ -400,8 +400,6 @@ Dask's concat, when operating by row, should not be called unknown divisions as 
 
 ===== Multi-DataFrame Internals
 
-
-
 Dask uses four different techniques/types, hash, broadcast, partitioned, and `stack_partitions`, to combine DataFrames with very different performance. Dask chooses the technique based on the indexes, divisions, and requested join type (e.g. outer/left/inner). The three column-based join techniques are hash joins, broadcast, and partitioned joins. When doing row-based combinations (e.g. `append`), Dask has a special technique called `stack_partitions` which is extra fast. It's important that you understand the performance of each of these techniques and the conditions that will cause Dask to pick which approach.
 
 *Hash* joins are the default that Dask uses when no other join technique is suitable. Hash joins involve shuffling the data for all the input DataFrames to partition on the target key. Hash joins use the hash values of keys which results in a DataFrame that is not in any particular order. As such the result of hash joins do not have any known divisions.

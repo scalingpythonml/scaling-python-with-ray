@@ -344,7 +344,7 @@ page_text = pages.map_batches(extract_text_for_batch)
 words = page_text.map_batches(tokenize_batch)
 word_count = words.groupby(lambda x: x).count()
 word_count.show()
-#tag::more_awesome_wordcount_with_batches[]
+#end::more_awesome_wordcount_with_batches[]
 
 
 # In[ ]:

@@ -93,7 +93,7 @@ class MailServerActorBase():
                 text=text, to=rcpt, msg_from=envelope.mail_from, from_device=False,
                 protocol=Protocol.EMAIL)
             self.user_pool.get_pool().submit(
-                lambda actor, message: actor.handle_message,
+                lambda actor, message: actor.handle_message(message),
                 message)
         return '250 Message accepted for delivery'
 

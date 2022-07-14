@@ -30,7 +30,7 @@ mailserver_pg = ray.util.placement_group(
 def make_mailserver_actor(idx: int):
     return (MailServerActor  # type: ignore
             .options(
-                placement_group=mailserver_pg, num_cpus=0.1)
+                name=f"mailserver_{idx}", placement_group=mailserver_pg, num_cpus=0.1)
             .remote(
                 idx=idx,
                 poolsize=actor_count,
@@ -41,7 +41,15 @@ def make_mailserver_actor(idx: int):
 
 mailserver_actors = list(map(make_mailserver_actor, actor_idxs))
 mailserver_pool = ActorPool(mailserver_actors)
-mailclient_actors = list(map(lambda idx: MailClientActor.remote(), actor_idxs))  # type: ignore
+
+
+def make_mailclient_actor(idx: int):
+    return (MailClientActor  # type: ignore
+            .options(name=f"mailclient_{idx}")
+            .remote())
+
+
+mailclient_actors = list(map(make_mailclient_actor, actor_idxs))  # type: ignore
 mailclient_pool = ActorPool(mailclient_actors)
 # f = mailclient_pool.submit(
 #     lambda actor, v: actor.send_msg.remote(*v),

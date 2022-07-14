@@ -3,6 +3,7 @@ import ray
 import logging
 import base64
 import requests
+import json
 from messaging.settings import settings
 from messaging.internal_types import CombinedMessage
 from messaging.utils import utils
@@ -35,10 +36,14 @@ class SatelliteClientBase():
             'Content-Type': 'application/x-www-form-urlencoded'}
         self._loginParams = settings.swarm_login_params
         self._hdrs = {'Accept': 'application/json'}
+        self._sendMessageHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'}
         self._hiveBaseURL = settings.hiveBaseURL
         self._loginURL = self._hiveBaseURL + '/login'
         self._getMessageURL = self._hiveBaseURL + '/api/v1/messages'
         self._ackMessageURL = self._hiveBaseURL + '/api/v1/messages/rxack/{}'
+        self._sendMessageURL = self._hiveBaseURL + '/api/v1/messages'
         logging.info(f"Starting actor {idx}")
 
     async def run(self):
@@ -117,6 +122,28 @@ class SatelliteClientBase():
             self.user_pool.get_pool().submit(
                 lambda actor, msg: actor.handle_message,
                 message)
+
+    async def send_message(self, protocol: int, msg_from: str, msg_to: int, data: str):
+        # TODO: batch?
+        messagedata = MessageDataPB()  # noqa
+        messagedata.from_device = False
+        message = messagedata.message.add()
+        message.text = data
+        message.protocol = protocol
+        message.to = msg_from
+        encoded = base64.b64encode(messagedata.SerializeToString())
+        request_dict = {
+            "deviceType": 0,
+            "deviceId": msg_to,
+            "userApplicationId": 1000,
+            "data": encoded
+        }
+        request_encoded = json.dumps(request_dict)
+        return self.session.post(
+            self._sendMessageURL,
+            data=request_encoded,
+            headers=self._sendMessageHeaders
+        )
 
 
 @ray.remote(max_restarts=-1)

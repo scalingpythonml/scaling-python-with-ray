@@ -1,0 +1,132 @@
+.form-container {
+    width: 420px;
+    &--centered {
+        margin-left:width(5) ;
+    }   
+}
+.gap-right {
+    margin-right: 16px;
+}
+.form {
+    .form-submit {
+        width: 100%;
+        margin-top: 27px;
+    }
+
+    .field + .form-link {
+        margin-top: 8px;
+        display: block;
+        text-align: right;
+        margin-top: 8px;
+    }
+
+}
+
+.form-header {
+    margin-bottom: 32px;
+
+    .title {
+        @include title();
+        margin-bottom: 16px;
+
+        &--sm {
+            @include text-config($font-weight: 700, $fs: 32px, $lh: 140%);
+        }
+    }
+
+    .subtitle {        
+        @include text-config($font-weight: 400, $fs: 16px, $lh: 150%);
+
+        margin-bottom: 32px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &__link,&__bold {        
+            @include text-config($font-weight: 700, $fs: 16px, $lh: 150%);
+
+        }
+    }
+
+    &-icon{
+        display: block;
+        width: 128px;
+        height: 128px;
+        margin: 0 auto;
+        margin-bottom: 38px;
+    }
+}
+
+.side-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.beaver-img {
+    position: absolute;
+    z-index: 1;
+    top: 176px;
+    right: 250px;
+    transform: rotate(67.44deg);
+    // animation-name: bounce; // ?!
+    animation-duration: 3s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-delay: 0;
+    animation-direction: alternate;
+}
+
+@keyframes bounce {
+    0% {
+        top: 76%;
+    }
+    100% {
+        top: 70%;
+    }
+}
+
+
+
+.form-footer {
+    margin-top: 32px;
+}
+
+.form-footer-text,.form-link {
+    @include text-config($font-weight: 500, $fs: 14px, $lh: 150%);
+}
+.form-footer-link {
+    @include text-config($font-weight: 700, $fs: 14px, $lh: 150%);
+
+}
+
+.form-body {
+    &__grid-layout {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 16px;
+        grid-auto-rows: 1fr;
+    }
+
+
+    &__flex-layout {
+        display: flex;
+        flex-flow: row wrap;
+
+    }
+
+    &__footer{
+        position: absolute;
+        bottom: width(1);
+        right:width(1);
+    }
+
+    &__footer-btn{
+        width: width(9);
+
+    }
+}

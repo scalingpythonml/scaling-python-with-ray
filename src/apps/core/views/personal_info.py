@@ -33,8 +33,8 @@ class PersonalInfoView(views.View):
     @property
     def base_context(self):
         return {
-            "title": "Personal Info",
-            "navname": "Personal Info",
+            "title": "Add details",
+            "navname": "Please, enter your details",
             "action": reverse("core:personal-info"),
             "step": OnboardingStepsEnum.DETAILS.value,
         }

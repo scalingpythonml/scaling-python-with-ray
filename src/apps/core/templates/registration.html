@@ -1,0 +1,149 @@
+{% load cms_tags sekizai_tags menu_tags %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="{% static 'core/style/style.css' %}">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+          integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+          integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+          integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+          crossorigin="anonymous"></script>
+  <title>SB: {% block title %} {{ title }} {% endblock %}</title>
+  
+  {% render_block "css" %}
+  {% block extra_head %}  {% endblock %}
+</head>
+<body>
+{% cms_toolbar %}
+{% if user.dont_have_active_subscriptions %}
+  <div class="alert alert-danger" role="alert">
+    You have not active subscription. Click <a href="{% url 'core:subscription' %}">here</a> to solve it.
+  </div>
+{% endif %}
+<!-- NAVBAR -->
+<!-- <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'core:index' %}"> SpaceBeaver
+      <span class="text-muted">
+            {% block navname %} {{ navname }} {% endblock %}
+            </span>
+    </a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'core:billing' %}">Billing</a>
+        </li>
+        {% show_menu 0 100 100 100 "bootstrap_menu.html" %}
+      </ul>
+    </div>
+    <div class="d-flex">
+      <div class="btn-group">
+        {% if request.user.is_authenticated %}
+          <a class="btn btn-primary text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
+          <a class="btn btn-primary text-uppercase" href="{% url 'accounts:logout' %}">Logout</a>
+        {% else %}
+          <a class="btn btn-primary text-uppercase" href="{% url 'core:login' %}">Login</a>
+          <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+        {% endif %}
+        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
+        
+        <a class="btn btn-success text-uppercase" href="{% url 'core:success-new-password' %}"> success New pass</a>
+
+        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password-link' %}"> New pass lnk</a>
+
+      </div>
+
+    </div>
+  </div>
+</nav> -->
+<!-- END NAVBAR -->
+<!-- <div class="page-container"> -->
+  <div class="container-fluid p-0 h-100vh">
+    <div class="row h-100vh m-0">
+        <nav class="side-nav">
+            <a  href="{% url 'core:dashboard' %}" class="logo logo-with-beaver">
+                <img class="logo__img" src="{% static 'core/img/svg/logo-with-beaver.svg' %}" alt="">
+            </a>
+          <ul class="progress-bar p-0 side-nav__progress-bar">
+            <li class="progress-bar__item ">
+                <a href="{% url 'core:personal-info' %}" class="progress-item {% if step == 2 %}progress-item--active{% endif %}">
+                    <div class="progress-item__step   {% if step == 2 %}progress-item__step--active{% endif %} {% if step > 2 %}progress-item__step--checked{% endif %}">
+                        <span class="progress-item__number {% if step == 2 %}progress-item__number--active{% endif %}">1</span>
+                        <span class="progress-item__check {% if step > 2 %}progress-item__check--checked{% endif %}">
+                          <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                        </span>
+                    </div>
+                    <span class="progress-item__text">Details</span>
+                </a>
+            </li>
+            <li class="progress-bar__item ">
+                <a href="{% url 'core:add-device' %}" class="progress-item {% if step == 3 %}progress-item--active{% endif %}">
+                    <div class="progress-item__step   {% if step == 3 %}progress-item__step--active{% endif %} {% if step > 3 %}progress-item__step--checked{% endif %}">
+                        <span class="progress-item__number {% if step == 3 %}progress-item__number--active{% endif %}">2</span>
+                        <span class="progress-item__check {% if step > 3 %}progress-item__check--checked{% endif %}">
+                          <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                        </span>
+                    </div>
+                    <span class="progress-item__text">Add device</span>
+                </a>
+            </li>
+            <li class="progress-bar__item ">
+                <a href="{% url 'core:pick-plan' %}"   class="progress-item {% if step == 4 %}progress-item--active{% endif %}">
+                    <div class="progress-item__step   {% if step == 4 %}progress-item__step--active{% endif %} {% if step > 4 %}progress-item__step--checked{% endif %}">
+                        <span class="progress-item__number {% if step == 4 %}progress-item__number--active{% endif %}">3</span>
+                        <span class="progress-item__check {% if step > 4 %}progress-item__check--checked{% endif %}">
+                          <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                        </span>
+                    </div>
+                    <span class="progress-item__text">Pick a plan</span>
+                </a>
+            </li>
+            <li class="progress-bar__item ">
+                <a  href="{% url 'core:subscription' %}"   class="progress-item {% if step == 5 %}progress-item--active{% endif %}">
+                    <div class="progress-item__step   {% if step == 5 %}progress-item__step--active{% endif %} {% if step > 5 %}progress-item__step--checked{% endif %}">
+                        <span class="progress-item__number {% if step == 5 %}progress-item__number--active{% endif %}">4</span>
+                        <span class="progress-item__check {% if step > 5 %}progress-item__check--checked{% endif %}">
+                          <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                        </span>
+                    </div>
+                    <span class="progress-item__text">Payment form</span>
+                </a>
+            </li>
+          </ul>
+        </nav>
+        <main class="main-layout">
+          <header class="form-header">
+              <h1 class="title">{{ title }}</h1>
+              <p class="subtitle">{{ navname }}</p>
+          </header>
+
+          {% block content %}
+
+          {% endblock %}
+        </main>
+  </div>
+</div>
+{% block footer %}
+  
+{% endblock %}
+{% render_block "js" %}
+{% block extra_js %}  {% endblock %}
+</body>
+</html>

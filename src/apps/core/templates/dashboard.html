@@ -1,28 +1,43 @@
-{% extends 'spacebeaver.html' %}
-
+{% extends 'dashboard-layout.html' %}
 
 {% block content %}
-  <div style="display: flex; justify-content: space-between;">
-    <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
-      <div class="card-header">Daily</div>
-      <div class="card-body">
-        <h5 class="card-title">Messages count today</h5>
-        <p class="card-text">{{ daily }}</p>
-      </div>
+  <div class="statistic-layout statistic-layout--grid">
+    <div class="statistic-card">
+        <header class="statistic-card__header d-flex align-items-center ">
+            <div class="statistic-card__img-wrap statistic-card__img-wrap--purple d-flex align-items-center justify-content-center">
+                <img class="statistic-card__img" src="{% static 'core/img/svg/icon-sms.svg' %}" alt="">
+            </div>
+            <div class="statistic-card__text-wrap">
+                <p class="statistic-card__count">{{ monthly }}</p>
+                <p class="statistic-card__count-description">Number of messages this month
+                </p>
+            </div>
+        </header>
+        <div class="statistic-card__body"></div>
     </div>
-    <div class="card text-white bg-secondary mb-3" style="max-width: 18rem;">
-      <div class="card-header">Monthly</div>
-      <div class="card-body">
-        <h5 class="card-title">Messages count in this month</h5>
-        <p class="card-text">{{ monthly }}</p>
-      </div>
+    <div class="statistic-card">
+        <header class="statistic-card__header d-flex align-items-center ">
+            <div class="statistic-card__img-wrap statistic-card__img-wrap--blue d-flex align-items-center justify-content-center">
+                <img class="statistic-card__img" src="{% static 'core/img/svg/icon-sms-tracking.svg' %}" alt="">
+            </div>
+            <div class="statistic-card__text-wrap">
+                <p class="statistic-card__count">{{ yearly }}</p>
+                <p class="statistic-card__count-description">Number of messages this year</p>
+            </div>
+        </header>
+        <div class="statistic-card__body"></div>
     </div>
-    <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
-      <div class="card-header">Yearly</div>
-      <div class="card-body">
-        <h5 class="card-title">Messages count in this year</h5>
-        <p class="card-text">{{ yearly }}</p>
-      </div>
+    <div class="statistic-card">
+        <header class="statistic-card__header d-flex align-items-center ">
+            <div class="statistic-card__img-wrap statistic-card__img-wrap--gray d-flex align-items-center justify-content-center">
+                <img class="statistic-card__img" src="{% static 'core/img/svg/icon-sms-notification.svg' %}" alt="">
+            </div>
+            <div class="statistic-card__text-wrap">
+                <p class="statistic-card__count">{{ daily }}</p>
+                <p class="statistic-card__count-description">Number of messages this today</p>
+            </div>
+        </header>
+        <div class="statistic-card__body"></div>
     </div>
-  </div>
+</div>
 {% endblock %}

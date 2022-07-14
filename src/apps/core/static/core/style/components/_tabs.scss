@@ -1,0 +1,41 @@
+.tabs-list {
+    margin-bottom: 20px;
+}
+.tab-item {
+    margin-right: 24px;
+
+    &:last-child {
+        margin-right: 0;
+    }
+
+    &:hover {
+        &::before {
+            display: none;
+        }
+    }
+
+    .tab-link{
+        padding: 8px 12px;
+        @include text-config($font-weight: 500, $fs: 18px, $lh: 150%);
+        
+        border-radius: 16px;
+        background-color: transparent;
+        &.active {
+            background-color: $primary-blue;
+
+        }
+    }
+}
+
+.tab-section {
+    margin-bottom: 32px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &__title {
+        @include text-config($font-weight: 700, $fs: 22px, $lh: 140%);
+        margin-bottom: 16px;
+    }
+}

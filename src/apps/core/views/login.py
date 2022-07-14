@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView as BaseLoginView
+from django.shortcuts import render
 from django.urls import reverse
+
+from apps.core.forms import LoginForm
 
 
 User = get_user_model()
@@ -22,6 +25,13 @@ def login_routing(user: User):
 
 class LoginView(BaseLoginView):
     template_name = "login.html"
+    form_class = LoginForm
+
+    def get(self, request):
+        form = self.form_class()
+        return render(
+            request, self.template_name, {"form": form}
+        )
 
     def get_success_url(self):
         return login_routing(self.request.user)

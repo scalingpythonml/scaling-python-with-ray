@@ -11,7 +11,7 @@ User = get_user_model()
 
 
 class SignUpView(View):
-    template_name = "onboarding_wizard_form.html"
+    template_name = "sign-up.html"
     form_class = SignUpForm
 
     def get(self, request):
@@ -39,8 +39,8 @@ class SignUpView(View):
     @property
     def base_context(self):
         return {
-            "title": "Sign Up",
-            "navname": "Sign Up",
+            "title": "Sign up",
+            "navname": "Get started with your account in Spacebeaver!",
             "action": reverse("core:sign-up"),
             "step": OnboardingStepsEnum.SIGN_UP.value,
         }

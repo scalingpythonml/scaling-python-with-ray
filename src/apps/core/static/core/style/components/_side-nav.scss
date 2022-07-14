@@ -1,0 +1,19 @@
+.side-nav {
+    background-color: $grayscale-gray-800;
+    width: width(10);
+    padding: width(1);
+
+    &--smaller {
+    width: width(9);
+
+    }
+
+    &__progress-bar {
+        margin-top: 115px;
+    }
+}
+
+.main {
+    width: calc(100% - width(10));
+    background-color: red;
+}

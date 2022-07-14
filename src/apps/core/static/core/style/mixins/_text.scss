@@ -1,0 +1,17 @@
+@mixin title($color: $primary-black){
+    font-family: $font-Aeonik;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 140%;
+    color: $color;
+}
+
+@mixin text-config($font-family: $font-Aeonik, $font-style: normal, $font-weight: 400, $fs: 16px, $lh: 150%, $color: $primary-black) {    
+    font-family: $font-family;
+    font-style: $font-style;
+    font-weight: $font-weight;
+    font-size: $fs;
+    line-height: $lh;
+    color: $color;
+}

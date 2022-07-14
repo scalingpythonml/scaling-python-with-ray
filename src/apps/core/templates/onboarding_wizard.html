@@ -1,13 +1,13 @@
-{% extends 'spacebeaver.html' %}
+{% extends 'registration.html' %}
 {% load static %}
 
 {% block extra_head %}
-  <link rel="stylesheet" href="{% static 'core/steps.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'core/steps.css' %}"> -->
 {% endblock %}
 
 {% block page_head %}
   <!-- WIZARD STEPS -->
-  <div class="container">
+  <!-- <div class="container">
     <ul class="progressbar">
       <li class="{% if step >= 1 %}active{% endif %}">Sign up</li>
       <li class="{% if step >= 2 %}active{% endif %}">Details</li>
@@ -16,7 +16,6 @@
       <li class="{% if step >= 5 %}active{% endif %}">Payment</li>
       <li class="{% if step >= 6 %}active{% endif %}">Activation</li>
     </ul>
-  </div>
-
+  </div> -->
   <!-- END WIZARD STEPS -->
 {% endblock %}

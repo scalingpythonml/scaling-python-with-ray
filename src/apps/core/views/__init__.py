@@ -11,3 +11,7 @@ from .pick_plan import PickPlanView
 from .replace_device import ReplaceDeviceView
 from .sign_up import SignUpView
 from .subscription import *
+from .forget_password import ForgetPasswordView
+from .new_password import NewPasswordView
+from .success_new_password import SuccessNewPasswordView
+

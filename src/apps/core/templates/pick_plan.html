@@ -1,7 +1,71 @@
-{% extends 'onboarding_wizard.html' %}
+{% extends 'registration.html' %}
 
+{% block page_head %}
+  <!-- WIZARD STEPS -->
+  <!-- <div class="container">
+    <ul class="progressbar">
+      <li class="{% if step >= 1 %}active{% endif %}">Sign up</li>
+      <li class="{% if step >= 2 %}active{% endif %}">Details</li>
+      <li class="{% if step >= 3 %}active{% endif %}">Add device</li>
+      <li class="{% if step >= 4 %}active{% endif %}">Pick plan</li>
+      <li class="{% if step >= 5 %}active{% endif %}">Payment</li>
+      <li class="{% if step >= 6 %}active{% endif %}">Activation</li>
+    </ul>
+  </div> -->
+    <!-- <ul class="progress-bar p-0 side-nav__progress-bar">
+      <li class="progress-bar__item ">
+          <a href="{% url 'core:personal-info' %}" class="progress-item {% if step == 2 %}progress-item--active{% endif %}">
+              <div class="progress-item__step   {% if step == 2 %}progress-item__step--active{% endif %} {% if step > 2 %}progress-item__step--checked{% endif %}">
+                  <span class="progress-item__number {% if step == 2 %}progress-item__number--active{% endif %}">1</span>
+                  <span class="progress-item__check {% if step > 2 %}progress-item__check--checked{% endif %}">
+                    <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                  </span>
+              </div>
+              <span class="progress-item__text">Details</span>
+          </a>
+      </li>
+      <li class="progress-bar__item ">
+          <a {% if step >= 3 %}href="{% url 'core:add-device' %}"{% endif %} class="progress-item {% if step == 3 %}progress-item--active{% endif %}">
+              <div class="progress-item__step   {% if step == 3 %}progress-item__step--active{% endif %} {% if step > 3 %}progress-item__step--checked{% endif %}">
+                  <span class="progress-item__number {% if step == 3 %}progress-item__number--active{% endif %}">2</span>
+                  <span class="progress-item__check {% if step > 3 %}progress-item__check--checked{% endif %}">
+                    <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                  </span>
+              </div>
+              <span class="progress-item__text">Add device</span>
+          </a>
+      </li>
+      <li class="progress-bar__item ">
+          <a class="progress-item {% if step == 4 %}progress-item--active{% endif %}">
+              <div class="progress-item__step   {% if step == 4 %}progress-item__step--active{% endif %} {% if step > 4 %}progress-item__step--checked{% endif %}">
+                  <span class="progress-item__number {% if step == 4 %}progress-item__number--active{% endif %}">3</span>
+                  <span class="progress-item__check {% if step > 4 %}progress-item__check--checked{% endif %}">
+                    <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                  </span>
+              </div>
+              <span class="progress-item__text">Pick a plan</span>
+          </a>
+      </li>
+      <li class="progress-bar__item ">
+          <a href="#" class="progress-item {% if step == 5 %}progress-item--active{% endif %}">
+              <div class="progress-item__step   {% if step == 5 %}progress-item__step--active{% endif %} {% if step > 5 %}progress-item__step--checked{% endif %}">
+                  <span class="progress-item__number {% if step == 5 %}progress-item__number--active{% endif %}">4</span>
+                  <span class="progress-item__check {% if step > 5 %}progress-item__check--checked{% endif %}">
+                    <img class="progress-item__check-icon" src=" {% static 'core/img/svg/icon-check.svg' %}" alt="">
+
+                  </span>
+              </div>
+              <span class="progress-item__text">Payment form</span>
+          </a>
+      </li>
+    </ul> -->
+  <!-- END WIZARD STEPS -->
+{% endblock %}
 {% block content %}
-  <div class="col-md-6 centered">
+  <!-- <div class="col-md-6 centered">
       <div class="card mb-3">
         <img class="card-img-top" src="{{ image }}" alt="plan-info">
         <div class="card-body">
@@ -11,5 +75,30 @@
           <a class="btn btn-primary" href="{% url 'core:subscription' %}">Next</a>
         </div>
       </div>
-  </div>
+  </div> -->
+
+  <form class="form-body form-body__flex-layout form" action="" method="post">
+    <div class="plan-card">
+        <div class="plan-card__header d-flex align-items-center">
+            <div class="plan-card__img-wrap gap-right">
+                <!-- <img class="plan-card__img" src="./img/svg/icon-mirroring-screen.svg" alt=""> -->
+                <img class="plan-card__img" src="{{ image }}" alt="">
+            </div>
+            <h2 class="plan-card__title">{{ plan_title }}</h2>
+        </div>
+        <div class="plan-card__pricing d-flex align-items-baseline">
+            <span class="plan-card__price">{{ price }}$</span><span class="plan-card__period">/month</span>
+        </div>
+
+        <ul class="plan-card__options p-0">
+            <li class="plan-card__options-item">Ipser lorem non veniter um </li>
+            <li class="plan-card__options-item">Ipser lorem non veniter um </li>
+            <li class="plan-card__options-item">Ipser lorem non veniter um </li>
+            <li class="plan-card__options-item">Ipser lorem non veniter um </li>
+        </ul>
+
+        <a  href="{% url 'core:subscription' %}" class="plan-card__btn">Select plan</a>
+
+    </div>
+</form>
 {% endblock %}

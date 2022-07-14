@@ -1,0 +1,11 @@
+.modal {
+    &__content {
+        padding: 40px;
+        background: $primary-white;
+        border-radius: 16px;
+    }
+
+    &__footer-btn {
+        width: 100%;
+    }
+}

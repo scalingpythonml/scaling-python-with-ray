@@ -52,6 +52,10 @@ view_urlpatterns = [
         login_required(DeleteBlockedNumberView.as_view()),
         name="delete-blocked-number",
     ),
+    path("forget-password", ForgetPasswordView.as_view(), name="forget-password"),
+    path("new-password", NewPasswordView.as_view(), name="new-password"),
+    path("success-new-password", SuccessNewPasswordView.as_view(), name="success-new-password"),
+    path("new-password-link", NewPasswordView.as_view(), name="new-password-link"),
 ]
 
 api_urlpatterns = [

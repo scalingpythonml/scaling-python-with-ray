@@ -1,16 +1,17 @@
-<form method="post" action="{{ action }}">
+
+<form method="post" action="{{ action }}" class="form-body form">
   {% csrf_token %}
   {% for field in form %}
-    <div class="form-group">
+    <div class="form-group field">
 
-      <label for="{{ field.id_for_label }}">{{ field.label_tag }}</label>
+      <label for="{{ field.id_for_label }}"  class="field__label {% if field.field.required %} field__label--required {% endif %}">{{ field.label_tag }}</label>
       {% if field.field.widget.input_type == 'select' %}
 
         {{ field }}
       {% else %}
         <input type="{{ field.field.widget.input_type }}"
                {% if field.value %}value="{{ field.value }}"{% endif %}
-               class="form-control {% if field.errors %} is-invalid {% endif %}"
+               class="field__input {% if field.errors %} is-invalid {% endif %}"
                id="{{ field.id_for_label }}" name="{{ field.name }}"
                aria-describedby="emailHelp" required="{{ field.field.required }}"
                placeholder="{{ field.field.widget.attrs.placeholder }}"
@@ -18,9 +19,9 @@
         >
       {% endif %}
       {% if field.errors %}
-        <div class="invalid-feedback">
+        <span class="invalid-feedback field__input-error">
           {{ field.errors }}
-        </div>
+        </span>
       {% endif %}
       <small id="emailHelp" class="form-text text-muted">{{ field.help_text }}</small>
     </div>
@@ -30,6 +31,8 @@
       {{ form.non_field_errors }}
     </div>
   {% endif %}
-  <button type="submit" class="btn btn-primary" style="margin-top: 10px">{{ button_name }}</button>
+  
+  <a href="{% url 'core:forget-password' %}" class="form-link mr-auto">Forgot password?</a>
+  <button type="submit" class="btn btn-primary">{{ button_name }}</button>
 </form>
 

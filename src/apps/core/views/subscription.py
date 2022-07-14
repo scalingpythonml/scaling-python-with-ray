@@ -25,8 +25,8 @@ class SubscriptionView(View):
     @property
     def base_context(self):
         return {
-            "title": "Subscription",
-            "navname": "Subscription",
+            "title": "Payment form",
+            "navname": "Please enter your payment information",
             "stripe_api_key": STRIPE_PUBLIC_API_KEY,
             "step": OnboardingStepsEnum.PAYMENT.value,
         }

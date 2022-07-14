@@ -1,0 +1,95 @@
+@import './var/index';
+@import './mixins/index';
+@import './function/index';
+
+* {
+    margin: 0;
+    outline: none;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: unset;
+}
+
+body {
+    background-color: white;
+}
+.logo {
+    display: block;
+
+    &.logo-with-beaver {
+        width: 167.45px;
+        height: 44.77px;
+    }
+    &__img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: top;
+    }
+
+}
+
+.h-100vh {
+    min-height: 100vh;
+    // height: 100%;
+
+    @media screen and (max-height: 500px) {
+        min-height: 100%;
+    }
+}
+.btn {
+    @include btn($outline: false);
+}
+
+.btn-outline {
+    @include btn($outline: true);
+    
+}
+.table{
+    margin: 0;
+
+    &--bottom-gap {
+        margin-bottom: 32px;
+    }
+}
+
+.link-btn {
+    appearance: none;
+    background-color: transparent;
+    cursor: pointer;
+    @include text-config($font-weight: 700, $fs: 14px, $lh: 150%);
+    &:hover {
+        color: $primary-blue-hover; 
+    }
+
+    &--underline{
+        border-bottom: 1px solid $primary-black;
+
+        &:hover {
+            color: $primary-blue-hover; 
+        border-bottom: 1px solid $primary-blue-hover;
+
+        }
+        
+    }
+
+    &--blue {
+        color: rgba(49, 106, 255, 1);
+    }
+}
+
+
+.close-btn {
+    appearance: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    position: absolute;
+    right: 0;
+    top: 10px;
+}
+@import './components/index';

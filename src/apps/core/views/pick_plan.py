@@ -16,8 +16,8 @@ class PickPlanView(View):
     @property
     def base_context(self):
         return {
-            "title": "Pick Plan",
-            "navname": "Pick Plan",
+            "title": "Pick a plan",
+            "navname": "Please, pick a plan",
             "plan_title": config.TITLE,
             "image": f"{settings.MEDIA_URL}{config.IMAGE}",
             "description": config.DESCRIPTION,

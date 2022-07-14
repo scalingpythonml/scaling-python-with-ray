@@ -7,6 +7,7 @@ ifeq (shell, $(firstword $(MAKECMDGOALS)))
 endif
 
 
+
 .PHONY: up
 up: export DOCKER_BUILDKIT := 1
 up: export COMPOSE_DOCKER_CLI_BUILD=1
@@ -29,14 +30,6 @@ rebuild:
 shell:
 	@docker-compose -f $(CONFIG) -p $(PROJECT) exec $(RUN_ARGS) /bin/bash
 
-.PHONE: test
-test: test-up test-down
-
-.PHONY: test-down
-test-down:
-	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec down
-
-.PHONY: test-up
-test-up:
-	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci up -d
-	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec -T -w /app app make test
+.PHONY: test
+test: up
+	@docker-compose -f $(CONFIG) -p $(PROJECT) exec app make test

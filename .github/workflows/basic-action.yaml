@@ -16,10 +16,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Setup env
-      run:
-        - export CI_PROJECT_DIR=$(pwd)
-        - export COMPOSE_INTERACTIVE_NO_CLI=1
+    - name: Setup project dir env
+      run: export CI_PROJECT_DIR=$(pwd)
+    - name: Try and set compose interactive
+      run: export COMPOSE_INTERACTIVE_NO_CLI=1
     - name: Bring up the project
       run: make up
     - name: Run the tests

@@ -17,7 +17,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Setup env
-      run: export CI_PROJECT_DIR=$(pwd)
+      run:
+        - export CI_PROJECT_DIR=$(pwd)
+        - export COMPOSE_INTERACTIVE_NO_CLI=1
     - name: Bring up the project
       run: make up
     - name: Run the tests

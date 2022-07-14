@@ -252,10 +252,17 @@ body {
   line-height: 150%;
   color: #F481FE;
   position: absolute;
+  display: block;
   opacity: 0;
+  margin-top: 8px;
+}
+.field__input-error ul {
+  list-style-type: none;
+  padding: 0;
 }
 .field__input-error__input--shown {
   opacity: 1;
+  position: static;
 }
 .field__input--invalid + .field__input-error {
   opacity: 1;

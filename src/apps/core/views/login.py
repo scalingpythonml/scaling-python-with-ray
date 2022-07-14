@@ -24,7 +24,7 @@ def login_routing(user: User):
 
 
 class LoginView(BaseLoginView):
-    template_name = "login.html"
+    template_name = "login.html" 
     form_class = LoginForm
 
     def get(self, request):

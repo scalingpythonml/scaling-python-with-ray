@@ -8,3 +8,9 @@ class OnboardingStepsEnum(Enum):
     PICK_PLAN = 4
     PAYMENT = 5
     ACTIVATION = 6
+
+
+class ProfileStepsEnum(Enum):
+    DASHBOARD = 1
+    BILLING = 2
+    SETTINGS = 3

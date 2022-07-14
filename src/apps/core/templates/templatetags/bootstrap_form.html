@@ -11,7 +11,7 @@
       {% else %}
         <input type="{{ field.field.widget.input_type }}"
                {% if field.value %}value="{{ field.value }}"{% endif %}
-               class="field__input {% if field.errors %} is-invalid {% endif %}"
+               class="field__input {% if field.errors %} field__input--invalid {% endif %}"
                id="{{ field.id_for_label }}" name="{{ field.name }}"
                aria-describedby="emailHelp" required="{{ field.field.required }}"
                placeholder="{{ field.field.widget.attrs.placeholder }}"
@@ -19,7 +19,7 @@
         >
       {% endif %}
       {% if field.errors %}
-        <span class="invalid-feedback field__input-error">
+        <span class="field__input-error">
           {{ field.errors }}
         </span>
       {% endif %}
@@ -31,8 +31,10 @@
       {{ form.non_field_errors }}
     </div>
   {% endif %}
-  
-  <a href="{% url 'core:forget-password' %}" class="form-link mr-auto">Forgot password?</a>
+
+  {% if forgetPassword %}
+    <a href="{% url 'core:forget-password' %}" class="form-link mr-auto">Forgot password?</a>
+  {% endif %}
   <button type="submit" class="btn btn-primary">{{ button_name }}</button>
 </form>
 

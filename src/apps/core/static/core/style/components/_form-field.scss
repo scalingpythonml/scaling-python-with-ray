@@ -63,11 +63,19 @@
     &__input-error {
         @include text-config($font-weight: 400, $fs: 14px, $lh: 150%, $color: $primary-pink);
         position: absolute;
+        display: block;
         opacity: 0;
+        margin-top: 8px;
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
 
 
         &__input--shown {
             opacity: 1;
+            position: static;
         }
     }
 

@@ -41,3 +41,4 @@ class ReplaceDeviceView(View):
             "action": reverse("core:replace-device"),
             "action_button_name": "Update",
         }
+ 

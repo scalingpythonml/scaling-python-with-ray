@@ -29,3 +29,9 @@ rebuild:
 .PHONY: shell
 shell:
 	@docker-compose -f $(CONFIG) -p $(PROJECT) exec $(RUN_ARGS) /bin/bash
+
+.PHONY: test
+test:
+	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci up -d
+	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec -T -w /app app make test
+	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec down

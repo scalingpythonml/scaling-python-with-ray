@@ -16,5 +16,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Test
+    - name: Setup env
+      run: export CI_PROJECT_DIR=$(pwd)
+    - name: Run tests
       run: make test

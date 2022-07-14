@@ -61,3 +61,6 @@ React development server can be started with `npm start`.
 
 #### Notes:
 Try run `make rebuild` and `make up` if something went wrong.
+
+#### Testing
+To run `make test` you must set `CI_PROJECT_DIR` to the project dir.

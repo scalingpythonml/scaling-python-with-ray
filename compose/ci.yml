@@ -26,12 +26,12 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       DOMAIN: ${DOMAIN}
       SSL: "off"
-      DATA_NETLOC: ${DATA_NETLOC}
+      DATA_NETLOC: postgresql://local:local@data:5420/local
+      OUTSIDE_DATA_NETLOC: mysql+pymysql://root:root@outside_db:3420/test
       CACHE_NETLOC: ${CACHE_NETLOC}
       BROKER_NETLOC: ${BROKER_NETLOC}
       STATIC_URL: ${STATIC_URL}
       MEDIA_URL: ${MEDIA_URL}
-      OUTSIDE_DATA_NETLOC: ${OUTSIDE_DATA_NETLOC}
       STRIPE_LIVE_SECRET_KEY: ${STRIPE_LIVE_SECRET_KEY}
       STRIPE_TEST_SECRET_KEY: ${STRIPE_TEST_SECRET_KEY}
       STRIPE_LIVE_PUBLIC_KEY: ${STRIPE_LIVE_PUBLIC_KEY}
@@ -52,7 +52,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5420:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -80,7 +80,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${OUTSIDE_DB_PASSWORD}
       MYSQL_DATABASE: ${OUTSIDE_DB_DATABASE}
     ports:
-      - '3306:3306'
+      - '3420:3306'
     volumes:
       - outside_db:/var/lib/mysql
       - ./outside_db/sms_item_init.sql:/docker-entrypoint-initdb.d/init.sql:ro

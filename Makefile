@@ -1,7 +1,6 @@
 CONFIG=compose/development.yml
 PROJECT=spacebeaver
 
-
 ifeq (shell, $(firstword $(MAKECMDGOALS)))
   RUN_ARGS := $(lastword $(MAKECMDGOALS))
   $(eval $(RUN_ARGS):;@:)
@@ -30,8 +29,14 @@ rebuild:
 shell:
 	@docker-compose -f $(CONFIG) -p $(PROJECT) exec $(RUN_ARGS) /bin/bash
 
-.PHONY: test
-test:
+.PHONE: test
+test: test-up test-down
+
+.PHONY: test-down
+test-down:
+	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec down
+
+.PHONY: test-up
+test-up:
 	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci up -d
 	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec -T -w /app app make test
-	@docker-compose -f compose/ci.yml -p $(PROJECT)_ci exec down

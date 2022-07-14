@@ -53,4 +53,4 @@ jobs:
       run: nosetests -vs --traverse-namespace messaging
     # Verify the style
     - name: Style check
-      run: flake8 messaging --max-line-length=100  --exclude "*/proto/*"
+      run: flake8 messaging --max-line-length=100  --exclude "*/proto/* */web/*"

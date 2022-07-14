@@ -1,0 +1,14 @@
+{% extends 'onboarding_wizard.html' %}
+
+{% block content %}
+  <div class="col-md-6 centered">
+    <div class="card text-white bg-success">
+      <div class="card-header">Success</div>
+      <div class="card-body">
+        <h5 class="card-title">Payment accepted</h5>
+        <p class="card-text">Your account was activated. Go to <a href="{% url 'core:dashboard' %}">dashboard</a> page</p>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

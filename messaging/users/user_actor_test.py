@@ -6,7 +6,8 @@ os.environ["__ENV__"] = "UnitTest"
 os.environ["SECRET_KEY"] = "d7b24a10f65b4cae8549d79991ebaf2b"
 os.environ["STRIPE_TEST_SECRET_KEY"] = "sk_test_very_secret"
 os.environ["DJSTRIPE_WEBHOOK_SECRET"] = "very_secret2"
-
+test_id = str(uuid.uuid1()).replace("-", "")
+os.environ["TEST_ID"] = test_id
 
 import unittest
 from ..utils import test_utils
@@ -18,8 +19,7 @@ class UserActorTests(unittest.TestCase):
     def setUp(self):
         # Sketchy to use shell but otherwise django gets unhappy
         # Also kind of slow move to before/after all
-        os.environ["TEST_ID"] = str(uuid.uuid1())
-        os.system(f"cd {django_path}; python manage.py migrate")
+        os.system(f"cd {django_path}; TEST_ID={test_id} python manage.py migrate")
 
         d1 = Device.objects.create(serial_number=1234)
         d2 = Device.objects.create(serial_number=1235)

@@ -28,7 +28,6 @@ class Settings:
         if not os.environ.get("__ENV__"):
             info = "__ENV__ variable is not defined."
             sys.stdout.write("{}{}{}{}\n".format(red, bold, info, end))
-            sys.exit(-1)
 
         environment = self._get_env_vars()
 
@@ -48,6 +47,7 @@ class Settings:
                     val = rs(os.environ.get(key))
 
             if not val:
+                setattr(self, "_%s" % e, None)
                 mv.append(key)
             else:
                 setattr(self, "_%s" % e, val)
@@ -59,12 +59,11 @@ class Settings:
             for e in mv:
                 msg_map += "{}: {},\n ".format(e, os.environ.get(e))
             info = (
-                "Environment configuration error. Some of next "
-                + "variables is not defined:\n {}."
+                "Environment configuration error. The following "
+                + "env variables are not defined:\n {}"
             ).format(msg_map)
 
             sys.stdout.write("{}{}{}{}\n".format(red, bold, info, end))
-            sys.exit(-1)
 
     def _get_env_vars(self):
         return [
@@ -480,16 +479,20 @@ class Settings:
         return self._DJSTRIPE_WEBHOOK_SECRET
 
     def _set_djstripe_test_db_params(self):
-        reg_exp = "(.*?)://(.*?):(.*?)@(.*?):(.*?)/(.*)"
-        vendor, user, password, host, port, name = re.match(
-            reg_exp, self._DATA_NETLOC
-        ).groups()
-        setattr(self, "DJSTRIPE_TEST_DB_VENDOR", vendor)
-        setattr(self, "DJSTRIPE_TEST_DB_PORT", port)
-        setattr(self, "DJSTRIPE_TEST_DB_USER", user)
-        setattr(self, "DJSTRIPE_TEST_DB_NAME", name)
-        setattr(self, "DJSTRIPE_TEST_DB_PASS", password)
-        setattr(self, "DJSTRIPE_TEST_DB_HOST", host)
+        try:
+            reg_exp = "(.*?)://(.*?):(.*?)@(.*?):(.*?)/(.*)"
+            vendor, user, password, host, port, name = re.match(
+                reg_exp, self._DATA_NETLOC
+            ).groups()
+            setattr(self, "DJSTRIPE_TEST_DB_VENDOR", vendor)
+            setattr(self, "DJSTRIPE_TEST_DB_PORT", port)
+            setattr(self, "DJSTRIPE_TEST_DB_USER", user)
+            setattr(self, "DJSTRIPE_TEST_DB_NAME", name)
+            setattr(self, "DJSTRIPE_TEST_DB_PASS", password)
+            setattr(self, "DJSTRIPE_TEST_DB_HOST", host)
+        except Exception as e:
+            info = f"{e} skipping stripe config"
+            print(info)
 
     DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 

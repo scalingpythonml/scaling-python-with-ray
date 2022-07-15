@@ -10,9 +10,9 @@ from sqlalchemy.orm import sessionmaker
 from .models import SmsItem
 
 
-engine = create_engine(settings.OUTSIDE_DATA_NETLOC)
+engine = None
 
-Session = sessionmaker(engine)
+Session = None
 
 user_messages_filter = lambda twillion_number: or_(
     SmsItem.sender_phone_number == twillion_number,
@@ -25,6 +25,9 @@ def get_user_message_count(
 ):
     period_condition = getattr(timezone.now(), period)
     try:
+        if engine is None:
+            engine = create_engine(settings.OUTSIDE_DATA_NETLOC)
+            Session = sessionmaker(engine)
         with Session() as session:
             count = (
                 session.query(SmsItem)

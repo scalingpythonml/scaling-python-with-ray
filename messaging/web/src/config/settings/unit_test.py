@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from configurations import Configuration
 
 from .common import Settings

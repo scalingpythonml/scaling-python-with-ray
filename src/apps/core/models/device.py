@@ -52,3 +52,6 @@ class Device(models.Model):
     @property
     def is_used(self):
         return self.used or self.user
+
+    class Meta:
+        app_label = "core"

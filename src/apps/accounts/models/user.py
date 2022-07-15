@@ -204,3 +204,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             customer__email=self.email, status="active"
         ).exists()
         return have_subscription and not have_active_subscription
+
+    class Meta:
+        app_label = "accounts"

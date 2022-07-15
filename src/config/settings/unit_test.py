@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from configurations import Configuration
+import os
+import uuid
 
 from .common import Settings
 
@@ -27,3 +29,9 @@ class UnitTest(Settings, Configuration):
     @property
     def DATABASES(self):
         engine = 'django.db.backends.sqlite3'
+        return {
+            "default": {
+                "ENGINE": engine,
+                "NAME": os.path.join("/tmp", f"{str(uuid.uuid1())}_farts.db"),
+                }
+            }

@@ -1,17 +1,26 @@
 # We need this before the imports because django.
 import os
+import uuid
 os.environ["DJANGO_CONFIGURATION"] = "UnitTest"
+os.environ["__ENV__"] = "UnitTest"
 os.environ["SECRET_KEY"] = "d7b24a10f65b4cae8549d79991ebaf2b"
+os.environ["STRIPE_TEST_SECRET_KEY"] = "sk_test_very_secret"
+os.environ["DJSTRIPE_WEBHOOK_SECRET"] = "very_secret2"
 
-from django.test import TestCase
+
 import unittest
 from ..utils import test_utils
 from messaging.internal_types import CombinedMessage
-from .models import Device, User
+from .models import Device, User, django_path
 from ..proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL  # type: ignore
 
-class UserActorTests(TestCase):
+class UserActorTests(unittest.TestCase):
     def setUp(self):
+        # Sketchy to use shell but otherwise django gets unhappy
+        # Also kind of slow move to before/after all
+        os.environ["TEST_ID"] = str(uuid.uuid1())
+        os.system(f"cd {django_path}; python manage.py migrate")
+
         d1 = Device.objects.create(serial_number=1234)
         d2 = Device.objects.create(serial_number=1235)
         self.user_with_device_and_subscription = User.objects.create(

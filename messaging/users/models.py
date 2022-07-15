@@ -7,7 +7,6 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings"
 parent_path = pathlib.Path(__file__).parent.parent
 django_path = parent_path.joinpath("web", "src")
 sys.path = sys.path + [ django_path.as_posix() ]
-print(sys.path)
 
 import django
 django.setup()

@@ -62,9 +62,10 @@ class ProfileView(View):
     @property
     def base_context(self):
         return {
-            "title": "Profile",
-            "navname": "Profile",
+            "title": "Settings",
+            "navname": "Settings",
             "action": reverse("accounts:profile"),
             "action_button_name": "Save",
-            "step": ProfileStepsEnum.SETTINGS.value
+            "step": ProfileStepsEnum.SETTINGS.value,
+            "forget": True
         }

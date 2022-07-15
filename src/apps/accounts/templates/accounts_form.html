@@ -1,5 +1,6 @@
 {% extends 'accounts_base.html' %}
 {% load bootstrap_form %}
+{% load bootstrap_save_form %}
 
 {% block content %}
 
@@ -29,65 +30,22 @@
     <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-general-tab"
       tabindex="0">
 
-      <form class="form-body  form-body__grid-layout  form" action="" method="post">
-        {% bs_form form action action_button_name %}
+      {% bootstrap_save_form form action 'Save' %}
 
-        <!-- <div class="field">
-          <label class="field__label field__label--required" for="fullName">Full name</label>
-          <input type="text" id="fullName" class="field__input" placeholder="Enter full name" required>
-        </div>
-        <div class="field">
-          <label class="field__label" for="company">Company
-          </label>
-          <input type="text" id="company" class="field__input" placeholder="Enter company">
-        </div>
-        <footer class="form-body__footer d-flex">
-          <button type="submit" class="btn form-body__footer-btn">Save</button>
-        </footer> -->
-      </form>
     </div>
     <div class="tab-pane fade" id="pills-security" role="tabpanel" aria-labelledby="pills-security-tab" tabindex="0">
-      <form class="form-body form-body__grid-layout form" action="" method="post">
 
-        <div class="field">
-          <label class="field__label" for="card">Cardholder name</label>
-          <input type="text" id="card" class="field__input" placeholder="Enter cardholder name">
-          <span class="field__input-error"></span>
-          <button type="button" class="field__change-btn link-btn link-btn--blue" data-bs-toggle="modal"
-            data-bs-target="#changeEmail">Change</button>
-        </div>
-        <div class="field">
-          <label class="field__label" for="nickname">Country</label>
-          <input type="text" id="nickname" class="field__input" placeholder="Select country ">
-          <span class="field__input-error field__input--shown">This nickname is already used</span>
-          <button type="button" class="field__change-btn link-btn link-btn--blue" data-bs-toggle="modal"
-            data-bs-target="#changePass">Change</button>
-        </div>
-      </form>
+      {% bootstrap_save_form form action 'Save' %}
+
     </div>
     <div class="tab-pane fade" id="pills-device-info" role="tabpanel" aria-labelledby="pills-device-info-tab"
       tabindex="0">
 
-      <form class="form-body form-body__grid-layout form" action="" method="post">
+      {% bootstrap_save_form form action 'Save' %}
 
-        <!-- <div class="field">
-          <label class="field__label field__label--required" for="serialNumber">Serial number</label>
-          <input type="text" id="serialNumber" class="field__input" placeholder="Enter serial number" required>
-          <span class="field__input-error"></span>
-        </div>
-        <div class="field">
-          <label class="field__label field__label--required" for="nickname">Device nickname</label>
-          <input type="text" id="nickname" class="field__input field__input--invalid"
-            placeholder="Enter device nickname" required>
-          <span class="field__input-error field__input--shown">This nickname is already used</span>
-        </div>
-
-        <footer class="form-body__footer d-flex">
-          <button type="submit" class="btn form-body__footer-btn">Save</button>
-        </footer> -->
-      </form>
     </div>
     <div class="tab-pane fade" id="pills-numbers" role="tabpanel" aria-labelledby="pills-numbers-tab" tabindex="0">
+
       <table class="table table--bottom-gap">
         <thead>
           <tr>
@@ -167,43 +125,24 @@
           </tr>
         </tbody>
       </table>
-      <!-- data-bs-toggle="modal" data-bs-target="#addBlock"  -->
-
-      <button class="link-btn link-btn--underline" onclick="addNumberModal(true)">Add to block</button>
-
-      <!-- <button class="btn btn-success" onclick="addNumberModal(true)">Add</button> -->
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Number</th>
-            <th scope="col">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for number in page %}
-          <tr>
-            <td>{{ number.number }}</td>
-            <td>
-              {% url 'core:delete-blocked-number' number.id as action_url %}
-              <button class="btn btn-link" onclick="deleteNumberModal(true, '{{ action_url }}')">
-                Delete
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
       <nav aria-label="navigation">
         <ul class="pagination">
           {% if page.has_previous %}
-          <li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
           </li>
           {% endif %}
           {% if page.has_next %}
-          <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">Next</a></li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
+          </li>
           {% endif %}
         </ul>
       </nav>
+
+      <button class="link-btn link-btn--underline" onclick="addNumberModal(true)">Add to block</button>
+
+
       <!-- DELETE NUMBER CONFIRMATION MODAL -->
 
       <div class="modal fade" id="delete-number" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -218,7 +157,7 @@
               </header>
               <form action="#" id="delete-number-form" method="post" class="form">
                 {% csrf_token %}
-                <button type="submit" class="btn form-submit">Unblock</button>
+                <button type="button" class="btn form-submit">Unblock</button>
                 <button type="button" class="btn-outline form-submit" data-dismiss="modal">Close</button>
 
               </form>
@@ -235,8 +174,7 @@
           <div class="modal-content modal__content">
             <div class="modal-body p-0">
               <button type="button" class="close-btn" data-dismiss="modal" aria-label="Close">
-                <img class="close-btn__icon" src="{% static 'core/img/svg/icon-close-circle.svg' %}" alt="">
-              </button>
+                <img class="close-btn__icon" src="{% static 'core/img/svg/icon-close-circle.svg' %}" alt=""></button>
 
               <header class="form-header text-center">
                 <h1 class="title title--sm text-start">Add to block</h1>
@@ -250,7 +188,7 @@
 
                   <label for="{{ field.id_for_label }}" class="field__label">{{ field.label_tag }}</label>
                   <input type="{{ field.field.widget.input_type }}" {% if field.value %}value="{{ field.value }}" {%
-                    endif %} class="form-control field__input {% if field.errors %} is-invalid {% endif %}"
+                    endif %} class="field__input {% if field.errors %} field__input--invalid {% endif %}"
                     id="{{ field.id_for_label }}" name="{{ field.name }}" aria-describedby="emailHelp"
                     required="{{ field.field.required }}" placeholder="{{ field.field.widget.attrs.placeholder }}" {% if
                     field.field.disabled %} disabled {% endif %}>
@@ -266,6 +204,9 @@
           </div>
         </div>
       </div>
+
+
+      <!-- SUCCESSFULLY BLOCKED MODAL -->
 
       <div class="modal fade" id="successfullyBlocked" tabindex="-1" aria-labelledby="successfullyBlockedLabel"
         aria-hidden="true">
@@ -294,6 +235,7 @@
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
   const deleteNumberModal = (show, action = '') => {
@@ -307,8 +249,6 @@
     $('#add-number').modal(show ? 'show' : 'hide');
   }
 
-  {% if error %}
-  addNumberModal(true);
-  {% endif %}
+  {% if error %} addNumberModal(true); {% endif %}
 </script>
 {% endblock %}

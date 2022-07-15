@@ -1,17 +1,16 @@
 
-<form method="post" action="{{ action }}" class="form-body form">
+<form method="post" action="{{ action }}" class="form-body form form-body__grid-layout">
   {% csrf_token %}
   {% for field in form %}
     <div class="form-group field">
 
       <label for="{{ field.id_for_label }}"  class="field__label {% if field.field.required %} field__label--required {% endif %}">{{ field.label_tag }}</label>
       {% if field.field.widget.input_type == 'select' %}
-
         {{ field }}
       {% else %}
         <input type="{{ field.field.widget.input_type }}"
                {% if field.value %}value="{{ field.value }}"{% endif %}
-               class="field__input {% if field.errors %} field__input--invalid {% endif %}"
+               class="field__input {% if field.errors %} field__input--invalid {% endif %} {% if field.field.widget.input_type == 'select' %} field__input--select {% endif %} "
                id="{{ field.id_for_label }}" name="{{ field.name }}"
                aria-describedby="emailHelp" required="{{ field.field.required }}"
                placeholder="{{ field.field.widget.attrs.placeholder }}"
@@ -32,9 +31,11 @@
     </div>
   {% endif %}
 
-  {% if forget %}
-    <a href="{% url 'core:forget-password' %}" class="form-link mr-auto">Forgot password?</a>
-  {% endif %}
-  <button type="submit" class="btn btn-primary">{{ button_name }}</button>
+
+  <footer class="form-body__footer d-flex">
+
+    <button type="button" class="btn-outline form-body__footer-btn gap-right">{{ button_name_2 }}</button>
+    <button type="submit" class="btn form-body__footer-btn" data-bs-toggle="modal" data-bs-target="#successfullyPaid">{{ button_name_1 }}</button>
+</footer>
 </form>
 

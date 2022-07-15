@@ -1,5 +1,5 @@
 
-<form method="post" action="{{ action }}" class="form-body form">
+<form method="post" action="{{ action }}" class="form-body form form-body__grid-layout">
   {% csrf_token %}
   {% for field in form %}
     <div class="form-group field">
@@ -32,9 +32,10 @@
     </div>
   {% endif %}
 
-  {% if forget %}
-    <a href="{% url 'core:forget-password' %}" class="form-link mr-auto">Forgot password?</a>
-  {% endif %}
-  <button type="submit" class="btn btn-primary">{{ button_name }}</button>
+
+  <footer class="form-body__footer d-flex">
+
+    <button type="button" class="btn form-body__footer-btn" data-bs-toggle="modal" data-bs-target="#successfullyPaid">{{ button_name }}</button>
+</footer>
 </form>
 

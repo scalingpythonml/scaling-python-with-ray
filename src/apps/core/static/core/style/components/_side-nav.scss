@@ -2,6 +2,7 @@
     background-color: $grayscale-gray-800;
     width: width(10);
     padding: width(1);
+    position: relative;
 
     &--smaller {
     width: width(9);

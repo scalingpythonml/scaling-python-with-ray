@@ -57,7 +57,16 @@
             }
         }
 
+        &.form-select {
+            padding-left: 40px;
+        }
         
+    }
+    .country-select-flag {
+        position: absolute; 
+        bottom: 20px;
+        left: 16px;
+        margin-left: 0 !important;
     }
 
     &__input-error {
@@ -81,6 +90,7 @@
 
     &__input--invalid + &__input-error {
         opacity: 1;
+        position: static;
     }
 
     &__change-btn{

@@ -1,466 +1,523 @@
 {% extends 'dashboard-layout.html' %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'core/credit-card.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
-    <script src="{% static 'core/js/loader.js' %}"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <style>
-        .col-sm {
-            margin: 10px;
-        }
+<link rel="stylesheet" href="{% static 'core/credit-card.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
+<script src="{% static 'core/js/loader.js' %}"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+    .col-sm {
+        margin: 10px;
+    }
 
-        .card {
-            height: 100%;
-            min-height: 300px;
-        }
-    </style>
+    .card {
+        height: 100%;
+        min-height: 300px;
+    }
+</style>
 {% endblock %}
 {% block content %}
 
-    <div class="tab-layout">
-        <ul class="nav nav-pills tabs-list" id="pills-tab" role="tablist">
-            <li class="nav-item tab-item" role="presentation">
-                <a class="nav-link tab-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Current plan</a>
-            </li>
-            <li class="nav-item tab-item" role="presentation">
-                <a class="nav-link tab-link " id="pills-profile-tab" data-toggle="pill" href="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Payment method</a>
-              </li>
-        </ul>
-        <div class="tab-content" id="pills-tabContent">
-            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
-                <section class="tab-section">
-                    <h2 class="tab-section__title">Plan details</h2>
+<div class="tab-layout">
+    <ul class="nav nav-pills tabs-list" id="pills-tab" role="tablist">
+        <li class="nav-item tab-item" role="presentation">
+            <a class="nav-link tab-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" type="button"
+                role="tab" aria-controls="pills-home" aria-selected="true">Current plan</a>
+        </li>
+        <li class="nav-item tab-item" role="presentation">
+            <a class="nav-link tab-link " id="pills-profile-tab" data-toggle="pill" href="#pills-profile" type="button"
+                role="tab" aria-controls="pills-profile" aria-selected="false">Payment method</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
+            tabindex="0">
+            <section class="tab-section">
+                <h2 class="tab-section__title">Plan details</h2>
 
 
-                    <div class="plan-card plan-card-simple d-flex align-items-center justify-content-between">
-                        {% if plan %}
+                <div class="plan-card plan-card-simple d-flex align-items-center justify-content-between">
+                    {% if plan %}
 
-                            <div class="plan-card__img-wrap gap-right">
-                                <img class="plan-card__img" src="{% static 'core/img/svg/icon-mirroring-screen.svg' %}" alt="">
-                            </div>
-                            <div class="plan-card-simple__description-wrap ">
-                                <div class="plan-card-simple__title-wrap d-flex align-items-baseline">
-                                    <span class="plan-card-simple__title">{{ plan.product_name }}</span>
-                                    <span class="plan-card-simple__status plan-card-simple__status--active">Activated</span>
-                                    <span class="plan-card-simple__status plan-card-simple__status--cancel">Canceled</span>
-                                    <span class="plan-card-simple__status plan-card-simple__status--deactivated">Deactivated</span>
-                                </div>
-                                <p class="plan-card-simple__duration">
-                                    Start date -
-                                    <span>
-                                        Jul 29 2022</span>
-                                    for
-                                    <span>{{ plan.amount }}
-                                        {{ plan.currency }}/{{ plan.interval_count }}
-                                        {{ plan.interval }}</span>
-                                    until
-                                    <span>Aug 29 2022</span>
-                                </p>
-                            </div>
-
-                        {% else %}
-                            <p class="plan-card-simple__duration">You have not plan now</p>
-                        {% endif %}
-                        {% if plan %}
-                            <button class="btn-outline plan-card-simple__btn" type="button" onclick="cancelSubscriptionConfirmation(true)">Cancel plan</button>
-                        {% else %}
-                            <a href="{% url 'core:pick-plan' %}" class="btn-outline plan-card-simple__btn" type="button">Update plan</a>
-
-                        {% endif %}
+                    <div class="plan-card__img-wrap gap-right">
+                        <img class="plan-card__img" src="{% static 'core/img/svg/icon-mirroring-screen.svg' %}" alt="">
                     </div>
-                </section>
-                <section class="tab-section">
-                    <h2 class="tab-section__title">Invoices</h2>
+                    <div class="plan-card-simple__description-wrap ">
+                        <div class="plan-card-simple__title-wrap d-flex align-items-baseline">
+                            <span class="plan-card-simple__title">{{ plan.product_name }}</span>
+                            <span class="plan-card-simple__status plan-card-simple__status--active">Activated</span>
+                            <span class="plan-card-simple__status plan-card-simple__status--cancel">Canceled</span>
+                            <span
+                                class="plan-card-simple__status plan-card-simple__status--deactivated">Deactivated</span>
+                        </div>
+                        <p class="plan-card-simple__duration">
+                            Start date -
+                            <span>
+                                Jul 29 2022</span>
+                            for
+                            <span>{{ plan.amount }}
+                                {{ plan.currency }}/{{ plan.interval_count }}
+                                {{ plan.interval }}</span>
+                            until
+                            <span>Aug 29 2022</span>
+                        </p>
+                    </div>
+
+                    {% else %}
+                    <p class="plan-card-simple__duration">You have not plan now</p>
+                    {% endif %}
+                    {% if plan %}
+                    <button class="btn-outline plan-card-simple__btn" type="button"
+                        onclick="cancelSubscriptionConfirmation(true)">Cancel plan</button>
+                    {% else %}
+                    <a href="{% url 'core:pick-plan' %}" class="btn-outline plan-card-simple__btn" type="button">Update
+                        plan</a>
+
+                    {% endif %}
+                </div>
+            </section>
+            <section class="tab-section">
+                <h2 class="tab-section__title">Invoices</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="col-title" scope="col">Type of payment</th>
+                            <th class="col-title" scope="col">Amount</th>
+                            <th class="col-title" scope="col">Status</th>
+                            <th class="col-title" scope="col">Payment method</th>
+                            <th class="col-title text-end" scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in page %}
+                        <tr>
+                            <td class="align-middle">
+                                <div class="payment-card d-flex align-items-center">
+                                    <div class="payment-card__img d-flex align-items-center justify-content-center">
+                                        <svg class="payment-card__icon" width="24" height="24" viewbox="0 0 24 24"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2 8.5H14.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M6 16.5H8" stroke="#222223" stroke-width="1.8"
+                                                stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M10.5 16.5H14.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path
+                                                d="M22 14.03V16.11C22 19.62 21.11 20.5 17.56 20.5H6.44C2.89 20.5 2 19.62 2 16.11V7.89C2 4.38 2.89 3.5 6.44 3.5H14.5"
+                                                stroke="#222223" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path d="M20 9.5V3.5L22 5.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M20 3.5L18 5.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+
+                                    </div>
+                                    <div class="payment-card__transaction-wrap">
+                                        <p class="payment-card__transaction-name">Basic plan</p>
+                                        <p class="payment-card__transaction-date">{{ invoice.created }}</p>
+                                    </div>
+
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <p class="transaction-amount">$200</p>
+                            </td>
+                            <td class="align-middle">
+                                <div class="transaction-tag transaction-tag--paid">
+                                    {{ invoice.status }}
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <p class="transaction-pay-method">Stripe</p>
+
+                            </td>
+                            <td class="align-middle">
+                                <p class="transaction-description text-end">Plan update</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td class="align-middle">
+                                <div class="payment-card d-flex align-items-center">
+                                    <div class="payment-card__img d-flex align-items-center justify-content-center">
+                                        <svg class="payment-card__icon" width="24" height="24" viewbox="0 0 24 24"
+                                            fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2 8.5H14.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M6 16.5H8" stroke="#222223" stroke-width="1.8"
+                                                stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M10.5 16.5H14.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path
+                                                d="M22 14.03V16.11C22 19.62 21.11 20.5 17.56 20.5H6.44C2.89 20.5 2 19.62 2 16.11V7.89C2 4.38 2.89 3.5 6.44 3.5H14.5"
+                                                stroke="#222223" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path d="M20 9.5V3.5L22 5.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M20 3.5L18 5.5" stroke="#222223" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+
+                                    </div>
+                                    <div class="payment-card__transaction-wrap">
+                                        <p class="payment-card__transaction-name">Basic plan</p>
+                                        <p class="payment-card__transaction-date">Jul 29 2022</p>
+                                    </div>
+
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <p class="transaction-amount">$200</p>
+                            </td>
+                            <td class="align-middle">
+                                <div class="transaction-tag transaction-tag--paid">
+                                    Paid
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <p class="transaction-pay-method">Stripe</p>
+
+                            </td>
+                            <td class="align-middle">
+                                <p class="transaction-description text-end">Plan update</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+            <section class="tab-section">
+                <h2 class="tab-section__title">Type of payment</h2>
+
+                <form class="form-body  form" action="" method="post">
+
+                    <fieldset class="payment-type-layout payment-type-layout__grid">
+                        <div class="payment-card-wrapp">
+                            <input class="position-absolute payment-card-wrapp__input" type="radio" name="payment-type"
+                                id="card" checked>
+                            <label for="card"
+                                class="payment-card payment-card--checked payment-card--big d-flex align-items-center justify-content-center">
+
+                                <div class="payment-card__img d-flex align-items-center justify-content-center">
+                                    <svg class="payment-card__icon" width="22" height="22" viewbox="0 0 22 22"
+                                        fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1.83301 7.79639H20.1663" stroke="#222223" stroke-width="1.7"
+                                            stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M5.5 15.1296H7.33333" stroke="#222223" stroke-width="1.7"
+                                            stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.625 15.1296H13.2917" stroke="#222223" stroke-width="1.7"
+                                            stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path
+                                            d="M5.90301 3.21289H16.0872C19.3505 3.21289 20.1663 4.01956 20.1663 7.23706V14.7629C20.1663 17.9804 19.3505 18.7871 16.0963 18.7871H5.90301C2.64884 18.7962 1.83301 17.9896 1.83301 14.7721V7.23706C1.83301 4.01956 2.64884 3.21289 5.90301 3.21289Z"
+                                            stroke="#222223" stroke-width="1.7" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <span class="payment-card__transaction-name payment-card__transaction-name--big">Bank
+                                    card</span>
+                            </label>
+                        </div>
+                        <div class="payment-card-wrapp">
+                            <input class="position-absolute payment-card-wrapp__input" type="radio" name="payment-type"
+                                id="stripe">
+
+                            <label for="stripe"
+                                class="payment-card payment-card--big d-flex align-items-center justify-content-center">
+
+                                <div
+                                    class="payment-card__img payment-card__img--blue d-flex align-items-center justify-content-center">
+
+                                    <svg class="payment-card__icon payment-card__icon--blue" width="15" height="22"
+                                        viewbox="0 0 15 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M5.97638 6.40157C5.97638 5.48031 6.73228 5.12598 7.98425 5.12598C9.77953 5.12598 12.0472 5.66929 13.8425 6.6378V1.08661C11.8819 0.307086 9.94488 0 7.98425 0C3.18898 0 0 2.50394 0 6.68504C0 13.2047 8.97638 12.1654 8.97638 14.9764C8.97638 16.063 8.0315 16.4173 6.70866 16.4173C4.74803 16.4173 2.24409 15.6142 0.259843 14.5276V20.1496C2.45669 21.0945 4.67717 21.4961 6.70866 21.4961C11.622 21.4961 15 19.063 15 14.8346C14.9764 7.79528 5.97638 9.04724 5.97638 6.40157Z"
+                                            fill="#6772E5" />
+                                    </svg>
+
+                                </div>
+                                <span
+                                    class="payment-card__transaction-name payment-card__transaction-name--big">Stripe</span>
+                            </label>
+                        </div>
+                        <div class="payment-card-wrapp">
+                            <input class="position-absolute payment-card-wrapp__input" type="radio" name="payment-type"
+                                id="bank">
+
+                            <label for="bank"
+                                class="payment-card payment-card--big d-flex align-items-center justify-content-center">
+
+                                <div class="payment-card__img d-flex align-items-center justify-content-center">
+
+                                    <svg class="payment-card__icon" width="22" height="22" viewbox="0 0 22 22"
+                                        fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.917 8.25H6.41699" stroke="#222223" stroke-width="1.7"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path
+                                            d="M20.1665 10.0558V11.9442C20.1665 12.4484 19.7632 12.8608 19.2499 12.8792H17.4532C16.4632 12.8792 15.5557 12.155 15.4732 11.165C15.4182 10.5875 15.6382 10.0467 16.0232 9.67083C16.3624 9.32249 16.8299 9.12085 17.3432 9.12085H19.2499C19.7632 9.13918 20.1665 9.55164 20.1665 10.0558Z"
+                                            stroke="#222223" stroke-width="1.7" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M16.023 9.67074C15.638 10.0466 15.418 10.5874 15.473 11.1649C15.5555 12.1549 16.463 12.8791 17.453 12.8791H19.2497V14.2083C19.2497 16.9583 17.4163 18.7916 14.6663 18.7916H6.41634C3.66634 18.7916 1.83301 16.9583 1.83301 14.2083V7.79159C1.83301 5.29825 3.33634 3.55658 5.67384 3.26325C5.91218 3.22658 6.15967 3.20825 6.41634 3.20825H14.6663C14.9047 3.20825 15.1338 3.21741 15.3538 3.25407C17.7188 3.52907 19.2497 5.27992 19.2497 7.79159V9.12076H17.343C16.8297 9.12076 16.3622 9.32241 16.023 9.67074Z"
+                                            stroke="#222223" stroke-width="1.7" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+
+                                </div>
+                                <span class="payment-card__transaction-name payment-card__transaction-name--big">Bank
+                                    account</span>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="form-body__grid-layout">
+
+                        <div class="field">
+                            <label class="field__label" for="card">Cardholder name</label>
+                            <input type="text" id="card" class="field__input" placeholder="Enter cardholder name">
+                            <span class="field__input-error"></span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="nickname">Country</label>
+                            <input type="text" id="nickname" class="field__input" placeholder="Select country ">
+                            <span class="field__input-error field__input--shown">This nickname is already used</span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="cardname">Name on card</label>
+                            <input type="text" id="cardname" class="field__input" placeholder="Enter name on card">
+                            <span class="field__input-error"></span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="expiration">Expiration month and year</label>
+                            <input type="text" id="expiration" class="field__input" placeholder="MM / YY">
+                            <span class="field__input-error field__input--shown">This nickname is already used</span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="CVV">CVV</label>
+                            <input type="text" id="CVV" class="field__input" placeholder="Enter CVV">
+                            <span class="field__input-error"></span>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="cardNumber">Card number</label>
+                            <input type="text" id="cardNumber" class="field__input" placeholder="Enter card number">
+                            <span class="field__input-error field__input--shown">This nickname is already used</span>
+                        </div>
+                    </fieldset>
+
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+<!-- OLD -->
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <div class="card">
+                <div class="card-header">
+                    Current payment method
+                </div>
+                <div class="card-body">
+                    {% if card %}
+                    <div class="credit-card">
+                        <div class="bank-name" title="BestBank">{{ card.brand }}</div>
+                        <div class="chip">
+                            <div class="side left"></div>
+                            <div class="side right"></div>
+                            <div class="vertical top"></div>
+                            <div class="vertical bottom"></div>
+                        </div>
+                        <div class="data">
+                            <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** ****
+                                {{ card.last4 }}</div>
+                            <div class="first-digits"></div>
+                            <div class="exp-date-wrapper">
+                                <div class="left-label">EXPIRES END</div>
+                                <div class="exp-date">
+                                    <div class="upper-labels">MONTH/YEAR</div>
+                                    <div class="date" title="{{ card.exp_month }}/{{ card.exp_year }}">
+                                        {{ card.exp_month }}/{{ card.exp_year }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="name-on-card"></div>
+                        </div>
+                        <div class="lines-down"></div>
+                        <div class="lines-up"></div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModalCenter"
+                        onclick="updatePaymentMethodModal(true)">
+                        {% if card %}
+                        Update
+                        {% else %}
+                        Add
+                        {% endif %}
+                    </button>
+                    {% if card %}
+                    <button class="btn btn-danger" onclick="deletePaymentMethodConfirmation(true)">
+                        Delete
+                    </button>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-sm">
+            <div class="card">
+                <div class="card-header">
+                    Current plan
+                </div>
+                <div class="card-body">
+                    {% if plan == false %}
                     <table class="table">
-                        <thead>
-                            <tr>
-                                <th class="col-title" scope="col">Type of payment</th>
-                                <th class="col-title" scope="col">Amount</th>
-                                <th class="col-title" scope="col">Status</th>
-                                <th class="col-title" scope="col">Payment method</th>
-                                <th class="col-title text-end" scope="col">Description</th>
-                            </tr>
-                        </thead>
                         <tbody>
-                          {% for invoice in page %}
-                                    <tr>
-                                      <td class="align-middle">
-                                          <div class="payment-card d-flex align-items-center">
-                                              <div class="payment-card__img d-flex align-items-center justify-content-center">
-                                                  <svg class="payment-card__icon" width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                      <path d="M2 8.5H14.5" stroke="#222223" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                                      <path d="M6 16.5H8" stroke="#222223" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                                      <path d="M10.5 16.5H14.5" stroke="#222223" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                                      <path d="M22 14.03V16.11C22 19.62 21.11 20.5 17.56 20.5H6.44C2.89 20.5 2 19.62 2 16.11V7.89C2 4.38 2.89 3.5 6.44 3.5H14.5" stroke="#222223" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                      <path d="M20 9.5V3.5L22 5.5" stroke="#222223" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                      <path d="M20 3.5L18 5.5" stroke="#222223" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                  </svg>
-      
-                                              </div>
-                                              <div class="payment-card__transaction-wrap">
-                                                  <p class="payment-card__transaction-name">Basic plan</p>
-                                                  <p class="payment-card__transaction-date">{{ invoice.created }}</p>
-                                              </div>
-      
-                                          </div>
-                                      </td>
-                                      <td class="align-middle">
-                                          <p class="transaction-amount">$200</p>
-                                      </td>
-                                      <td class="align-middle">
-                                          <div class="transaction-tag transaction-tag--paid">
-                                            {{ invoice.status }}
-                                          </div>
-                                      </td>
-                                      <td class="align-middle">
-                                          <p class="transaction-pay-method">Stripe</p>
-      
-                                      </td>
-                                      <td class="align-middle">
-                                          <p class="transaction-description text-end">Plan update</p>
-                                      </td>
-                                  </tr>
-                                {% endfor %}
                             <tr>
-                                <td class="align-middle">
-                                    <div class="payment-card d-flex align-items-center">
-                                        <div class="payment-card__img d-flex align-items-center justify-content-center">
-                                            <svg class="payment-card__icon" width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M2 8.5H14.5" stroke="#222223" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M6 16.5H8" stroke="#222223" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M10.5 16.5H14.5" stroke="#222223" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M22 14.03V16.11C22 19.62 21.11 20.5 17.56 20.5H6.44C2.89 20.5 2 19.62 2 16.11V7.89C2 4.38 2.89 3.5 6.44 3.5H14.5" stroke="#222223" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M20 9.5V3.5L22 5.5" stroke="#222223" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M20 3.5L18 5.5" stroke="#222223" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-
-                                        </div>
-                                        <div class="payment-card__transaction-wrap">
-                                            <p class="payment-card__transaction-name">Basic plan</p>
-                                            <p class="payment-card__transaction-date">Jul 29 2022</p>
-                                        </div>
-
-                                    </div>
-                                </td>
-                                <td class="align-middle">
-                                    <p class="transaction-amount">$200</p>
-                                </td>
-                                <td class="align-middle">
-                                    <div class="transaction-tag transaction-tag--paid">
-                                        Paid
-                                    </div>
-                                </td>
-                                <td class="align-middle">
-                                    <p class="transaction-pay-method">Stripe</p>
-
-                                </td>
-                                <td class="align-middle">
-                                    <p class="transaction-description text-end">Plan update</p>
-                                </td>
+                                <th scope="row">Product</th>
+                                <td>{{ plan.product_name }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Description</th>
+                                <td>{{ plan.product_description }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Price</th>
+                                <td>{{ plan.amount }}
+                                    {{ plan.currency }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Interval</th>
+                                <td>{{ plan.interval_count }}
+                                    {{ plan.interval }}</td>
                             </tr>
                         </tbody>
                     </table>
-                </section>
-            </div>
-            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
-                <section class="tab-section">
-                    <h2 class="tab-section__title">Type of payment</h2>
-
-                    <form class="form-body  form" action="" method="post">
-
-                        <fieldset class="payment-type-layout payment-type-layout__grid">
-                            <div class="payment-card-wrapp">
-                                <input class="position-absolute payment-card-wrapp__input" type="radio" name="payment-type" id="card" checked>
-                                <label for="card" class="payment-card payment-card--checked payment-card--big d-flex align-items-center justify-content-center">
-
-                                    <div class="payment-card__img d-flex align-items-center justify-content-center">
-                                        <svg class="payment-card__icon" width="22" height="22" viewbox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M1.83301 7.79639H20.1663" stroke="#222223" stroke-width="1.7" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M5.5 15.1296H7.33333" stroke="#222223" stroke-width="1.7" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M9.625 15.1296H13.2917" stroke="#222223" stroke-width="1.7" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M5.90301 3.21289H16.0872C19.3505 3.21289 20.1663 4.01956 20.1663 7.23706V14.7629C20.1663 17.9804 19.3505 18.7871 16.0963 18.7871H5.90301C2.64884 18.7962 1.83301 17.9896 1.83301 14.7721V7.23706C1.83301 4.01956 2.64884 3.21289 5.90301 3.21289Z" stroke="#222223" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <span class="payment-card__transaction-name payment-card__transaction-name--big">Bank card</span>
-                                </label>
-                            </div>
-                            <div class="payment-card-wrapp">
-                                <input class="position-absolute payment-card-wrapp__input" type="radio" name="payment-type" id="stripe">
-
-                                <label for="stripe" class="payment-card payment-card--big d-flex align-items-center justify-content-center">
-
-                                    <div class="payment-card__img payment-card__img--blue d-flex align-items-center justify-content-center">
-
-                                        <svg class="payment-card__icon payment-card__icon--blue" width="15" height="22" viewbox="0 0 15 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M5.97638 6.40157C5.97638 5.48031 6.73228 5.12598 7.98425 5.12598C9.77953 5.12598 12.0472 5.66929 13.8425 6.6378V1.08661C11.8819 0.307086 9.94488 0 7.98425 0C3.18898 0 0 2.50394 0 6.68504C0 13.2047 8.97638 12.1654 8.97638 14.9764C8.97638 16.063 8.0315 16.4173 6.70866 16.4173C4.74803 16.4173 2.24409 15.6142 0.259843 14.5276V20.1496C2.45669 21.0945 4.67717 21.4961 6.70866 21.4961C11.622 21.4961 15 19.063 15 14.8346C14.9764 7.79528 5.97638 9.04724 5.97638 6.40157Z" fill="#6772E5"/>
-                                        </svg>
-
-                                    </div>
-                                    <span class="payment-card__transaction-name payment-card__transaction-name--big">Stripe</span>
-                                </label>
-                            </div>
-                            <div class="payment-card-wrapp">
-                                <input class="position-absolute payment-card-wrapp__input" type="radio" name="payment-type" id="bank">
-
-                                <label for="bank" class="payment-card payment-card--big d-flex align-items-center justify-content-center">
-
-                                    <div class="payment-card__img d-flex align-items-center justify-content-center">
-
-                                        <svg class="payment-card__icon" width="22" height="22" viewbox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M11.917 8.25H6.41699" stroke="#222223" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M20.1665 10.0558V11.9442C20.1665 12.4484 19.7632 12.8608 19.2499 12.8792H17.4532C16.4632 12.8792 15.5557 12.155 15.4732 11.165C15.4182 10.5875 15.6382 10.0467 16.0232 9.67083C16.3624 9.32249 16.8299 9.12085 17.3432 9.12085H19.2499C19.7632 9.13918 20.1665 9.55164 20.1665 10.0558Z" stroke="#222223" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M16.023 9.67074C15.638 10.0466 15.418 10.5874 15.473 11.1649C15.5555 12.1549 16.463 12.8791 17.453 12.8791H19.2497V14.2083C19.2497 16.9583 17.4163 18.7916 14.6663 18.7916H6.41634C3.66634 18.7916 1.83301 16.9583 1.83301 14.2083V7.79159C1.83301 5.29825 3.33634 3.55658 5.67384 3.26325C5.91218 3.22658 6.15967 3.20825 6.41634 3.20825H14.6663C14.9047 3.20825 15.1338 3.21741 15.3538 3.25407C17.7188 3.52907 19.2497 5.27992 19.2497 7.79159V9.12076H17.343C16.8297 9.12076 16.3622 9.32241 16.023 9.67074Z" stroke="#222223" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-
-                                    </div>
-                                    <span class="payment-card__transaction-name payment-card__transaction-name--big">Bank account</span>
-                                </label>
-                            </div>
-                        </fieldset>
-                        <fieldset class="form-body__grid-layout">
-
-                            <div class="field">
-                                <label class="field__label" for="card">Cardholder name</label>
-                                <input type="text" id="card" class="field__input" placeholder="Enter cardholder name">
-                                <span class="field__input-error"></span>
-                            </div>
-                            <div class="field">
-                                <label class="field__label" for="nickname">Country</label>
-                                <input type="text" id="nickname" class="field__input" placeholder="Select country ">
-                                <span class="field__input-error field__input--shown">This nickname is already used</span>
-                            </div>
-                            <div class="field">
-                                <label class="field__label" for="cardname">Name on card</label>
-                                <input type="text" id="cardname" class="field__input" placeholder="Enter name on card">
-                                <span class="field__input-error"></span>
-                            </div>
-                            <div class="field">
-                                <label class="field__label" for="expiration">Expiration month and year</label>
-                                <input type="text" id="expiration" class="field__input" placeholder="MM / YY">
-                                <span class="field__input-error field__input--shown">This nickname is already used</span>
-                            </div>
-                            <div class="field">
-                                <label class="field__label" for="CVV">CVV</label>
-                                <input type="text" id="CVV" class="field__input" placeholder="Enter CVV">
-                                <span class="field__input-error"></span>
-                            </div>
-                            <div class="field">
-                                <label class="field__label" for="cardNumber">Card number</label>
-                                <input type="text" id="cardNumber" class="field__input" placeholder="Enter card number">
-                                <span class="field__input-error field__input--shown">This nickname is already used</span>
-                            </div>
-                        </fieldset>
-
-                    </form>
-                </section>
-            </div>
-        </div>
-    </div>
-    <!-- OLD -->
-
-    <div class="container">
-        <div class="row">
-            <div class="col-sm">
-                <div class="card">
-                    <div class="card-header">
-                        Current payment method
-                    </div>
-                    <div class="card-body">
-                        {% if card %}
-                            <div class="credit-card">
-                                <div class="bank-name" title="BestBank">{{ card.brand }}</div>
-                                <div class="chip">
-                                    <div class="side left"></div>
-                                    <div class="side right"></div>
-                                    <div class="vertical top"></div>
-                                    <div class="vertical bottom"></div>
-                                </div>
-                                <div class="data">
-                                    <div class="pan" title="**** **** **** {{ card.last4 }}">**** **** ****
-                                        {{ card.last4 }}</div>
-                                    <div class="first-digits"></div>
-                                    <div class="exp-date-wrapper">
-                                        <div class="left-label">EXPIRES END</div>
-                                        <div class="exp-date">
-                                            <div class="upper-labels">MONTH/YEAR</div>
-                                            <div class="date" title="{{ card.exp_month }}/{{ card.exp_year }}">
-                                                {{ card.exp_month }}/{{ card.exp_year }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="name-on-card"></div>
-                                </div>
-                                <div class="lines-down"></div>
-                                <div class="lines-up"></div>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModalCenter" onclick="updatePaymentMethodModal(true)">
-                            {% if card %}
-                                Update
-                            {% else %}
-                                Add
-                            {% endif %}
-                        </button>
-                        {% if card %}
-                            <button class="btn btn-danger" onclick="deletePaymentMethodConfirmation(true)">
-                                Delete
-                            </button>
-                        {% endif %}
-                    </div>
-
-                </div>
-
-            </div>
-            <div class="col-sm">
-                <div class="card">
-                    <div class="card-header">
-                        Current plan
-                    </div>
-                    <div class="card-body">
-                        {% if plan == false %}
-                            <table class="table">
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">Product</th>
-                                        <td>{{ plan.product_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Description</th>
-                                        <td>{{ plan.product_description }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Price</th>
-                                        <td>{{ plan.amount }}
-                                            {{ plan.currency }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Interval</th>
-                                        <td>{{ plan.interval_count }}
-                                            {{ plan.interval }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <p class="card-text">You have not plan now</p>
-                        {% endif %}
-                    </div>
-                    {% if plan %}
-                        <div class="btn-group">
-                            <button class="btn btn-danger" onclick="cancelSubscriptionConfirmation(true)">Cancel subscription</button>
-                        </div>
                     {% else %}
-                        <div class="btn-group">
-                            <a class="btn btn-success" href="{% url 'core:pick-plan' %}">Subscribe</a>
-                        </div>
+                    <p class="card-text">You have not plan now</p>
                     {% endif %}
                 </div>
+                {% if plan %}
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="cancelSubscriptionConfirmation(true)">Cancel
+                        subscription</button>
+                </div>
+                {% else %}
+                <div class="btn-group">
+                    <a class="btn btn-success" href="{% url 'core:pick-plan' %}">Subscribe</a>
+                </div>
+                {% endif %}
             </div>
         </div>
-        <div class="row">
-            <div class="col-sm">
-                <div class="card">
-                    <div class="card-header">
-                        Invoices
-                    </div>
-                    <div class="card-body">
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <div class="card">
+                <div class="card-header">
+                    Invoices
+                </div>
+                <div class="card-body">
 
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">PDF</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for invoice in page %}
-                                    <tr>
-                                        <td>{{ invoice.created }}</td>
-                                        <td>{{ invoice.status }}</td>
-                                        <td>
-                                            <a href="{{ invoice.invoice_pdf }}" class="link-primary" target="_blank">Download</a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <nav aria-label="Page navigation example">
-                            <ul class="pagination">
-                                {% if page.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
-                                    </li>
-                                {% endif %}
-                                {% if page.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">PDF</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in page %}
+                            <tr>
+                                <td>{{ invoice.created }}</td>
+                                <td>{{ invoice.status }}</td>
+                                <td>
+                                    <a href="{{ invoice.invoice_pdf }}" class="link-primary"
+                                        target="_blank">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            {% if page.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            {% if page.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
-    <!-- UPDATE PAYMENT METHOD MODAL -->
-    <div class="modal fade" id="update-payment-method-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Add card</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="payment-form">
-
-                    <div class="modal-body">
-                        <div class="card-container">
-
-                            <div
-                                id="card-element"><!-- Elements will create input elements here -->
-                            </div>
-                        </div>
-
-                        <!-- We'll put the error messages in this element -->
-                        <div id="card-element-errors" role="alert"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
-                </form>
-
+</div>
+<!-- UPDATE PAYMENT METHOD MODAL -->
+<div class="modal fade" id="update-payment-method-modal" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Add card</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        </div>
-    </div>
-    <!-- DELETE PAYMENT METHOD CONFIRMATION MODAL -->
-    <div class="modal fade" id="delete-payment-method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <form id="payment-form">
+
                 <div class="modal-body">
-                    Are you sure what you want delete payment method?
+                    <div class="card-container">
+
+                        <div id="card-element">
+                            <!-- Elements will create input elements here -->
+                        </div>
+                    </div>
+
+                    <!-- We'll put the error messages in this element -->
+                    <div id="card-element-errors" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" id="delete-payment-method-button" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
                 </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<!-- DELETE PAYMENT METHOD CONFIRMATION MODAL -->
+<div class="modal fade" id="delete-payment-method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure what you want delete payment method?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="delete-payment-method-button" class="btn btn-danger">Delete</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- CANCEL PLAN CONFIRMATION MODAL -->
-    <!-- <div class="modal fade" id="cancel-subscription" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+<!-- CANCEL PLAN CONFIRMATION MODAL -->
+<!-- <div class="modal fade" id="cancel-subscription" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
            aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -482,179 +539,180 @@
       </div> -->
 
 
-    <div class="modal fade" id="cancel-subscription" tabindex="-1" aria-labelledby="cancelPlanLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal__content">
-                <div class="modal-body p-0">
-                    <header class="form-header text-center">
-                        <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
-                        <h1 class="title title--sm">Successfully canceled</h1>
-                        <p class="subtitle">You plan successfully canceled</p>
-                    </header>
-                </div>
-                <div class="modal-footer modal__footer p-0 border-0">
-                    <button type="button" class="btn modal__footer-btn" data-bs-dismiss="modal" data-dismiss="modal">Back to Billing</button>
+<div class="modal fade" id="cancel-subscription" tabindex="-1" aria-labelledby="cancelPlanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal__content">
+            <div class="modal-body p-0">
+                <header class="form-header text-center">
+                    <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+                    <h1 class="title title--sm">Successfully canceled</h1>
+                    <p class="subtitle">You plan successfully canceled</p>
+                </header>
+            </div>
+            <div class="modal-footer modal__footer p-0 border-0">
+                <button type="button" class="btn modal__footer-btn" data-bs-dismiss="modal" data-dismiss="modal">Back to
+                    Billing</button>
 
-                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- LOADER -->
-    <div id="loader-container">
-        <div class="loader-item spinner-border text-primary" role="status"></div>
-    </div>
+<!-- LOADER -->
+<div id="loader-container">
+    <div class="loader-item spinner-border text-primary" role="status"></div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
+<script>
 
-        const updatePaymentMethodModal = (show) => {
-            $('#update-payment-method-modal').modal(show ? 'show' : 'hide');
+    const updatePaymentMethodModal = (show) => {
+        $('#update-payment-method-modal').modal(show ? 'show' : 'hide');
+    }
+</script>
+<script>
+    /********************
+ UPDATE PAYMENT METHOD
+ ********************/
+    let stripe = Stripe("{{ stripe_api_key }}");
+    let elements = stripe.elements();
+    let card = elements.create('card');
+
+
+    card.mount('#card-element');
+    card.on('change', function (event) {
+        displayError(event);
+    });
+
+
+    function setErrorText(text) {
+        let displayError = document.getElementById('card-element-errors');
+        displayError.textContent = text;
+    }
+
+    function displayError(event) {
+        if (event.error) {
+            setErrorText(event.error.message);
+        } else {
+            setErrorText("");
         }
-    </script>
-    <script>
-        /********************
-     UPDATE PAYMENT METHOD
-     ********************/
-        let stripe = Stripe("{{ stripe_api_key }}");
-        let elements = stripe.elements();
-        let card = elements.create('card');
+    }
 
-
-        card.mount('#card-element');
-        card.on('change', function (event) {
-            displayError(event);
-        });
-
-
-        function setErrorText(text) {
-            let displayError = document.getElementById('card-element-errors');
-            displayError.textContent = text;
-        }
-
-        function displayError(event) {
-            if (event.error) {
-                setErrorText(event.error.message);
+    function updatePaymentMethod({ paymentMethodId }) {
+        return (fetch('/update-payment-method', {
+            method: 'post',
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token }}"
+            },
+            body: JSON.stringify(
+                { paymentMethodId: paymentMethodId }
+            )
+        }).then(res => res.json()).then(res => {
+            if (res.error) {
+                setErrorText(res.error);
+            } else if (res.success) {
+                card.clear();
+                updatePaymentMethodModal(false);
             } else {
-                setErrorText("");
+                setErrorText("Update error")
             }
-        }
+        }).catch(err => {
+            console.log('catch', err)
+        }).finally(() => setLoading(false)));
+    }
 
-        function updatePaymentMethod({paymentMethodId}) {
-            return(fetch('/update-payment-method', {
-                method: 'post',
-                headers: {
-                    'Content-type': 'application/json',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                },
-                body: JSON.stringify(
-                    {paymentMethodId: paymentMethodId}
-                )
-            }).then(res => res.json()).then(res => {
-                if (res.error) {
-                    setErrorText(res.error);
-                } else if (res.success) {
-                    card.clear();
-                    updatePaymentMethodModal(false);
-                } else {
-                    setErrorText("Update error")
-                }
-            }).catch(err => {
-                console.log('catch', err)
-            }). finally(() => setLoading(false)));
-        }
-
-        function createPaymentMethod({card}) {
-            stripe.createPaymentMethod({
-                type: 'card',
-                card: card,
-                billing_details: {
-                    name: "{{ request.user.full_name }}",
-                    email: "{{ request.user.email }}"
-                }
-            }).then((result) => {
-                if (result.error) {
-                    displayError(result);
-                    setLoading(false);
-                } else {
-                    updatePaymentMethod({paymentMethodId: result.paymentMethod.id});
-                }
-            });
-        }
-
-        const form = document.getElementById('payment-form');
-
-        form.addEventListener('submit', function (ev) {
-            ev.preventDefault();
-            setLoading(true);
-            createPaymentMethod({card});
+    function createPaymentMethod({ card }) {
+        stripe.createPaymentMethod({
+            type: 'card',
+            card: card,
+            billing_details: {
+                name: "{{ request.user.full_name }}",
+                email: "{{ request.user.email }}"
+            }
+        }).then((result) => {
+            if (result.error) {
+                displayError(result);
+                setLoading(false);
+            } else {
+                updatePaymentMethod({ paymentMethodId: result.paymentMethod.id });
+            }
         });
-    </script>
+    }
 
-    <script>
-        /**********************
-     * DELETE PAYMENT METHOD
-     **********************/
-        const deletePaymentMethodConfirmation = (show) => {
-            $('#delete-payment-method').modal(show ? 'show' : 'hide');
-        }
-        const deletePaymentMethod = () => {
-            setLoading(true);
-            fetch('/delete-payment-method', {
-                method: 'delete',
-                headers: {
-                    'Content-type': 'application/json',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-            }).then(res => res.json()).then(res => {
-                if (res.error) {
-                    console.log(res);
-                } else if (res.success) {
-                    console.log(res);
-                }
+    const form = document.getElementById('payment-form');
+
+    form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        setLoading(true);
+        createPaymentMethod({ card });
+    });
+</script>
+
+<script>
+    /**********************
+ * DELETE PAYMENT METHOD
+ **********************/
+    const deletePaymentMethodConfirmation = (show) => {
+        $('#delete-payment-method').modal(show ? 'show' : 'hide');
+    }
+    const deletePaymentMethod = () => {
+        setLoading(true);
+        fetch('/delete-payment-method', {
+            method: 'delete',
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token }}"
+            }
+        }).then(res => res.json()).then(res => {
+            if (res.error) {
                 console.log(res);
-            }). finally(() => {
-                setLoading(false);
-                deletePaymentMethodConfirmation(false);
-            });
-        }
-
-        $('#delete-payment-method-button').click(() => {
-            deletePaymentMethod();
-        })
-    </script>
-
-    <script>
-        /**********************
-     * CANCEL SUBSCRIPTION
-     **********************/
-        const cancelSubscriptionConfirmation = (show) => {
-            $('#cancel-subscription').modal(show ? 'show' : 'hide');
-        }
-        const cancelSubscription = () => {
-            setLoading(true);
-            fetch('/cancel-subscription', {
-                method: 'post',
-                headers: {
-                    'Content-type': 'application/json',
-                    'X-CSRFToken': "{{ csrf_token }}"
-                }
-            }).then(res => res.json()).then(res => {
-                if (res.error) {
-                    console.log(res);
-                } else if (res.success) {
-                    console.log(res);
-                }
+            } else if (res.success) {
                 console.log(res);
-            }). finally(() => {
-                setLoading(false);
-                cancelSubscriptionConfirmation(false);
-            });
-        }
+            }
+            console.log(res);
+        }).finally(() => {
+            setLoading(false);
+            deletePaymentMethodConfirmation(false);
+        });
+    }
 
-        $('#cancel-subscription-button').click(() => {
-            cancelSubscription();
-        })
-    </script>
+    $('#delete-payment-method-button').click(() => {
+        deletePaymentMethod();
+    })
+</script>
+
+<script>
+    /**********************
+ * CANCEL SUBSCRIPTION
+ **********************/
+    const cancelSubscriptionConfirmation = (show) => {
+        $('#cancel-subscription').modal(show ? 'show' : 'hide');
+    }
+    const cancelSubscription = () => {
+        setLoading(true);
+        fetch('/cancel-subscription', {
+            method: 'post',
+            headers: {
+                'Content-type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token }}"
+            }
+        }).then(res => res.json()).then(res => {
+            if (res.error) {
+                console.log(res);
+            } else if (res.success) {
+                console.log(res);
+            }
+            console.log(res);
+        }).finally(() => {
+            setLoading(false);
+            cancelSubscriptionConfirmation(false);
+        });
+    }
+
+    $('#cancel-subscription-button').click(() => {
+        cancelSubscription();
+    })
+</script>
 {% endblock %}

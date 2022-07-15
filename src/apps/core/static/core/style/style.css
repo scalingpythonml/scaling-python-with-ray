@@ -244,6 +244,15 @@ body {
 .field__input--invalid:hover, .field__input--invalid:active, .field__input--invalid:focus {
   border-color: #F481FE;
 }
+.field__input.form-select {
+  padding-left: 40px;
+}
+.field .country-select-flag {
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  margin-left: 0 !important;
+}
 .field__input-error {
   font-family: "Aeonik", Arial, sans-serif;
   font-style: normal;
@@ -266,6 +275,7 @@ body {
 }
 .field__input--invalid + .field__input-error {
   opacity: 1;
+  position: static;
 }
 .field__change-btn {
   position: absolute;
@@ -433,6 +443,7 @@ body {
   background-color: #F6F6F8;
   width: 300px;
   padding: 30px;
+  position: relative;
 }
 .side-nav--smaller {
   width: 270px;
@@ -751,6 +762,7 @@ body {
 
 .navigation-block {
   margin-top: 33px;
+  position: relative;
 }
 .navigation-block__title {
   margin-bottom: 20px;

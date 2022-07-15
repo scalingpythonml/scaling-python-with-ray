@@ -1,34 +1,8 @@
 {% extends 'registration.html' %}
-{% load bootstrap_form %}
+{% load bootstrap_steps_form %}
 
-{% block page_head %}
-  <!-- WIZARD STEPS -->
-  <!-- <div class="container">
-    <ul class="progressbar">
-      <li class="{% if step >= 1 %}active{% endif %}">Sign up</li>
-      <li class="{% if step >= 2 %}active{% endif %}">Details</li>
-      <li class="{% if step >= 3 %}active{% endif %}">Add device</li>
-      <li class="{% if step >= 4 %}active{% endif %}">Pick plan</li>
-      <li class="{% if step >= 5 %}active{% endif %}">Payment</li>
-      <li class="{% if step >= 6 %}active{% endif %}">Activation</li>
-    </ul>
-  </div> -->
+{% block content %}   
+    {% bootstrap_steps_form form action "Next" "Back" %}
 
-
-  <!-- END WIZARD STEPS -->
-{% endblock %}
-{% block content %}
-    <!-- <header class="form-header">
-        <h1 class="title">{% block title %} {{ title }} {% endblock %}</h1>
-        <p class="subtitle">{% block navname %} {{ navname }} {% endblock %}</p>
-    </header> -->
-    <form class="form-body form-body__grid-layout form" action="" method="post">
-      {% bs_form form action "Next" %}
-
-        <footer class="form-body__footer d-flex">
-            <button type="button" class="btn-outline form-body__footer-btn gap-right">Back</button>
-            <button type="submit" class="btn form-body__footer-btn">Next</button>
-        </footer>
-    </form>
 
 {% endblock %}

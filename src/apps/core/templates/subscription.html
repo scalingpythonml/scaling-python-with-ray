@@ -23,11 +23,55 @@
 
       <!-- We'll put the error messages in this element -->
       <div id="card-element-errors" role="alert"></div>
-      <button id="submit" class="btn btn-primary" type="submit">Subscribe</button>
+
+
+      <footer class="form-body__footer d-flex">
+        <button type="button" class="btn-outline form-body__footer-btn gap-right">Back</button>
+        <button id="submit1" type="button" class="btn form-body__footer-btn" data-toggle="modal" data-target="#successfullyPaid">Next</button>
+    </footer>
     </form>
   </div>
   <div id="loader-container">
     <div class="loader-item spinner-border text-primary" role="status">
+    </div>
+  </div>
+
+  <div class="modal fade" id="successfullyPaid" tabindex="-1" aria-labelledby="successfullyPaidLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+        <div class="modal-body p-0">
+            <header class="form-header text-center">
+                <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+
+                <h1 class="title title--sm">Successfully paid</h1>
+                <p class="subtitle">You have successfully paid 200$</p>
+
+            </header>
+        </div>
+        <div class="modal-footer modal__footer p-0 border-0">
+          <button type="button" class="btn modal__footer-btn" data-dismiss="modal" data-toggle="modal" data-target="#successfullyActivated">Activate your account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div class="modal fade" id="successfullyActivated" tabindex="-1" aria-labelledby="successfullyActivatedLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+        <div class="modal-body p-0">
+            <header class="form-header text-center">
+                <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+                <h1 class="title title--sm">Successfully activated</h1>
+                <p class="subtitle">Your account has been successfully activated and the serial number confirmed</p>
+
+            </header>
+        </div>
+        <div class="modal-footer modal__footer p-0 border-0">
+          <a  href="{% url 'core:dashboard' %}" class="btn modal__footer-btn" >Go to Dashboard</a>
+          <!-- data-bs-dismiss="modal" -->
+        </div>
+      </div>
     </div>
   </div>
 

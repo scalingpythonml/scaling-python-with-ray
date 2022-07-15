@@ -35,7 +35,7 @@ class AddDeviceView(views.View):
     def base_context(self):
         return {
             "title": "Add device",
-            "navname": "Add device",
+            "navname": "Please, add your device",
             "action": reverse("core:add-device"),
             "step": OnboardingStepsEnum.ADD_DEVICE.value,
         }

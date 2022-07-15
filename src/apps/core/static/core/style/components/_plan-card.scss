@@ -7,11 +7,11 @@
     margin-bottom: width(1);
     flex-shrink: 0;
 
-    &__header{
+    &__header {
         margin-bottom: 24px;
     }
 
-    &__img-wrap{
+    &__img-wrap {
         width: 45px;
         height: 45px;
         border-radius: 50%;
@@ -44,12 +44,13 @@
     &__price {
         @include text-config($font-weight: 700, $fs: 28px, $lh: 150%);
     }
-    &__period{
+
+    &__period {
         @include text-config($font-weight: 400, $fs: 16px, $lh: 150%);
 
     }
 
-    &__options{
+    &__options {
         list-style: none;
         margin-bottom: 32px;
     }
@@ -77,7 +78,7 @@
     }
 
 
-    &__btn{
+    &__btn {
         @include btn($outline: true);
         padding: 9.5px 0;
         width: 100%;
@@ -92,7 +93,7 @@
         margin-right: auto;
     }
 
-    &__title{
+    &__title {
         @include text-config($font-weight: 700, $fs: 18px, $lh: 140%);
         margin-bottom: 4px;
     }
@@ -108,5 +109,15 @@
 
     &__btn {
         padding: 9.5px 28px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+
+    .plan-card-simple {
+        &__btn {
+            width: 100%;
+            margin-top: 32px;
+        }
     }
 }

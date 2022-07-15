@@ -1,0 +1,43 @@
+.navbar  {
+    background-color: transparent;
+    padding: 30px;
+    &--simple  {
+        position: fixed;
+        top: 0;
+        z-index: 10;
+        left: 0;
+        width: 100%;
+    }
+
+    .navbar-brand {
+        font-family: $font-Aeonik;
+        font-style: normal;
+        font-weight: 900;
+        font-size: 18px;
+        line-height: 150%;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+
+        color: #FFFFFF;
+    }
+}
+
+.navbar-toggler {
+    &:focus,&:active {
+        box-shadow: none;
+    }
+    &__icon {
+        padding: 0;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .navbar  {
+        padding: 9px 16px;background: #FFFFFF;
+        position: relative;
+        /* Horizontal divider */
+        
+        box-shadow: inset 0px -1px 0px #EAEAEE;
+        
+    }
+}

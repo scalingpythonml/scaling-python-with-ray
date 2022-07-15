@@ -35,10 +35,9 @@ body {
 
 .h-100vh {
     min-height: 100vh;
-    // height: 100%;
 
-    @media screen and (max-height: 500px) {
-        min-height: 100%;
+    @media screen and (max-width: 1024px) {
+        min-height: calc(100vh - 100px)
     }
 }
 .btn {

@@ -8,6 +8,7 @@ from apps.accounts.views import (
     ChangeEmailView,
     ChangePasswordView,
     ProfileView,
+    SettingsView,
 )
 
 
@@ -24,6 +25,11 @@ urlpatterns = [
         "change-email",
         login_required(ChangeEmailView.as_view()),
         name="change-email",
+    ),
+    path(
+        "settings",
+        login_required(SettingsView.as_view()),
+        name="settings",
     ),
     path("logout", LogoutView.as_view(next_page="/"), name="logout"),
 ]

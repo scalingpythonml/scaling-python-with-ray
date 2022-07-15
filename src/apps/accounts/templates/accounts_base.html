@@ -1,47 +1,41 @@
 {% extends 'dashboard-layout.html' %}
 
 
-{% block page_head %}
-  <ul class="nav nav-tabs">
-    <li class="nav-item">
+{% block content %}
+
+<div class="tab-layout">
+  <ul class="nav nav-pills tabs-list" id="pills-tab" role="tablist">
+    <li class="nav-item tab-item" role="presentation">
       {% url 'accounts:profile' as profile_url %}
-      <a class="nav-link {% if request.path == profile_url %}active{% endif %}"
-         href="{{ profile_url }}">Profile</a>
+      <a class="nav-link tab-link  {% if request.path == profile_url %}active{% endif %}"
+        href="{{ profile_url }}">General information</a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item tab-item" role="presentation">
+    {% url "accounts:settings" as settings_url %}
+    <a class="nav-link tab-link {% if request.path == settings_url %}active{% endif %}"
+       href="{{ settings_url }}">Change email</a>
+    </li>
+    <li class="nav-item tab-item" role="presentation">
       {% url 'core:replace-device' as device_url %}
-      <a class="nav-link {% if request.path == device_url %}active{% endif %}"
-         href="{{ device_url }}">Device</a>
+      <a class="nav-link tab-link  {% if request.path == device_url %}active{% endif %}" href="{{ device_url }}">Device
+        information</a>
     </li>
-    <li class="nav-item">
-      {% url "accounts:change-email" as change_email_url %}
-      <a class="nav-link {% if request.path == change_email_url %}active{% endif %}"
-         href="{{ change_email_url }}">Change email</a>
-    </li>
-    <li class="nav-item">
-      {% url 'accounts:change-password' as change_password_url %}
-      <a class="nav-link {% if request.path == change_password_url %}active{% endif %}"
-         href="{{ change_password_url }}">Change password</a>
-    </li>
-    <li class="nav-item">
+    <li class="nav-item tab-item" role="presentation">
       {% url 'core:blocked-numbers' as blocked_numbers_url %}
-      <a class="nav-link {% if request.path == blocked_numbers_url %}active{% endif %}"
-         href="{{ blocked_numbers_url }}">Blocked numbers</a>
+      <a class="nav-link tab-link {% if request.path == blocked_numbers_url %}active{% endif %}"
+        href="{{ blocked_numbers_url }}">Blocked numbers</a>
     </li>
   </ul>
-{% endblock %}
+  <div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-general-tab"
+      tabindex="0">
 
-
-{% block content %}
-  <div class="col-md-6 centered">
-    <div class="card mb-3">
-      <div class="card-header">
-        {{ title }}
-      </div>
-      {% block card_content %}
+      {% block tab_content %}
 
       {% endblock %}
+
     </div>
   </div>
-{% endblock %}
+</div>
 
+{% endblock %}

@@ -2,7 +2,7 @@
     border: 1px solid #EFEFF1;
     border-radius: 16px;
     padding: 24px;
-    width: width(12);
+    min-width: width(11);
 
     &__header {
         margin-bottom: 32px;
@@ -50,8 +50,13 @@
     }
 
     &__body {
-        height: 218px;
-        background-color: red;
+        
+            canvas {
+                height: 218px !important;
+                width: 100% !important;
+                
+            }
+
     } 
 }
 
@@ -60,5 +65,29 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-gap: 16px;
+        // max-width: width(37);
+    }
+}
+
+@media screen and (max-width: 1360px) {
+    .statistic-card {
+        min-width: unset
+
+    }
+
+    .statistic-layout {
+        &--grid {
+            // display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            // grid-gap: 16px;
+        }
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .statistic-layout {
+        &--grid {
+            grid-template-columns: repeat(1, 1fr);
+        }
     }
 }

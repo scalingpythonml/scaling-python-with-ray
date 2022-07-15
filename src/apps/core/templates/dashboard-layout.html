@@ -29,16 +29,22 @@
             </div>
         {% endif %}
         <!-- NAVBAR -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar--simple navbar-expand-lg d-lg-none d-block">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'core:index' %}">
+                <a class="navbar-brand d-none d-lg-block"   href="{% url 'core:index' %}">
                     SpaceBeaver
-                    <span class="text-muted">
-                        {% block navname %}
+                    {% block navname %}
                             {{ navname }}
                         {% endblock %}
-                    </span>
                 </a>
+                <a   href="{% url 'core:index' %}" class="logo logo-with-beaver d-block d-lg-none">
+                    <img class="logo__img" src="{% static 'core/img/svg/logo-with-beaver.svg' %}" alt="">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                  
+                    <img class="navbar-toggler__icon" src="{% static 'core/img/svg/burger.svg' %}" alt="">
+                </button>
+               
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item active">
@@ -47,34 +53,40 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'core:billing' %}">Billing</a>
                         </li>
+                        {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class=" text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class=" text-uppercase" href="{% url 'accounts:logout' %}">Logout</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class=" text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class=" text-uppercase" href="{% url 'core:success-new-password' %}">
+                            success New pass</a>
+                        </li>
+                        <li class="nav-item">
+                        <a class=" text-uppercase" href="{% url 'core:new-password-link' %}">
+                            New pass lnk</a>
+                            </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class=" text-uppercase" href="{% url 'core:login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class=" text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+                        </li>
+                        {% endif %}
                         {% show_menu 0 100 100 100 "bootstrap_menu.html" %}
                     </ul>
                 </div>
-                <div class="d-flex">
-                    <div class="btn-group">
-                        {% if request.user.is_authenticated %}
-                            <a class="btn btn-primary text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
-                            <a class="btn btn-primary text-uppercase" href="{% url 'accounts:logout' %}">Logout</a>
-                        {% else %}
-                            <a class="btn btn-primary text-uppercase" href="{% url 'core:login' %}">Login</a>
-                            <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
-                        {% endif %}
-                        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
-
-                        <a class="btn btn-success text-uppercase" href="{% url 'core:success-new-password' %}">
-                            success New pass</a>
-
-                        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password-link' %}">
-                            New pass lnk</a>
-
-                    </div>
-
-                </div>
             </div>
         </nav>
-{% block page_head %}
+        {% block page_head %}
 
-{% endblock %}
+        {% endblock %}
         <!-- END NAVBAR -->
         <!-- <div class="page-container"> -->
         <div class="container-fluid p-0 h-100vh">
@@ -140,7 +152,7 @@
                     <header class="form-header dashbord-header d-flex align-items-center justify-content-between">
                         <h1 class="title dashbord-header__title">{{ title }}</h1>
 
-                        <div class="constrols d-flex align-items-center">
+                        <div class="constrols d-lg-flex d-none align-items-center">
                             <button class="notification" type="button">
                                 <img class="notification__icon" src="{% static 'core/img/svg/icon-notification.svg' %}" alt="">
                             </button>
@@ -149,10 +161,10 @@
                                 <span class="user__name">Mike</span>
                             </div>
                             <div class="dropdown user-dropdown ">
-                                <button class="dropdown-toggle d-flex align-items-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="dropdown-toggle d-flex align-items-center" type="button" id="navDropdown" data-toggle="dropdown" aria-expanded="false">
                                     <img src="{% static 'core/img/svg/icon-dots-more.svg' %}" alt="">
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navDropdown">
                                     <li>
                                         <a class="dropdown-item" href="#">Action</a>
                                     </li>

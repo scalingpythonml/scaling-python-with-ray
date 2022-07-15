@@ -1,19 +1,22 @@
 .form-container {
     width: 420px;
+
     &--centered {
-        margin-left:width(5) ;
-    }   
+        margin-left: width(5);
+    }
 }
+
 .gap-right {
     margin-right: 16px;
 }
+
 .form {
     .form-submit {
         width: 100%;
         margin-top: 27px;
     }
 
-    .field + .form-link {
+    .field+.form-link {
         margin-top: 8px;
         display: block;
         text-align: right;
@@ -34,7 +37,7 @@
         }
     }
 
-    .subtitle {        
+    .subtitle {
         @include text-config($font-weight: 400, $fs: 16px, $lh: 150%);
 
         margin-bottom: 32px;
@@ -43,18 +46,37 @@
             margin-bottom: 0;
         }
 
-        &__link,&__bold {        
+        &__link,
+        &__bold {
             @include text-config($font-weight: 700, $fs: 16px, $lh: 150%);
 
         }
     }
 
-    &-icon{
+    &-icon {
         display: block;
         width: 128px;
         height: 128px;
         margin: 0 auto;
         margin-bottom: 38px;
+    }
+}
+
+@media screen and (max-width: 1220px) {
+    .form-container {
+        width: 100%;
+        margin: 0 auto;
+        max-width: 420px;
+
+        &--centered {
+            margin-left: auto;
+        }
+    }
+
+    .form-header {
+        .title {
+            font-size: 32px;
+        }
     }
 }
 
@@ -70,35 +92,34 @@
 .beaver-img {
     position: absolute;
     z-index: 1;
-    top: 176px;
-    right: 250px;
-    transform: rotate(67.44deg);
-    // animation-name: bounce; // ?!
-    animation-duration: 3s;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
-    animation-delay: 0;
-    animation-direction: alternate;
+    transform: rotate(67.44deg) translateY(50%);
+    left: 38%;
+    top: 20%;
+    // margin: 0 auto;
+}
+.deco-text-frame {
+    position: absolute;
+    z-index: 2;
 }
 
-@keyframes bounce {
-    0% {
-        top: 76%;
-    }
-    100% {
-        top: 70%;
-    }
+.deco-text-frame--top {
+    top: 28%;
+    left: 10%; 
 }
-
-
+.deco-text-frame--bottom {
+    right: 5%;
+    bottom: 29%; 
+}
 
 .form-footer {
     margin-top: 32px;
 }
 
-.form-footer-text,.form-link {
+.form-footer-text,
+.form-link {
     @include text-config($font-weight: 500, $fs: 14px, $lh: 150%);
 }
+
 .form-footer-link {
     @include text-config($font-weight: 700, $fs: 14px, $lh: 150%);
 
@@ -119,14 +140,39 @@
 
     }
 
-    &__footer{
+    &__footer {
         position: absolute;
         bottom: width(1);
-        right:width(1);
+        right: width(1);
     }
 
-    &__footer-btn{
+    &__footer-btn {
         width: width(9);
 
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .form-body {
+        position: static;
+        &__footer {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            left: 16px;
+
+            @media screen and (max-height: 800px) {
+                position: static;
+            }
+
+            .btn, .btn-outline {
+                width: 100%;;
+            }
+        }
+        &__grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-gap: 0;
+        }
     }
 }

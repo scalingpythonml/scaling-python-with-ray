@@ -5,16 +5,6 @@
 <link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
 <script src="{% static 'core/js/loader.js' %}"></script>
 <script src="https://js.stripe.com/v3/"></script>
-<style>
-    .col-sm {
-        margin: 10px;
-    }
-
-    .card {
-        height: 100%;
-        min-height: 300px;
-    }
-</style>
 {% endblock %}
 {% block content %}
 
@@ -34,33 +24,32 @@
             tabindex="0">
             <section class="tab-section">
                 <h2 class="tab-section__title">Plan details</h2>
-
-
-                <div class="plan-card plan-card-simple d-flex align-items-center justify-content-between">
+                <div class="plan-card plan-card-simple d-block d-lg-flex align-items-center">
                     {% if plan %}
-
-                    <div class="plan-card__img-wrap gap-right">
-                        <img class="plan-card__img" src="{% static 'core/img/svg/icon-mirroring-screen.svg' %}" alt="">
-                    </div>
-                    <div class="plan-card-simple__description-wrap ">
-                        <div class="plan-card-simple__title-wrap d-flex align-items-baseline">
-                            <span class="plan-card-simple__title">{{ plan.product_name }}</span>
-                            <span class="plan-card-simple__status plan-card-simple__status--active">Activated</span>
-                            <span class="plan-card-simple__status plan-card-simple__status--cancel">Canceled</span>
-                            <span
-                                class="plan-card-simple__status plan-card-simple__status--deactivated">Deactivated</span>
+                    <div class="d-flex align-items-center">
+                        <div class="plan-card__img-wrap gap-right">
+                            <img class="plan-card__img" src="{% static 'core/img/svg/icon-mirroring-screen.svg' %}" alt="">
                         </div>
-                        <p class="plan-card-simple__duration">
-                            Start date -
-                            <span>
-                                Jul 29 2022</span>
-                            for
-                            <span>{{ plan.amount }}
-                                {{ plan.currency }}/{{ plan.interval_count }}
-                                {{ plan.interval }}</span>
-                            until
-                            <span>Aug 29 2022</span>
-                        </p>
+                        <div class="plan-card-simple__description-wrap ">
+                            <div class="plan-card-simple__title-wrap d-flex align-items-baseline">
+                                <span class="plan-card-simple__title">{{ plan.product_name }}</span>
+                                <span class="plan-card-simple__status plan-card-simple__status--active">Activated</span>
+                                <span class="plan-card-simple__status plan-card-simple__status--cancel">Canceled</span>
+                                <span
+                                    class="plan-card-simple__status plan-card-simple__status--deactivated">Deactivated</span>
+                            </div>
+                            <p class="plan-card-simple__duration">
+                                Start date -
+                                <span>
+                                    Jul 29 2022</span>
+                                for
+                                <span>{{ plan.amount }}
+                                    {{ plan.currency }}/{{ plan.interval_count }}
+                                    {{ plan.interval }}</span>
+                                until
+                                <span>Aug 29 2022</span>
+                            </p>
+                        </div>
                     </div>
 
                     {% else %}
@@ -305,10 +294,14 @@
                     </fieldset>
 
                 </form>
+
+                <button class="link-btn link-btn--underline" data-bs-toggle="modal" data-bs-target="#delete-payment-method">Delete card</button>
+
             </section>
         </div>
     </div>
 </div>
+
 <!-- OLD -->
 
 <div class="container">
@@ -494,50 +487,28 @@
         </div>
     </div>
 </div>
+
 <!-- DELETE PAYMENT METHOD CONFIRMATION MODAL -->
 <div class="modal fade" id="delete-payment-method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Are you sure what you want delete payment method?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" id="delete-payment-method-button" class="btn btn-danger">Delete</button>
-            </div>
+            <div class="modal-body p-0">
+                <header class="form-header text-center">
+                  <img class="form-header-icon" src="{% static 'core/img/svg/icon-warning.svg' %}" alt="">
+        
+                  <h1 class="title title--sm">Are you sure what you want delete payment method?</h1>
+                </header>
+                <form action="#" id="delete-number-form" method="post" class="form">
+                  {% csrf_token %}
+                  <button type="button" id="delete-payment-method-button"  class="btn form-submit">Delete</button>
+                  <button type="button" class="btn-outline form-submit" data-dismiss="modal">Close</button>
+        
+                </form>
+              </div>
         </div>
     </div>
 </div>
-
-<!-- CANCEL PLAN CONFIRMATION MODAL -->
-<!-- <div class="modal fade" id="cancel-subscription" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-           aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Cancel</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              Are you sure what you want cancel you subscription?
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" id="cancel-subscription-button" class="btn btn-danger">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div> -->
-
 
 <div class="modal fade" id="cancel-subscription" tabindex="-1" aria-labelledby="cancelPlanLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

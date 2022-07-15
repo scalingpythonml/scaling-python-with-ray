@@ -24,6 +24,10 @@
     $active-bg-color: $primary-blue-hover;
     $disabled-bg-color: $primary-black;
 
+    &--wide {
+        width: 100%;
+    }
+
     @if $outline {
         $back-color: transparent;
         $border: $primary-black;

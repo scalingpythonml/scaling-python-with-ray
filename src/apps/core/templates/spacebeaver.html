@@ -42,7 +42,7 @@
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'core:index' %}"> SpaceBeaver
+    <a class="navbar-brand d-none d-lg-block"   href="{% url 'core:index' %}">SpaceBeaver
       <span class="text-muted">
             {% block navname %} {{ navname }} {% endblock %}
             </span>
@@ -61,17 +61,17 @@
     <div class="d-flex">
       <div class="btn-group">
         {% if request.user.is_authenticated %}
-          <a class="btn btn-primary text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
-          <a class="btn btn-primary text-uppercase" href="{% url 'accounts:logout' %}">Logout</a>
+          <a class=" text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
+          <a class=" text-uppercase" href="{% url 'accounts:logout' %}">Logout</a>
         {% else %}
-          <a class="btn btn-primary text-uppercase" href="{% url 'core:login' %}">Login</a>
-          <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+          <a class=" text-uppercase" href="{% url 'core:login' %}">Login</a>
+          <a class=" text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
         {% endif %}
-        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
+        <a class=" text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
         
-        <a class="btn btn-success text-uppercase" href="{% url 'core:success-new-password' %}"> success New pass</a>
+        <a class=" text-uppercase" href="{% url 'core:success-new-password' %}"> success New pass</a>
 
-        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password-link' %}"> New pass lnk</a>
+        <a class=" text-uppercase" href="{% url 'core:new-password-link' %}"> New pass lnk</a>
 
       </div>
 
@@ -81,11 +81,14 @@
 <!-- END NAVBAR -->
 <!-- <div class="page-container"> -->
   <div class="container-fluid p-0 h-100vh">
-    <div class="row h-100 m-0">
-    {% block page_head %}
-
-    {% endblock %}
-
+    <div class="row h-100vh m-0">
+      <div class="col-lg-6 d-none d-lg-block position-relative overflow-hidden">
+        <img src="{% static 'core/img/jpg/form-bg.jpg' %}" class="side-background" alt="">
+        <img src="{% static 'core/img/svg/text-frame-1.svg' %}"  class="deco-text-frame deco-text-frame--top" alt="">
+        <img src="{% static 'core/img/svg/text-frame-2.svg' %}"  class="deco-text-frame deco-text-frame--bottom" alt="">
+      
+        <img src="{% static 'core/img/svg/beaver.svg' %}"  class="beaver-img" alt="">
+      </div>
     {% block content %}
 
     {% endblock %}

@@ -1,5 +1,56 @@
 .banner {
     margin-bottom: 40px;
-    background-color: red;
-    height: 278px;
+    min-height: 278px;
+    padding: 69px 68px;
+    position: relative;
+    background: #030939;
+    border-radius: 16px;
+    overflow: hidden;
+
+    &__back-wrap {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: 0;
+
+    }
+
+    &__back {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &__text-wrap {
+        position: relative;
+        z-index: 1;
+        width: width(11);
+    }
+
+    &__title {
+        @include text-config($font-weight: 700, $fs: 30px, $lh: 140%, $color: $primary-white);
+        margin-bottom: 16px;
+
+    }
+
+    &__subtitle {
+        @include text-config($font-weight: 400, $fs: 16px, $lh: 150%, $color: $primary-white);
+        margin-bottom: 0;
+    }
+
+    &--mobile {
+        display: none;
+    }
+}
+@media screen and (max-width: 768px) {
+    .banner {
+        height: auto;
+        padding: 32px;
+        padding-bottom: 220px;
+        &__text-wrap {
+            width: 100%;
+        }
+    }
 }

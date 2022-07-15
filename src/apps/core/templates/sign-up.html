@@ -1,37 +1,16 @@
 {% extends 'spacebeaver.html' %}
-{% load bootstrap_form %}
+{% load sign_up %}
 
-{% block page_head %}
-  <!-- WIZARD STEPS -->
-  <!-- <div class="container">
-    <ul class="progressbar">
-      <li class="{% if step >= 1 %}active{% endif %}">Sign up</li>
-      <li class="{% if step >= 2 %}active{% endif %}">Details</li>
-      <li class="{% if step >= 3 %}active{% endif %}">Add device</li>
-      <li class="{% if step >= 4 %}active{% endif %}">Pick plan</li>
-      <li class="{% if step >= 5 %}active{% endif %}">Payment</li>
-      <li class="{% if step >= 6 %}active{% endif %}">Activation</li>
-    </ul>
-  </div> -->
-
-  <!-- END WIZARD STEPS -->
-{% endblock %}
 {% block content %}
-    <div class="col-6 h-100 position-relative">
-        left side
-      </div>
-      <div class="col-6 d-flex align-items-center h-100">
-        <div class="form-container form-container--centered">
-          <header class="form-header">
-            <h1 class="title">Sign up</h1>
-            <p class="subtitle">Get started with your account in Spacebeaver!</p>
-          </header>
-          <form class="form-body form" action="" method="post">
-            {% bs_form form action "Create account" %}
-          </form>
-        </div>
-      </div>
-    
-    
-
+<div class="col-12 col-lg-6 d-flex align-items-center">
+  <div class="form-container form-container--centered">
+    <header class="form-header">
+      <h1 class="title">Sign up</h1>
+      <p class="subtitle">Get started with your account in Spacebeaver!</p>
+    </header>
+    <!-- <form class="form-body form" action="" method="post"> -->
+    {% sign_up form action "Create account" %}
+    <!-- </form> -->
+  </div>
+</div>
 {% endblock %}

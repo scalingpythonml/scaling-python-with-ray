@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
+from apps.core.consts import ProfileStepsEnum
 
 from apps.core.models import Device
 from apps.core.views.add_device import DeviceForm
@@ -39,6 +40,7 @@ class ReplaceDeviceView(View):
             "title": "Replace device",
             "navname": "Replace device",
             "action": reverse("core:replace-device"),
-            "action_button_name": "Update",
+            "action_button_name": "Update", 
+            "step": ProfileStepsEnum.SETTINGS.value
         }
  

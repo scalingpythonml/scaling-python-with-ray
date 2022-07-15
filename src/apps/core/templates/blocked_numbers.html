@@ -1,104 +1,71 @@
-{% extends 'dashboard-layout.html' %}
-
-{% block content %}
-
-<table class="table table--bottom-gap">
-  <thead>
-    <tr>
-      <th class="col-title" scope="col">Name</th>
-      <th class="col-title" scope="col">Number</th>
-      <th class="col-title" scope="col">Status</th>
-      <th class="col-title text-end" scope="col">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for number in page %}
-    <tr>
-      <td class="align-middle">
-        <div class="user-card d-flex align-items-center">
-          <div class="user-card__img d-flex align-items-center justify-content-center">
-            <svg class="user-card__icon" width="24" height="24" viewbox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M14.61 3H9.39001C8.77801 3 7.914 3.36 7.482 3.792L3.792 7.48201C3.36 7.91401 3 8.77801 3 9.39001V14.61C3 15.222 3.36 16.086 3.792 16.518L7.482 20.208C7.914 20.64 8.77801 21 9.39001 21H14.61C15.222 21 16.086 20.64 16.518 20.208L20.208 16.518C20.64 16.086 21 15.222 21 14.61V9.39001C21 8.77801 20.64 7.91401 20.208 7.48201L16.518 3.792C16.086 3.36 15.222 3 14.61 3Z"
-                stroke="#F480FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M5.646 18.372L18.372 5.646" stroke="#F480FF" stroke-width="1.8" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
+<!-- {#% extends 'dassdvsvhboard-gsgsdglayout.html' %} -->
+{% extends 'accounts_base.html' %}
 
 
-          </div>
-          <div class="user-card__wrap">
-            <p class="user-card__name">Jacob Jones</p>
-          </div>
-
-        </div>
-      </td>
-      <td class="align-middle">
-        <p class="user-number">{{ number.number }}</p>
-      </td>
-      <td class="align-middle">
-        <p class="user-tag user-tag--cancel">Blocked</p>
-
-      </td>
-      <td class="align-middle text-end">
-        {% url 'core:delete-blocked-number' number.id as action_url %}
-        <button class="link-btn" onclick="deleteNumberModal(true, '{{ action_url }}')">Unblock</button>
-      </td>
-    </tr>
-    {% endfor %}
-    <tr>
-      <td class="align-middle">
-        <div class="user-card d-flex align-items-center">
-          <div class="user-card__img d-flex align-items-center justify-content-center">
-            <svg class="user-card__icon" width="24" height="24" viewbox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M14.61 3H9.39001C8.77801 3 7.914 3.36 7.482 3.792L3.792 7.48201C3.36 7.91401 3 8.77801 3 9.39001V14.61C3 15.222 3.36 16.086 3.792 16.518L7.482 20.208C7.914 20.64 8.77801 21 9.39001 21H14.61C15.222 21 16.086 20.64 16.518 20.208L20.208 16.518C20.64 16.086 21 15.222 21 14.61V9.39001C21 8.77801 20.64 7.91401 20.208 7.48201L16.518 3.792C16.086 3.36 15.222 3 14.61 3Z"
-                stroke="#F480FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M5.646 18.372L18.372 5.646" stroke="#F480FF" stroke-width="1.8" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-
-
-          </div>
-          <div class="user-card__wrap">
-            <p class="user-card__name">Jacob Jones</p>
-          </div>
-
-        </div>
-      </td>
-      <td class="align-middle">
-        <p class="user-number">+449827789202</p>
-      </td>
-      <td class="align-middle">
-        <p class="user-tag user-tag--cancel">Blocked</p>
-
-      </td>
-      <td class="align-middle text-end">{% url 'core:delete-blocked-number' number.id as action_url %}
-        <button class="link-btn" onclick="deleteNumberModal(true, '{{ action_url }}')">Unblock</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<nav aria-label="navigation">
-  <ul class="pagination">
-    {% if page.has_previous %}
-    <li class="page-item">
-      <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
-    </li>
-    {% endif %}
-    {% if page.has_next %}
-    <li class="page-item">
-      <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
-    </li>
-    {% endif %}
-  </ul>
-</nav>
-
-<button class="link-btn link-btn--underline" onclick="addNumberModal(true)">Add to block</button>
-
-
+{% block tab_content %}
+      <table class="table table--bottom-gap">
+        <thead>
+          <tr>
+            <th class="col-title" scope="col">Name</th>
+            <th class="col-title  d-none d-lg-block" scope="col">Number</th>
+            <th class="col-title" scope="col">Status</th>
+            <th class="col-title text-end" scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for number in page %}
+          <tr>
+            <td class="align-middle">
+              <div class="user-card d-flex align-items-center">
+                <div class="user-card__img d-flex align-items-center justify-content-center">
+                  <svg class="user-card__icon" width="24" height="24" viewbox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M14.61 3H9.39001C8.77801 3 7.914 3.36 7.482 3.792L3.792 7.48201C3.36 7.91401 3 8.77801 3 9.39001V14.61C3 15.222 3.36 16.086 3.792 16.518L7.482 20.208C7.914 20.64 8.77801 21 9.39001 21H14.61C15.222 21 16.086 20.64 16.518 20.208L20.208 16.518C20.64 16.086 21 15.222 21 14.61V9.39001C21 8.77801 20.64 7.91401 20.208 7.48201L16.518 3.792C16.086 3.36 15.222 3 14.61 3Z"
+                      stroke="#F480FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M5.646 18.372L18.372 5.646" stroke="#F480FF" stroke-width="1.8" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+      
+      
+                </div>
+                <div class="user-card__wrap">
+                  <p class="user-card__name">Jacob Jones</p>
+                </div>
+      
+              </div>
+            </td>
+            <td class="align-middle  d-none d-lg-block">
+              <p class="user-number">{{ number.number }}</p>
+            </td>
+            <td class="align-middle">
+              <p class="user-tag user-tag--cancel">Blocked</p>
+      
+            </td>
+            <td class="align-middle text-end">
+              {% url 'core:delete-blocked-number' number.id as action_url %}
+              <button class="link-btn" onclick="deleteNumberModal(true, '{{ action_url }}')">Unblock</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <nav aria-label="navigation">
+        <ul class="pagination">
+          {% if page.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
+          </li>
+          {% endif %}
+          {% if page.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      
+      <button class="link-btn link-btn--underline" onclick="addNumberModal(true)">Add to block</button>
 <!-- DELETE NUMBER CONFIRMATION MODAL -->
 
 <div class="modal fade" id="delete-number" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"

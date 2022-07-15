@@ -110,3 +110,12 @@
         grid-gap: 16px;
     }
 }
+
+@media screen and (max-width: 1024px) {
+    .payment-type-layout{
+    &__grid {
+        grid-template-columns: 1fr;
+
+    }
+    }
+}

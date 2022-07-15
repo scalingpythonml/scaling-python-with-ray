@@ -1,21 +1,18 @@
 {% extends 'spacebeaver.html' %}
-{% load bootstrap_form %}
+{% load login_form %}
 
 
 {% block title %} Login {% endblock %}
 {% block navname %} Login {% endblock %}
 
 {% block content %}
-  <div class="col-6 h-100 position-relative">
-    left side
-  </div>
-  <div class="col-6 d-flex align-items-center h-100">
+<div class="col-12 col-lg-6 d-flex align-items-center">
     <div class="form-container form-container--centered">
       <header class="form-header">
         <h1 class="title">Log in</h1>
         <p class="subtitle">Log in to your spacebeaver account!</p>
       </header>
-      {% bs_form form action "Log in" %}
+      {% login_form form action "Log in" %}
       <footer class="form-footer text-center">
           <p class="form-footer-text">Don't have an account yet? <a href="{% url 'core:sign-up' %}" class="form-footer-link">Sign up</a></p>
       </footer>

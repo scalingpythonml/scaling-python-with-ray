@@ -32,9 +32,6 @@
     </div>
   {% endif %}
 
-  {% if forget %}
-    <a href="{% url 'core:forget-password' %}" class="form-link mr-auto">Forgot password?</a>
-  {% endif %}
-  <button type="submit" class="btn btn-primary">{{ button_name }}</button>
+  <button type="submit" class="form-submit btn btn--wide">{{ button_name }}</button>
 </form>
 

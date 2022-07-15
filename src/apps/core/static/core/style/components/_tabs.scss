@@ -39,3 +39,34 @@
         margin-bottom: 16px;
     }
 }
+@media screen and (max-width: 1024px) {
+    .tabs-list{
+        white-space: nowrap;
+        display: flex;
+        word-break: keep-all;
+        flex-wrap: nowrap;
+        width: 100%;
+        overflow-x: scroll;
+
+        /* width */
+        &::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+        
+        /* Track */
+        &::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        
+        /* Handle */
+        &::-webkit-scrollbar-thumb {
+            background: transparent; 
+        }
+        
+        /* Handle on hover */
+        &::-webkit-scrollbar-thumb:hover {
+            background: transparent; 
+        }
+    }
+}

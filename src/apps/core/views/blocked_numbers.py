@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
+from apps.core.consts import ProfileStepsEnum
 
 from apps.core.forms import BlockedNumberForm
 from apps.core.models import BlockedNumber
@@ -41,6 +42,7 @@ class BlockedNumbersView(View):
         return {
             "title": "Blocked numbers",
             "navname": "Blocked numbers",
+            "step": ProfileStepsEnum.SETTINGS.value
         }
 
 

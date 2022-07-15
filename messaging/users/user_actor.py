@@ -1,18 +1,7 @@
-# django setup
-import sys
-import os
-import pathlib
-
-os.environ["DJANGO_SETTINGS_MODULE"] = messaging.web.src.config.settings
-parent_path = pathlib.Path(__file__).parent
-django_path = parent_path.joinpath("messaging", "web", "src")
-sys.path = sys.path + [ django_path.as_posix() ]
-
 import logging
 from messaging.internal_types import CombinedMessage
 from messaging.utils import utils
-from messaging.web.src.apps.core.models import Device  # type: ignore
-from messaging.web.src.apps.accounts.models import User  # type: ignore
+from .models import Device, User 
 from messaging.proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL
 
 

@@ -1,3 +1,13 @@
+# django setup
+import sys
+import os
+import pathlib
+
+os.environ["DJANGO_SETTINGS_MODULE"] = messaging.web.src.config.settings
+parent_path = pathlib.Path(__file__).parent
+django_path = parent_path.joinpath("messaging", "web", "src")
+sys.path = sys.path + [ django_path.as_posix() ]
+
 import logging
 from messaging.internal_types import CombinedMessage
 from messaging.utils import utils
@@ -40,6 +50,10 @@ class UserActorBase():
         """
         # TODO: Update the Sms item
         user = self._fetch_user(input_msg)
+        # TODO: rename these functions to be more english-ish.
+        if user.customer_subscription is None:
+            # Ignore users without an active subscription
+            return
         # TODO - handle blocked numbers
         # blocked_numbers = BlockedNumber.object.get(user=user)
         # TODO - handle quota

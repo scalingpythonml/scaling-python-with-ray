@@ -50,6 +50,7 @@ ray.get(trivial_ds.get_internal_block_refs())
 
 
 get_ipython().system('wget http://gender-pay-gap.service.gov.uk/viewing/download-data/2021')
+get_ipython().system('mv 2021 2021.csv')
 
 
 # In[ ]:
@@ -58,7 +59,7 @@ get_ipython().system('wget http://gender-pay-gap.service.gov.uk/viewing/download
 # If in local mode
 if local:
     #tag::load_csv_local_fs[]
-    ds = ray.data.read_csv("2021")
+    ds = ray.data.read_csv("2021.csv")
     #end::looad_csv_local_fs[]
 
 
@@ -98,6 +99,7 @@ except Exception as e:
 # In[ ]:
 
 
+# Note: broken in latest version of Ray (see https://github.com/ray-project/ray/issues/26605 ) works in previous
 #tag::load_from_https[]
 fs = fsspec.filesystem('https')
 ds = ray.data.read_csv(
@@ -172,7 +174,8 @@ weighted_mean = ray.data.aggregate.AggregateFn(
     name='weighted_mean',
     init=init_func,
     merge=combine_aggs,
-    accumulate=accumulate_func,
+    accumulate_row=accumulate_func, # Used to be accumulate
+    # There is a higher performance option called accumulate_block for vectorized op
     finalize=finalize)
 aggregated = ds_with_median.groupby("PostCode").aggregate(weighted_mean)
 #end::agg[]
@@ -204,9 +207,32 @@ ds_with_median.show()
 # In[ ]:
 
 
+#tag::enable_dask[]
+from ray.util.dask import enable_dask_on_ray, disable_dask_on_ray
+enable_dask_on_ray() # Routes all Dask calls through the Ray scheduler
+#end::enable_dask[]
+
+
+# In[ ]:
+
+
 #tag::to_dask[]
 dask_df = ds.to_dask()
 #end::to_dask[]
+
+
+# In[ ]:
+
+
+#tag::enable_spark[]
+import raydp
+spark = raydp.init_spark(
+  app_name = "sleepy",
+  num_executors = 2,
+  executor_cores = 1,
+  executor_memory = "2GB"
+)
+#end::enable_spark[]
 
 
 # In[ ]:
@@ -350,5 +376,7 @@ word_count.show()
 # In[ ]:
 
 
-
+#tag::wc_write[]
+word_count.write_csv("s3://ray-demo/wc")
+#end::wc_write[]
 

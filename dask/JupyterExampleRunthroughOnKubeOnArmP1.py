@@ -94,7 +94,7 @@ def add(x, y):
 # In[13]:
 
 
-get_ipython().run_cell_magic('time', '', '# This takes three seconds to run because we call each\n# function sequentially, one after the other\n\nx = inc(1)\ny = inc(2)\nz = add(x, y)')
+get_ipython().run_cell_magic('time', '', '# This takes three seconds to run because we call each\n# function sequentially, one after the other\n\nx = inc(1)\ny = inc(2)\nz = add(x, y)\n')
 
 
 # In[14]:
@@ -106,13 +106,13 @@ from dask import delayed
 # In[15]:
 
 
-get_ipython().run_cell_magic('time', '', '# This runs immediately, all it does is build a graph\n\nx = delayed(inc)(1)\ny = delayed(inc)(2)\nz = delayed(add)(x, y)')
+get_ipython().run_cell_magic('time', '', '# This runs immediately, all it does is build a graph\n\nx = delayed(inc)(1)\ny = delayed(inc)(2)\nz = delayed(add)(x, y)\n')
 
 
 # In[16]:
 
 
-get_ipython().run_cell_magic('time', '', 'z.compute()')
+get_ipython().run_cell_magic('time', '', 'z.compute()\n')
 
 
 # In[17]:
@@ -156,13 +156,13 @@ def is_even(x):
 # In[21]:
 
 
-get_ipython().run_cell_magic('time', '', 'results = []\nfor x in data:\n    if is_even(x):  # even\n        y = delayed(double)(x)\n    else:          # odd\n        y = delayed(inc)(x)\n    results.append(y)\n\ntotal = delayed(sum)(results)\ntotal.compute()')
+get_ipython().run_cell_magic('time', '', 'results = []\nfor x in data:\n    if is_even(x):  # even\n        y = delayed(double)(x)\n    else:          # odd\n        y = delayed(inc)(x)\n    results.append(y)\n\ntotal = delayed(sum)(results)\ntotal.compute()\n')
 
 
 # In[22]:
 
 
-get_ipython().run_cell_magic('time', '', 'results = []\nfor x in data:\n    def compute(x):\n        if is_even(x):  # even\n            return double(x)\n        else:          # odd\n            return inc(x)\n    y = delayed(compute)(x)\n    results.append(y)\n\ntotal = delayed(sum)(results)\ntotal.compute()')
+get_ipython().run_cell_magic('time', '', 'results = []\nfor x in data:\n    def compute(x):\n        if is_even(x):  # even\n            return double(x)\n        else:          # odd\n            return inc(x)\n    y = delayed(compute)(x)\n    results.append(y)\n\ntotal = delayed(sum)(results)\ntotal.compute()\n')
 
 
 # In[23]:

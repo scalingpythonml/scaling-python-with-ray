@@ -31,6 +31,7 @@ class UnitTest(Settings, Configuration):
         engine = 'django.db.backends.sqlite3'
         return {
             "default": {
+                "ENGINE": engine,
                 "NAME": os.path.join("/tmp", f"{str(uuid.uuid1())}_farts.db"),
                 }
             }

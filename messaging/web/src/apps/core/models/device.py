@@ -22,7 +22,6 @@ class DeviceManager(models.Manager):
 
 
 class Device(models.Model):
-    app_label = "apps.core"
     serial_number = models.CharField(max_length=100, unique=True)
     used = models.BooleanField(default=False)
     nickname = models.CharField(max_length=100, blank=True, null=True)
@@ -53,3 +52,6 @@ class Device(models.Model):
     @property
     def is_used(self):
         return self.used or self.user
+
+    class Meta:
+        app_label = "core"

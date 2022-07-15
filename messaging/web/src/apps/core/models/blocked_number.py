@@ -21,6 +21,7 @@ class BlockedNumberManager(models.Manager):
 
 
 class BlockedNumber(models.Model):
+    app_label = "apps.core"
     number = models.CharField(max_length=20, unique=True)
     user = models.ManyToManyField(User, related_name="blocked_numbers")
 

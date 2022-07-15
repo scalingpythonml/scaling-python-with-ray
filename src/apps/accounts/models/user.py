@@ -119,7 +119,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     """
 
-    app_label = "apps.accounts"
     id = models.BigAutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     full_name = models.CharField(max_length=100, blank=True, null=True)
@@ -205,3 +204,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             customer__email=self.email, status="active"
         ).exists()
         return have_subscription and not have_active_subscription
+
+    class Meta:
+        app_label = "accounts"

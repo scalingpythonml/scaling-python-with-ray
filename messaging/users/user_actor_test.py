@@ -1,17 +1,14 @@
 # We need this before the imports because django.
 import os
-os.environ["DJANGO_CONFIGURATION"] = "Test"
+os.environ["DJANGO_CONFIGURATION"] = "UnitTest"
 os.environ["SECRET_KEY"] = "d7b24a10f65b4cae8549d79991ebaf2b"
 
 from django.test import TestCase
 import unittest
 from ..utils import test_utils
 from messaging.internal_types import CombinedMessage
-from .models import Device, User 
+from .models import Device, User
 from ..proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL  # type: ignore
-
-from . import mailserver_actor
-
 
 class UserActorTests(TestCase):
     def setUp(self):

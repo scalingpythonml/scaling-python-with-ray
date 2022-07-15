@@ -8,7 +8,8 @@ import celery
 
 # configure settings as task can access settings during execution
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-os.environ.setdefault("DJANGO_CONFIGURATION", os.environ.get("__ENV__"))
+if "__ENV__" in os.environ:
+    os.environ.setdefault("DJANGO_CONFIGURATION", os.environ.get("__ENV__"))
 
 from configurations import importer  # noqa: E402 isort:skip
 

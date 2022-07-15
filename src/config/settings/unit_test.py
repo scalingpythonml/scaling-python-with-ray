@@ -27,3 +27,8 @@ class UnitTest(Settings, Configuration):
     @property
     def DATABASES(self):
         engine = 'django.db.backends.sqlite3'
+        return {
+            "default": {
+                "NAME": os.path.join(BASE_DIR, "unit_farts.db").as_posix,
+                }
+            }

@@ -110,12 +110,14 @@ test_dl = DataLoader(test, batch_size=32, shuffle=False)
 model = WineQualityModel(11)
 # define the optimization
 start = time.time()
+#tag::train[]
 # train
 plugin = RayPlugin(num_workers=6)
 trainer = Trainer(max_steps=1000, plugins=[plugin])
 trainer.fit(model, train_dl)
 print(f"Build model in {time.time() - start}")
 print(model)
+#end::train[]
 # evaluate a model
 predictions, actuals = list(), list()
 for i, (inputs, targets) in enumerate(test_dl):

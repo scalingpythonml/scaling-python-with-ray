@@ -35,6 +35,7 @@ class FilePersistence(BasePersitence):
         else:
             return None
 
+#tag::persist_pool[]
 pool = ActorPool([FilePersistence.remote(), FilePersistence.remote(), FilePersistence.remote()])
 
 @ray.remote
@@ -89,7 +90,7 @@ class Account:
 
 account_actor = Account.options(name='Account').remote(balance=100.,minimal_balance=20.,
                                     account_key='1234567', persistence=pool)
-
+#end::persist_pool[]
 
 print(f"Current balance {ray.get(account_actor.balance.remote())}")
 print(f"New balance {ray.get(account_actor.withdraw.remote(40.))}")

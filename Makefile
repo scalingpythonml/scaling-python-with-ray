@@ -33,3 +33,8 @@ shell:
 .PHONY: test
 test: up
 	@docker-compose -f $(CONFIG) -p $(PROJECT) exec -T app make test
+
+.PHONY: make-migrations
+make-migrations: up
+	@docker-compose -f $(CONFIG) -p $(PROJECT) exec -T app make migrate
+	@docker-compose -f $(CONFIG) -p $(PROJECT) exec -T app make make-migrations

@@ -7,8 +7,9 @@ import pytest
 
 
 User = get_user_model()
-UserStub = namedtuple("User", "full_name email password")
+UserStub = namedtuple("User", "username full_name email password")
 test_user_data = UserStub(
+    "farts",
     "test-fullname",
     "somewhere@test.com",
     "&Aqa&5y!8wMpWGUC8gJBWqpxjE8p8nT7XDB2xwZA4$KEb9Nd2&&kv42Y*!Vg4kHE8fPw5k2PwBSD$y*bqzEmXdH8fe#F4#BdY5x",
@@ -18,7 +19,8 @@ test_user_data = UserStub(
 @pytest.fixture
 def user():
     assert not User.objects.count()
-    user = User.objects.create(
+    user = User.objects.create_user(
+        username=test_user_data.username,
         full_name=test_user_data.full_name,
         email=test_user_data.email,
     )
@@ -35,6 +37,7 @@ def user():
 def superuser():
     assert not User.objects.count()
     user = User.objects.create_superuser(
+        username=test_user_data.username,
         email=test_user_data.email,
         password=test_user_data.password,
         full_name=test_user_data.full_name,
@@ -53,6 +56,7 @@ def superuser():
 def inactiveuser():
     assert not User.objects.count()
     user = User.objects.create_inactive_user(
+        username=test_user_data.username,
         email=test_user_data.email,
         password=test_user_data.password,
         full_name=test_user_data.full_name,
@@ -71,6 +75,7 @@ def inactiveuser():
 def activeuser():
     assert not User.objects.count()
     user = User.objects.create_user(
+        username=test_user_data.username,
         email=test_user_data.email,
         password=test_user_data.password,
         full_name=test_user_data.full_name,

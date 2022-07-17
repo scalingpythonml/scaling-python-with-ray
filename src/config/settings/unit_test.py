@@ -34,5 +34,5 @@ class UnitTest(Settings, Configuration):
             "default": {
                 "ENGINE": engine,
                 "NAME": os.path.join("/tmp", f"{test_id}_farts.db"),
-                }
             }
+        }

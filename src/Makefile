@@ -35,6 +35,10 @@ runserver:
 migrate:
 	@$(MANAGE) migrate $(app) $(CONFIG)
 
+.PHONY: make-migrations
+make-migrations:
+	@$(MANAGE) makemigrations $(app) $(CONFIG)
+
 .PHONY: shell
 shell:
 	@$(MANAGE) shell $(CONFIG)

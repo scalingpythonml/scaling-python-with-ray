@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from configurations import Configuration
 import os
+
+from configurations import Configuration
 
 from .common import Settings
 
@@ -27,11 +28,11 @@ class UnitTest(Settings, Configuration):
 
     @property
     def DATABASES(self):
-        engine = 'django.db.backends.sqlite3'
+        engine = "django.db.backends.sqlite3"
         test_id = os.environ["TEST_ID"]
         return {
             "default": {
                 "ENGINE": engine,
                 "NAME": os.path.join("/tmp", f"{test_id}_farts.db"),
-                }
             }
+        }

@@ -121,6 +121,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     id = models.BigAutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    username = models.CharField(max_length=100, unique=True)
     full_name = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(null=True, blank=True, unique=True)
     thumb = ImageField(upload_to=_get_user_image_path, null=True, blank=True)
@@ -137,7 +138,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "username"
+    EMAIL_FIELD="email"
     REQUIRED_FIELDS = []
 
     def __str__(self):

@@ -154,6 +154,7 @@ Exit codes are numeric codes that are set when a program exits, with any value b
 .Common exit codes
 |===
 |Exit code |Common meaning
+
 |0 |Success (but often misreported, especially in shell scripts)
 |1 |Generic error
 |127 |Command not found (in a shell script)

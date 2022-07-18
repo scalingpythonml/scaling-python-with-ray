@@ -120,13 +120,14 @@ Permanent clusters have some important benefits which can be useful. From a deve
 .Comparison Chart
 |===
 | |Transient / Ephemeral Clusters |Permanent Clusters
-|Resource Cost |Normally lower unless running, unless workloads that could bin-pack or share resources between users. |Higher when resource leaks prevent auto-scaler from scaling down.
-|Library Isolation |Flexible (including native) |Only venv/conda env level isolation
-|Ability to try new versions of Ray |Yes, may require code changes for new APIs. |Higher overhead
-|Longest Actor Life |Ephemeral (with the cluster) |"Permanent" (excluding cluster crashes/redeploys)
-|Shared Actors |No |Yes
-|Time to launch new application |Potentially long (cloud-dependent) |Varies (if the cluster has spare capacity nearly instant, otherwise cloud-dependent)
-|Data Read Amortization |No (each cluster must-read in any shared data sets) |Possible (if well structured)
+
+|*Resource Cost* |Normally lower unless running, unless workloads that could bin-pack or share resources between users. |Higher when resource leaks prevent auto-scaler from scaling down.
+|*Library Isolation* |Flexible (including native) |Only venv/conda env level isolation
+|*Ability to try new versions of Ray* |Yes, may require code changes for new APIs. |Higher overhead
+|*Longest Actor Life* |Ephemeral (with the cluster) |"Permanent" (excluding cluster crashes/redeploys)
+|*Shared Actors* |No |Yes
+|*Time to launch new application* |Potentially long (cloud-dependent) |Varies (if the cluster has spare capacity nearly instant, otherwise cloud-dependent)
+|*Data Read Amortization* |No (each cluster must-read in any shared data sets) |Possible (if well structured)
 |===
 
 The choice between ephemeral and permanent clusters depends on your use cases and requirements. It is possible that in some deployments a mix of ephemeral clusters and permanent clusters may offer the correct tradeoffs.

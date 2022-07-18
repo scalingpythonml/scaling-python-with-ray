@@ -332,7 +332,8 @@ So, which scaling approach should we use for our implementation? This https://le
 [[table-4-1]]
 .Comparison of different actor’s scaling approaches
 |===
-|*Scaling approach* |*Feature* |*Usage criteria*
+|Scaling approach |Feature |Usage criteria
+
 |Actor pool |Multiple processes, high CPU utilization |CPU-bound
 |Async actor |Single process, single thread, cooperative multitasking, tasks cooperatively decide on switching. |Slow IO-bound
 |Threaded actor |Single process, multiple threads, preemptive multitasking, OS decides on task switching. a|

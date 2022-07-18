@@ -19,7 +19,7 @@ The system layer consists of three major components: a global control store, a d
 
 [[overall-ray-architecture]]
 .Overall Ray architecture
-image:images/ch05/fig_0501.png[]
+image::images/ch05/fig_0501.png[]
 
 At the heart of Ray’s architecture is a global control store (GCS) that maintains the entire control state of the system. Internally, the GCS is a key-value store with pubsubfootnote:[Pubsub systems allow processes to subscribe to updates by categories] functionality. At present, the GCS is a single point of failure and runs on the head node.
 

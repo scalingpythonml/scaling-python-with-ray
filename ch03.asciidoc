@@ -97,7 +97,7 @@ You may wish to specify one of the few optional parameters to `ray.wait`:
 
 [TIP]
 ====
-The timeout parameter is extremely important in both `ray.get()` and `ray.wait()`. If this parameter is not specified and one of your remote functions misbehaves (i.e. never completes), then the `ray.get()`/__`__ray.wait()_`_ will never return, and your program will block forever.footnote:[If you're working interactively, you can fix this with a SIGINT or the stop button in Jupyter.] As a result, for any production code, we recommend that you use the timeout parameter in both to avoid deadlocks.
+The timeout parameter is extremely important in both `ray.get()` and `ray.wait()`. If this parameter is not specified and one of your remote functions misbehaves (i.e. never completes), then the `ray.get()`/`ray.wait()` will never return, and your program will block forever.footnote:[If you're working interactively, you can fix this with a SIGINT or the stop button in Jupyter.] As a result, for any production code, we recommend that you use the timeout parameter in both to avoid deadlocks.
 ====
 
 Ray's get and wait functions handle timeouts slightly differently. Ray doesn't raise an exception on `ray.wait` when a timeout occurs; instead, it simply returns fewer ready futures than `num_returns`. However, if `ray.get` encounters a timeout Ray will raise a `GetTimeoutError`. Note that the return of the wait/get function does not mean that your remote function will be terminated; it will still run in the dedicated process. You can explicitly terminate your future (see below) if you want to release the resources.

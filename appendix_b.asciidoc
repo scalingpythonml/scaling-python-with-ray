@@ -116,7 +116,7 @@ As requested by our YAML file we see only a head, the worker nodes will be creat
 
 ==== Installation of Ray on AWS
 
-AWS cloud installation leverages Boto3 - AWS SDK for Python and requires configuring your AWS credentials in `__~/.aws/credentials`__ filefootnote:[See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration[+++https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration+++] for information on setting up Boto3 configuration.],
+AWS cloud installation leverages Boto3 - AWS SDK for Python and requires configuring your AWS credentials in `~/.aws/credentials` filefootnote:[See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration[+++https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration+++] for information on setting up Boto3 configuration.],
 
 Once the credentials are created and Boto3 is installed, you can use this https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/ray-aws.yaml[+++yaml file+++]footnote:[This file is adopted from https://github.com/ray-project/ray/blob/master/python/ray/autoscaler/aws/example-full.yaml[+++Ray Github+++]] to install Ray on AWS using the following command:
 

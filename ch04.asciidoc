@@ -40,7 +40,7 @@ Now that you know the general principles of the actor model, let’s take a clos
 
 Ray implements remote actors as a stateful worker. When you create a new remote actor, Ray creates a new worker and schedules the actor’s methods on that worker.
 
-A common example of an actor is a bank account. Let's take a look at how you can implement an account using Ray remote actors. The creation of a Ray remote actor is as simple as decorating a Python class with the `__@ray.remote`__ decorator <<simple_remote_actor_creation>>.
+A common example of an actor is a bank account. Let's take a look at how you can implement an account using Ray remote actors. The creation of a Ray remote actor is as simple as decorating a Python class with the `@ray.remote` decorator <<simple_remote_actor_creation>>.
 
 [[simple_remote_actor_creation]]
 .Implementing Ray remote actor

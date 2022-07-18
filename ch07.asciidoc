@@ -103,7 +103,7 @@ include::examples/ray_examples/serving/simple/simple_tc.py[tags=simpler_call]
 
 Note that here, unlike <<direct_invoke>> which is using the default method ___call___, invoke methods are explicitly specified (instead of putting request type in the request itself, request type here is implicit - it’s a method name).
 
-Ray offers two types of handles - synchronous and asynchronous. _Sync_ flag - `__Deployment.get_handle(..., sync=True|False)`__ can be used to specify a handle type.
+Ray offers two types of handles - synchronous and asynchronous. _Sync_ flag - `Deployment.get_handle(..., sync=True|False)` can be used to specify a handle type.
 
 * The default handle is synchronous. In this case, calling handle.remote() returns a Ray _ObjectRef_.
 * To create an asynchronous handle set _sync=False_. Async handle invocation is asynchronous and you will have to use _await_ to get a Ray ObjectRef. To use _await_, you have to run _deployment.get_handle_ and _handle.remote_ in the Python _asyncio_ event loop.
@@ -128,11 +128,11 @@ Of course, you can combine all three to achieve your goals. Let’s take a close
 
 ===== Adding parameters to annotations
 
-The _`@serve.deployment`_ annotation can take several https://docs.ray.io/en/master/serve/core-apis.html[+++parameters+++], the most widely used being the number of replicas and resource requirements.
+The `@serve.deployment` annotation can take several https://docs.ray.io/en/master/serve/core-apis.html[+++parameters+++], the most widely used being the number of replicas and resource requirements.
 
 ===== Improving scalability with resource replicas
 
-By default, `deployment.deploy()` creates a single instance of a deployment. By specifying the number of replicas in `__@serve.deployment`__ you can scale out a deployment to many processes. When the requests are sent to such a replicated deployment, Ray uses round-robin scheduling to invoke individual replicas. You can modify <<tc_control_basic>> to add a number of replicas and ID for individual instances (<<tc_control_scaled>>).
+By default, `deployment.deploy()` creates a single instance of a deployment. By specifying the number of replicas in `@serve.deployment` you can scale out a deployment to many processes. When the requests are sent to such a replicated deployment, Ray uses round-robin scheduling to invoke individual replicas. You can modify <<tc_control_basic>> to add a number of replicas and ID for individual instances (<<tc_control_scaled>>).
 
 [[tc_control_scaled]]
 .Scaled Deployment
@@ -164,7 +164,7 @@ If your deployments begin to exceed ~3k requests per second you should also scal
 
 ===== Resource requirements for deployments
 
-You can request specific resource requirements in _`_@serve.deployment`. For example, two cpus and 1 GPU would be:
+You can request specific resource requirements in `@serve.deployment`. For example, two cpus and 1 GPU would be:
 
 [source, python]
 ----

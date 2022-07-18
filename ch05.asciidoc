@@ -101,7 +101,7 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ex_use_ray_put]
 
 When another node needs an object it asks the owner for who has any copies of the object and then fetches and creates a local copy of that object. This means there can be many copies of the same object in object stores on different nodes. Ray does not pro-actively replicate objects, so it is also possible that Ray may only have one copy of an object.
 
-By default, Ray will raise an ObjectLostError when you attempt to get a lost object. You can enable recomputing by providing _`_enable_object_reconstruction=True`_ to ray.init or adding _--enable-object-reconstruction_ to ray start. This recomputationfootnote:[This recomputation is done using information in the global control store.] will only happen once the object is needed, e.g. it is lazy on resolution.
+By default, Ray will raise an ObjectLostError when you attempt to get a lost object. You can enable recomputing by providing `enable_object_reconstruction=True` to ray.init or adding _--enable-object-reconstruction_ to ray start. This recomputationfootnote:[This recomputation is done using information in the global control store.] will only happen once the object is needed, e.g. it is lazy on resolution.
 
 There are two possible ways to lose an object. Since the owner is responsible for reference counting, if the owner is lost, the object is lost regardless of whether there are other copies of the object. If there are no copies of an object left Ray, e.g. all the nodes having it stored die, Ray also loses the object.footnote:[This case is distinct since the object may be stored only on nodes different from the owner.]
 

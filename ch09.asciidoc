@@ -9,7 +9,7 @@ In addition to simplifying your usage of different tools, Ray also has a growing
 
 [TIP]
 ====
-As covered in <<ray_objects>>, Ray Datasets default behaviour may be different than you expect. You can enable object recovery by setting _`_enable_object_reconstruction=True`_ in `ray.init` to make Ray Datasets more resilient.
+As covered in <<ray_objects>>, Ray Datasets default behaviour may be different than you expect. You can enable object recovery by setting `enable_object_reconstruction=True` in `ray.init` to make Ray Datasets more resilient.
 ====
 
 Ray Datasets continue to be an area of active development, including large feature additions between minor releases, and there will likely be more functionality added by the time you are reading this chapter. Regardless, the fundamental principles of partitioning and multi-tool interoperability will remain the same.

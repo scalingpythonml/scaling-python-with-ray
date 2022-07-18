@@ -5,18 +5,17 @@ We wrote this book for developers and data scientists looking to build and scale
 
 While you can use Ray from Java, this book is in Python, and we assume a general familiarity with the Python ecosystem. If you are not familiar with Python, some excellent O'Reilly titles include Learning Python and Python for Data Analysis. 
 
-Serverless is a bit of a buzzword, and despite its name, it does contain servers, but the idea is you don't have to worry about the servers. For many developers and data scientists, the promise of having things magically scale without worrying about the servers' details is quite appealing. On the other hand, if you enjoy getting into the nitty-gritty of your servers, deployment mechanisms, load-balancers, etc., this is probably not the book for you -- but hopefully, you recommend this to your users.
+Serverless is a bit of a buzzword, and despite its name, it does contain servers, but the idea is you don't have to manage them explicitly. For many developers and data scientists, the promise of having things magically scale without worrying about the servers' details is quite appealing. On the other hand, if you enjoy getting into the nitty-gritty of your servers, deployment mechanisms, load-balancers, etc., this is probably not the book for you -- but hopefully, you will recommend this to your colleagues.
+
 
 
 === Acknowledgments
 
-This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, Vini Jaiswal, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
+We would like to acknowledge the contribution of Carlos Andrade Costa who cowrote with us Chapter 8 - Ray Workflows. This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
 
 Holden would also like to thank her wife and partners for putting up with her long in-the-bath-tub writing sessions. A special thank you to Timbit for guarding the house and generally giving me a reason to get out of bed (albeit often a bit too early for my taste).
 
 image::images/preface/timbit.png[]
-
-
 
 === A note on responsibility
 
@@ -35,7 +34,7 @@ The https://github.com/scalingpythonml/scalingpythonml[Scaling Python ML Github]
 This book is here to help you get your job done. In general, if an example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you’re reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing a CD-ROM of examples from O’Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. The code is also available under an Apache 2 License. Incorporating a significant amount of example code from this book into your product’s documentation may require permission.
 
 //TODO update this to be our book. I.e. a how to cite us thingy
-
 We appreciate, but do not require attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: “_Scaling Python with Ray_ (O’Reilly). Copyright 2022, ISBNGOHERE.”
 
-If you feel your use of code examples falls outside fair use or the permission given above, feel free to contact us at pass:[&lt;a class="email" href="mailto:permissions@oreilly.com">&lt;em>permissions@oreilly.com&lt;/em>&lt;/a>].
+If you feel your use of code examples falls outside fair use or the permission given above, feel free to contact us at pass:[<a class="email" href="mailto:permissions@oreilly.com"><em>permissions@oreilly.com</em></a>].
+

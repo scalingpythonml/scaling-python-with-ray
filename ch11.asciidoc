@@ -1,0 +1,112 @@
+[[ch11]]
+== Using GPUs and accelerators with Ray
+
+While Ray is primarily focused on horizontal scaling, sometimes using special accelerators like GPUs can be cheaper and faster than just throwing more "regular" compute nodes at a problem. GPUs are well suited to vectorized operations performing the same operation on chunks of data at a time. Machine learning, and more generally linear algebra, are some of the top use casesfootnote:[Another one of the top use cases has been cryptocurrency mining, but you don't need a system like Ray for that. Cryptomining with GPUs has lead to increased demand with many cards selling above MSRP, and NVIDIA has been https://www.pcmag.com/news/cryptocurrency-miners-nvidias-lite-hash-rate-limiter-did-little-to-stop#:~:text=Nvidia%20tried%20to%20discourage%20cryptocurrency,say%20the%20effort%20was%20pointless.[+++attempting to discourage cryptocurrency mining with it's latest GPUs.+++]], as deep learning is incredibly vectorizable. Often GPU resources are more expensive than CPU resources, so Ray's architecture makes it easy to only request GPU resources when necessary. To take advantage of GPUs you need to use specialized libraries, and since these libraries deal with direct memory access their results may not always be serializable. In the GPU computing world NVIDIA and to a lesser degree AMD are the two main options, with different libraries for integration.
+
+=== What are GPUs good at
+
+Not every problem is a good fit for GPU acceleration. GPUs are especially good at performing the same calculation on a large number of data points at the same time. If a problem is well suited to vectorization then there is a good chance that GPUs may be well suited to it.
+
+Some common problems that benefit from GPU acceleration include:
+
+* Machine learning
+* Linear algebra
+* Physics simulations
+* Graphics (no surprise here)
+
+GPUs are not well suited to branch-heavy non-vectorized workflows, or workflows where the cost of copying the data is similar to or higher than the cost of the computation.
+
+=== The Building Blocks
+
+Working with GPUs involves some additional overhead, similar to the overhead of distributing tasks (although a bit faster). This overhead comes from serializing data as well as communication overhead, although the links between CPU and GPU are generally faster than network links. Unlike distributed tasks with Ray, GPUs do not have Python interpreters. Instead of sending Python lambdas, your high-level tools will generally generate or call native GPU code. Compute Unified Device Architecture (CUDA) and Radeon Open Compute (ROCm) are the two defacto low-level libraries for interacting with GPUs, from NVidia and AMD respectively.
+
+NVIDIA released CUDA first, and it quickly gained traction with many higher-level libraries and tools, including Tensorflow. AMD's ROCm has had a slower start, and has not seen the same level of adoption. Some high-level tools, including PyTorch, have now integrated ROCm support, but many others require using a special "forked" ROCm version, like Tensorflow (tensorflow-rocm) or LAPACK (rocSolver).
+
+Getting the building blocks right can be surprisingly challenging. For example, in our experience getting NVIDIA GPU Docker containers to build with Ray on Linux4Tegra took several days. ROCm and CUDA libraries have specific versions which support specific hardware, and similarly, higher-level programs that you may wish to use likely only support some versions. If you are running on Kubernetes, or a similar containerized platform, you can benefit from starting with pre-built containers https://hub.docker.com/r/nvidia/cuda[+++like NVidia's CUDA images+++] or https://hub.docker.com/u/rocm[+++AMD's rocM images as the base.+++]
+
+=== Higher Level Libraries
+
+Unless you have very specialized needs, you'll likely find it easiest to work with higher-level libraries that generate GPU code for you, like BLAS, Tensorflow, or numba. You should try and install these libraries in the base container or machine image that you are using, as they often involve a substantial amount of compile-time during installation.
+
+Some of the libraries, like numba, perform dynamic rewriting of your Python code. To have numba operate on your code, you add a decorator to your function (e.g. `@numba.jit`). Unfortunately, `numba.jit` and other dynamic rewriting of your functions are not directly supported in Ray. Instead, if you are using such a library, simply wrap the call as shown in <<numba_ex>>.
+
+// AU: tag `numba_ex` isn't present in the linked file
+[[numba_ex]]
+.Example title here
+====
+[source, python]
+----
+include::examples/ray_examples/gpu/Ray-GPUs.py[tags=numba_ex]
+----
+====
+
+[NOTE]
+====
+Similar to Ray's distributed functions these tools will generally take care of copying data for you, but it's important to remember it isn't free to move data in and out of GPUs. Since these datasets can be large, most libraries try to do multiple operations on the same data. If you have an iterative algorithm that re-uses the data, using an actor to hold on to the GPU resource and keep data in the GPU can reduce this cost.
+====
+
+Regardless of which libraries you choose (or if you decide to do it yourself), you'll need to make sure Ray schedules your code on nodes with GPUs.
+
+=== Acquiring and Releasing GPU and accelerator resources
+
+You can request GPU resources by adding `num_gpus` to the `ray.remote` decorator, much the same way as memory and CPU. Like other resourcesfootnote:[Like memory.] in Ray, GPUs in Ray are not guaranteed and Ray does not automatically clean up resources for you. While Ray does not automatically clean up memory for you, Python does (to an extent), making GPU leaks more likely than memory leaks.
+
+Many of the high level libraries do not release the GPU unless the Python VM exits. You can force the Python VM to exit after each call, thereby releasing any GPU resources, by adding `max_calls=1` in your `ray.remote` decorator, as in <<remote_gpu>>.
+
+[[remote_gpu]]
+.Example title here
+====
+[source, python]
+----
+include::examples/ray_examples/gpu/Ray-GPUs.py[tags=remote_gpu]
+----
+====
+
+One downside of restarting is that it removes your ability to reuse existing data in the GPU or accelerator. You can work around this by using long-lived actors in place of functions, but with the tradeoff of locking up the resources in those actors.
+
+=== Ray's ML Libraries
+
+You can also configure Ray's built-in ML libraries to use GPUs. To have Ray Train launch PyTorch to use GPU resources for training, you need to set `use_gpu=True` in your `Trainer` constructor call, same as how you configure the number of workers. Ray Tune gives you more flexibility for resource requests, and you specify the resources in the `tune.run` using the same dictionary as you would in `ray.remote`. For example, to use two cpus + one GPU per trial you would call `tune.run(trainable, num_samples=10, resources_per_trial=\{"cpu": 2, "gpu": 2})`.
+
+=== Autoscaler with GPUs and accelerators
+
+Ray's autoscaler has the ability to understand different types of nodes and chooses which node type to schedule based on the requested resources. This is especially important with GPUs, which tend to be more expensive (and in lower supply), than other resources. On our cluster, since we only have four nodes with GPUs, so we configure the auto-scaler as follows:
+
+[source,yaml]
+----
+include::examples/ray_examples/installRay/helm/helm_config_selector.yaml[]
+----
+
+This way the autoscaler can allocate containers without GPU resources, which allows Kubernetes to place those pods on CPU-only nodes.
+
+=== CPU Fallback as a Design Pattern
+
+Most of the high-level libraries that can be accelerated by GPUs also have CPU fallback. Ray does not have a built-in way of expressing the concept of CPU fallback, or "GPU if available." In Ray, if you ask for resources and the scheduler can not find them, and the auto-scaler can not create an instance for it, the function or actor will block forever. With a bit of creativity, you can build your own CPU-fall-back code in Ray.
+
+If you want to use GPU resources when the cluster has them and fall back to CPU you'll need to do a bit of extra work. The simplest way to determine if a cluster has useable GPU resources is to ask Ray to run a remote task with a GPU and then set the resources based on this as shown in <<cpu_fallback>>.
+
+[[cpu_fallback]]
+.Example title here
+====
+[source, python]
+----
+include::examples/ray_examples/gpu/Ray-GPUs.py[tags=gpu_fallback]
+----
+====
+
+Any libraries you use will also need to "fall-back" to CPU-based code. If they don't do so automatically (e.g. you have two different functions called depending on CPU v.s. GPU, like `mul_two_cuda` and `mul_two_np`) then you can pass through a boolean indicating if the cluster has GPUs.
+
+[WARNING]
+====
+This can still result in failures on GPU clusters if GPU resources are not properly released. Ideally, you should fix the GPU release issue, but on a multi-tenant cluster that may not be an option. You can also do try/except with acquiring the GPU inside of each function.
+====
+
+=== Other (non-GPU) Accelerators
+
+While much of this chapter has been focused on GPU accelerators, the same general techniques apply to other kinds of hardware acceleration. For example, numba is able to take advantage of special CPU features, Tensorflow can take advantage of TPUs, etc. In some cases resources may not require a code change, but instead simply offer faster performance with the same APIs, like machines with NVME drives. In all of those cases you can configure your auto-scaler to tag and make these resources available in much the same way as GPUs.
+
+Releasing non-GPU resources
+
+=== Conclusion
+
+GPUs are a wonderful tool to accelerate certain types of workflows on Ray. While Ray itself doesn't have hooks for accelerating your code with GPUs it integrates well with the various libraries that you can use for GPU computation. Many of these libraries were not created with the idea of shared computation in mind, so it's important to be on the look-out for accidental resource leaks, especially since GPU resources tend to be more expensive.

@@ -1,21 +1,14 @@
+[[ch05]]
 == Ray Design Details
-
-.A Note for Early Release Readers
-****
-With Early Release ebooks, you get books in their earliest form&mdash;the authors' raw and unedited content as they write—so you can take advantage of these technologies long before the official release of these titles.
-
-This will be the fifth chapter of the final book. Please note that the GitHub repo will be made active later on.
-
-If you have comments about how we might improve the content and/or examples in this book, or if you notice missing material within this chapter, please reach out to the editor at vwilson@oreilly.com.
-****
 
 Now that you've created and worked with remote functions and actors, it's time to learn what's happening behind the scenes. In this chapter, you will learn about important distributed system concepts, like fault tolerance, how Ray manages resources, and ways to speed up your remote functions and actors. Many of these details are most important when using Ray in a distributed fashion, but even local users benefit. Having a solid grasp of how Ray is working will help you decide how and when to use it.
 
 [[fault_tolerance]]
 === Fault Tolerance
 
-Fault tolerance refers to how a system will handle failures of everything from user code to the framework itself or the machines it runs on. Ray has a different fault tolerance mechanism tailored for each system. Like many systems, Ray can not recover from the "head" node failing.footnote:[ Some distributed systems can survive failure of head nodes, these involve using systems such as Zookeeper and algorithms like Paxos or Raft that use multiple computers to monitor and restart jobs with a voting system. If you need to handle head node failure, you can write your own recovery logic, but this is very complicated to do right, instead a system like Spark, which has integrated job restarts, may be a better option. Even Spark] 
-Overall, Ray’s https://www.usenix.org/system/files/osdi18-moritz.pdf[architecture] (<<overall-ray-architecture>>) consists of an application layer and a system layer, both of which can handle failures.
+Fault tolerance refers to how a system will handle failures of everything from user code to the framework itself or the machines it runs on. Ray has a different fault tolerance mechanism tailored for each system. Like many systems, Ray can not recover from the "head" node failing.footnote:[Some distributed systems can survive failure of head nodes, these involve using systems such as Zookeeper and algorithms like Paxos or Raft that use multiple computers to monitor and restart jobs with a voting system. If you need to handle head node failure, you can write your own recovery logic, but this is very complicated to do right, instead a system like Spark, which has integrated job restarts, may be a better option. Even Spark]
+
+Overall, Ray’s https://www.usenix.org/system/files/osdi18-moritz.pdf[+++architecture+++] (<<overall-ray-architecture>>) consists of an application layer and a system layer, both of which can handle failures.
 
 [WARNING]
 ====
@@ -26,9 +19,10 @@ The system layer consists of three major components: a global control store, a d
 
 [[overall-ray-architecture]]
 .Overall Ray architecture
-image::images/ch05/fig_0501.png[]
+image:images/ch05/fig_0501.png[]
 
-At the heart of Ray’s architecture is a global control store (GCS) that maintains the entire control state of the system. Internally, the GCS is a key-value store with pubsubfootnote:[ Pubsub systems allow processes to subscribe to updates by categories] functionality. At present, the GCS is a single point of failure and runs on the head node. 
+At the heart of Ray’s architecture is a global control store (GCS) that maintains the entire control state of the system. Internally, the GCS is a key-value store with pubsubfootnote:[Pubsub systems allow processes to subscribe to updates by categories] functionality. At present, the GCS is a single point of failure and runs on the head node.
+
 Usage of GCS, centrally maintaining Ray’s state significantly simplifies overall architecture, by enabling the rest of the system layer component to be stateless. This design is fundamental for fault tolerance (i.e., on failure, components simply restart and read the lineage from the GCS) and makes it easy to scale the distributed object store and scheduler independently, as all components share the needed state via the GCS.
 
 Since remote functions do not contain any persistent state, recovering from their failure is relatively simple. Ray will try again until it succeeds or reaches a maximum number of retries. As seen in the previous chapter, you can control the number of retries through the max_retries parameter in the @ray.remote annotation. To try out and better understand Ray's fault tolerance, you should write a "flaky" remote function that fails some % of the time as shown in <<ex_flaky_ray>>.
@@ -60,18 +54,18 @@ Ray actors are lazily initialized, so failure during the init stage is the same 
 
 When an actor fails between messages, Ray automatically attempts to recover the actor the next time it is called, up to max_retries times. If you've written your state recovery code well, failures between messages are generally invisible besides slightly slower processing times. If you don't have state recovery, each restart will reset the actor to the initial values.
 
-If your application fails, nearly all of the resources your application was using will eventually be garbage collected. The one exception is detached resources,footnote:[ Like detached actors and detached placement groups.] which Ray will restart as configured beyond the life of your current program provided the cluster does not fail.footnote:[This can prevent your cluster from scaling down as Ray will not release the resources.]
+If your application fails, nearly all of the resources your application was using will eventually be garbage collected. The one exception is detached resourcesfootnote:[Like detached actors and detached placement groups.], which Ray will restart as configured beyond the life of your current program provided the cluster does not fail.footnote:[This can prevent your cluster from scaling down as Ray will not release the resources.]
 
 Ray does not automatically attempt to recreate lost objects after they are first stored. You can configure Ray to try and recreate lost objects when accessed. In the next section, you'll learn more about the Ray objects and how to configure that resiliency.
 
 [[ray_objects]]
 === Ray Objects
 
-Ray objects can contain anything serializable (covered in the next section), including references to other ray Objects, called ObjectRefs.  An ObjectRef, is essentially a unique ID that refers to a remote object and is conceptually similar to futures. Ray objects are created automatically for task results, and large parameters of actors and remote functions. You can manually create objects by calling `ray.put`, which will return an immediately ready ObjectRef, e.g. `o = ray.put(1)`.
+Ray objects can contain anything serializable (covered in the next section), including references to other ray Objects, called ObjectRefs. An ObjectRef, is essentially a unique ID that refers to a remote object and is conceptually similar to futures. Ray objects are created automatically for task results, and large parameters of actors and remote functions. You can manually create objects by calling `ray.put`, which will return an immediately ready ObjectRef, e.g. `o = ray.put(1)`.
 
 [TIP]
 ====
-In general, initially, small objects are stored in their owner’s in-process store while Ray stores large objects on the worker, which generates them. This allows Ray to balance each object's memory footprint and resolution time. 
+In general, initially, small objects are stored in their owner’s in-process store while Ray stores large objects on the worker, which generates them. This allows Ray to balance each object's memory footprint and resolution time.
 ====
 
 The owner of an object is the worker that created the initial `ObjectRef`, by submitting the creating task or calling `ray.put`. The owner manages the lifetime of the object through reference counting.
@@ -92,7 +86,7 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ex_ray_immuteable]
 ----
 ====
 
-When you run the above code you can see that while you can mutate a value, the change won't propagate to the object store. 
+When you run the above code you can see that while you can mutate a value, the change won't propagate to the object store.
 
 If a parameter or return value is large and used more than once, or medium-sized and used frequently, then it can be worthwhile to store it as an object explicitly. You can then use the ObjectRef in place of the regular parameter, and it will automatically be translated for you, as shown in <<ex_use_ray_put>>.
 
@@ -107,17 +101,16 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ex_use_ray_put]
 
 When another node needs an object it asks the owner for who has any copies of the object and then fetches and creates a local copy of that object. This means there can be many copies of the same object in object stores on different nodes. Ray does not pro-actively replicate objects, so it is also possible that Ray may only have one copy of an object.
 
-By default, Ray will raise an ObjectLostError when you attempt to get a lost object. You can enable recomputing by providing pass:[<em>_enable_object_reconstruction=True</em>] to ray.init or adding pass:[<em>--enable-object-reconstruction</em>] to ray start. This recomputationfootnote:[This recomputation is done using information in the global control store.] will only happen once the object is needed, e.g. it is lazy on resolution.
+By default, Ray will raise an ObjectLostError when you attempt to get a lost object. You can enable recomputing by providing _`_enable_object_reconstruction=True`_ to ray.init or adding _--enable-object-reconstruction_ to ray start. This recomputationfootnote:[This recomputation is done using information in the global control store.] will only happen once the object is needed, e.g. it is lazy on resolution.
 
 There are two possible ways to lose an object. Since the owner is responsible for reference counting, if the owner is lost, the object is lost regardless of whether there are other copies of the object. If there are no copies of an object left Ray, e.g. all the nodes having it stored die, Ray also loses the object.footnote:[This case is distinct since the object may be stored only on nodes different from the owner.]
- 
+
 [TIP]
 ====
 Ray will follow the `max_retries` limit discussed above during reconstruction.
 ====
 
-Ray's object store uses reference counting garbage collectionfootnote:[The same algorithm as Python.] to cleanup objects which your program doesn't need anymore. The object store keeps track of both direct references, and ObjectRefs which refer to other ObjectRefs.footnote:[Same cycle problem as Python.]
-
+Ray's object store uses reference counting garbage collectionfootnote:[The same algorithm as Python.] to cleanup objects which your program doesn't need anymore. The object store keeps track of both direct references, and ObjectRefs which refer to other ObjectRefsfootnote:[Same cycle problem as Python.].
 
 Even with garbage collection, an object store can fill up with objects. When an object store fills up, Ray will first execute garbage collection, removing objects with no references. If there is still memory pressure, the object store will attempt to spill to disk. Spilling to disk copies objects from memory to disk and is called spilling since it happens when the memory usage overflows.
 
@@ -139,16 +132,16 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=ray_obj_store_confi
 ----
 ====
 
-Frameworks like Ray use serialization to pass both data and functions between workers. Before Ray can transfer an object into the object store, it must first serialize the object. 
+Frameworks like Ray use serialization to pass both data and functions between workers. Before Ray can transfer an object into the object store, it must first serialize the object.
 
 [[help_im_in_a_pickle]]
 === Serialization/Pickling
 
-Ray, and systems like it, depend on serialization, to be able to store and move data (and functions) between different processes.footnote:[These processes can be on the same node or different ones] Not all objects are serializable, and as a result, can not move between workers. In addition to the object store and IPC, fault tolerance depends on serialization so the same restrictions apply. There are many different kinds of serialization, from multi-language data-only tools like JSON and Arrow to Python's internal pickle. Serializing with pickle is called "pickling." Pickling can handle a wider range of types than JSON, but can only be used between Python processes. Pickling does not work for all objects —in most cases, there is no good way to serialize (like a network connection), and in other cases, this is because no one has had the time to implement one.
+Ray, and systems like it, depend on serialization, to be able to store and move data (and functions) between different processesfootnote:[These processes can be on the same node or different ones]. Not all objects are serializable, and as a result, can not move between workers. In addition to the object store and IPC, fault tolerance depends on serialization so the same restrictions apply. There are many different kinds of serialization, from multi-language data-only tools like JSON and Arrow to Python's internal pickle. Serializing with pickle is called "pickling." Pickling can handle a wider range of types than JSON, but can only be used between Python processes. Pickling does not work for all objects —in most cases, there is no good way to serialize (like a network connection), and in other cases, this is because no one has had the time to implement one.
 
 In addition to communicating between processes, Ray also has a shared in-memory object store. This object store allows multiple processes on the same computer to share objects.
 
-Ray uses a few different serialization techniques depending on the use case. With some exceptions, Ray's Python libraries generally use a fork of Cloudpickle, an improved pickle. For Datasets, Ray tries to use Apache Arrow (Arrow) and will fall back to cloudpickle when Arrow does not work. Ray's Java libraries use a variety of serializers, including "fast-serialization", and msgpack. Internally, Ray uses protocol buffers between workers. As a Ray Python developer, you will benefit the most from an in-depth understanding of the  Cloudpickle and Arrow serialization tools.
+Ray uses a few different serialization techniques depending on the use case. With some exceptions, Ray's Python libraries generally use a fork of Cloudpickle, an improved pickle. For Datasets, Ray tries to use Apache Arrow (Arrow) and will fall back to cloudpickle when Arrow does not work. Ray's Java libraries use a variety of serializers, including "fast-serialization", and msgpack. Internally, Ray uses protocol buffers between workers. As a Ray Python developer, you will benefit the most from an in-depth understanding of the Cloudpickle and Arrow serialization tools.
 
 ==== Cloudpickle
 
@@ -194,7 +187,6 @@ As mentioned before, Ray uses Apache Arrow to serialize Datasets when possible. 
 
 Apache Arrow works with many data processing and machine learning tools, including Pandas, PySpark, Tensorflow, and Dask. Arrow is a columnar format with a strongly typed schema. It is generally more space-efficient than pickling, and it can be used not only between different versions of Python but also between programming languages (e.g. Rust/C/Java/Python/CUDA/ etc.)
 
-
 [NOTE]
 ====
 Not all tools using Apache Arrow support all of the same data types. For example, Arrow supports nested columns, which Pandas does not.
@@ -210,18 +202,18 @@ While you won't interact directly with gRPC(gRPC remote procedure calls) in the 
 
 By default Ray assumes that all functions and actors have the same resource requirements (e.g. 1 CPU). For actors or functions with different resource requirements, you can specify the resources that your function or actor needs. The scheduler will attempt to find a node that has these resources available, and if there are none, the autoscaler, covered next, will attempt to allocate a node that meets those requirements.
 
-The ray.remote decorator takes num_cpus, num_gpus, and memory as parameters to indicate the amount of resources an actor or remote function will consume. The defaults are one CPU and zero GPUs. You can override this value by specifying required resources in the _@ray.remote_ annotation, for example, usage of annotation pass:[<em>@ray.remote(num_cpus=4, num_gpus=2)</em>] will request four CPUs and two GPUs for function execution. 
+The ray.remote decorator takes num_cpus, num_gpus, and memory as parameters to indicate the amount of resources an actor or remote function will consume. The defaults are one CPU and zero GPUs. You can override this value by specifying required resources in the _@ray.remote_ annotation, for example, usage of annotation _@ray.remote(num_cpus=4, num_gpus=2)_ will request four CPUs and two GPUs for function execution.
 
 [TIP]
 ====
 Most resource requests in Ray are "soft", which means that Ray does not enforce or guarantee the limits, but does its best to try and meet them.
 ====
 
-If you know how much memory a task or actor requires, you can specify it in the resource requirements of its ray.remote annotation to enable memory-aware scheduling.footnote:[Specifying a memory requirement does NOT impose any limits on memory usage. The requirements are used for admission control during scheduling only (similar to how CPU scheduling works in Ray). It is up to the task itself to not use more memory than it requested.] For example, `@ray.remote(memory=500 * 1024 * 1024)` will request 500MiB of memory to for this task.footnote:[Note that Ray itself does not impose any limits on the memory usage. It is up to the task itself to not use more memory than it requested.]  
+If you know how much memory a task or actor requires, you can specify it in the resource requirements of its ray.remote annotation to enable memory-aware schedulingfootnote:[Specifying a memory requirement does NOT impose any limits on memory usage. The requirements are used for admission control during scheduling only (similar to how CPU scheduling works in Ray). It is up to the task itself to not use more memory than it requested.]. For example, `@ray.remote(memory=500 * 1024 * 1024)` will request 500MiB of memory to for this taskfootnote:[Note that Ray itself does not impose any limits on the memory usage. It is up to the task itself to not use more memory than it requested.].
 
 .Ray Memory usage
 ****
-Ray memory usage is split into https://docs.ray.io/en/master/memory-management.html[two main groups] - memory used by Ray itself (Ray system memory) and memory used by applications (Ray application memory). Ray’s system memory is currently comprised of:
+Ray memory usage is split into https://docs.ray.io/en/master/memory-management.html[+++two main groups+++] - memory used by Ray itself (Ray system memory) and memory used by applications (Ray application memory). Ray’s system memory is currently comprised of:
 
 * Redis: memory used for storing the list of nodes and actors present in the cluster. The amount of memory used for these purposes is typically quite small.
 * Raylet: memory used by the C++ raylet process running on each node. This cannot be controlled but is typically quite small.
@@ -229,13 +221,13 @@ Ray memory usage is split into https://docs.ray.io/en/master/memory-management.h
 Ray application memory is comprised of:
 
 * Worker heap: memory used by users’ application, best measured as the resident set size (RSS) of your application minus its shared memory usage (SHR) in commands such as top.
-* Object store memory: memory used when your application creates objects in the object store via _ray.put_ and when returning values from remote functions. Objects are evicted when they fall out of scope. There is an object store server running on each node. Objects will be https://docs.ray.io/en/master/memory-management.html#object-spilling[spilled to disk] if the object store fills up.
-* Object store shared memory: memory used when your application reads objects via _ray.get_. 
+* Object store memory: memory used when your application creates objects in the object store via _ray.put_ and when returning values from remote functions. Objects are evicted when they fall out of scope. There is an object store server running on each node. Objects will be https://docs.ray.io/en/master/memory-management.html#object-spilling[+++spilled to disk+++] if the object store fills up.
+* Object store shared memory: memory used when your application reads objects via _ray.get_.
 
-To help you to debug some of the memory issues Ray provides a ray memory command that can be invoked from the command line from the machine where the Ray node is running (at the time of this writing there is no corresponding API). This command allows you to get  a dump of all of the ObjectRef references that are currently held by the driver, actors, and tasks in the cluster. This allows to track down what ObjectRef references are in scope and may be causing an ObjectStoreFullError.
+To help you to debug some of the memory issues Ray provides a ray _memory_ command that can be invoked from the command line from the machine where the Ray node is running (at the time of this writing there is no corresponding API). This command allows you to get a dump of all of the ObjectRef references that are currently held by the driver, actors, and tasks in the cluster. This allows to track down what ObjectRef references are in scope and may be causing an ObjectStoreFullError.
 ****
 
-Ray can also keep track of and assign custom resources using the same mechanism as memory and CPU resources. When the worker process is starting, it needs to know all of the resources that are present. For manually launched workers you specify the customs resources with a `--resources` argument. For example, on a mixed ARCH cluster, you might want to add `--resources={"x86": "1"}` to the x86 nodes and `--resources{"arm64":"1"}` to the ARM nodes. If See <<app_deploying>> to configure resources with your deployment mechanism.
+Ray can also keep track of and assign custom resources using the same mechanism as memory and CPU resources. When the worker process is starting, it needs to know all of the resources that are present. For manually launched workers you specify the customs resources with a `--resources` argument. For example, on a mixed ARCH cluster, you might want to add `--resources=\{"x86": "1"}` to the x86 nodes and `--resources\{"arm64":"1"}` to the ARM nodes. If See <<app_deploying>> to configure resources with your deployment mechanism.
 
 [TIP]
 ====
@@ -246,7 +238,7 @@ So far we've focused on horizontal scaling, but you can also use Ray to get more
 
 === Autoscaler
 
-One of the important components of Ray is the autoscaler, which is responsible for managing the workers. More specifically, autoscaler is responsible for the following three functions:footnote:[for more detailed information on autoscaler refer to this excellent https://www.youtube.com/watch?v=BJ06eJasdu4[video]]
+One of the important components of Ray is the autoscaler, which is responsible for managing the workers. More specifically, autoscaler is responsible for the following three functionsfootnote:[for more detailed information on autoscaler refer to this excellent https://www.youtube.com/watch?v=BJ06eJasdu4[+++video+++]]:
 
 * Launching of the new workers (based on demand) including:
 ** Uploading user defined files or directories
@@ -259,18 +251,18 @@ One of the important components of Ray is the autoscaler, which is responsible f
 ** The Raylet running a worker crashes
 ** Worker’s set up/startup/file mounts changes
 
-The auto-scaler creates new nodes in response to the following events:footnote:[For more information on the worker nodes creation for different platforms refer to this https://docs.ray.io/en/master/cluster/cloud.html#cluster-cloud[documentation].]
+The auto-scaler creates new nodes in response to the following eventsfootnote:[For more information on the worker nodes creation for different platforms refer to this https://docs.ray.io/en/master/cluster/cloud.html#cluster-cloud[+++documentation+++].]:
 
-* Cluster creation with the min-nodes configuration. In this case, the autoscaler creates the required amount of nodes.
+* Cluster creation with the _min-nodes_ configuration. In this case, the autoscaler creates the required amount of nodes.
 * Resource demands. For remote functions with the resource requirements, the autoscaler checks whether a cluster can satisfy additional resource requirements and, if not, creates a new worker node(s).
 * Placement groups. Similar to resource demand, for new placement groups the autoscaler checks whether the cluster has enough resources and, if not, creates new worker node(s).
-* SDK pass:[<a href="https://docs.ray.io/en/latest/cluster/sdk.html"><em>request_resources</em></a>] function call is similar to the cluster creation request, but these resources are never released for the life of the cluster.
+* SDK https://docs.ray.io/en/latest/cluster/sdk.html[_+++request_resources+++_] function call is similar to the cluster creation request, but these resources are never released for the life of the cluster.
 
 Ray's autoscaler works with different node/computer types, which can map to different physical instance type (for example different AWS node types), or accelerators (for example GPU).
 
 === Placement Groups - Organizing your tasks & actors
 
-Ray applications use placement groups to organize tasks as well as pre-allocate resources. Organizing tasks is sometimes important for re-using resources and increased data locality. 
+Ray applications use placement groups to organize tasks as well as pre-allocate resources. Organizing tasks is sometimes important for re-using resources and increased data locality.
 
 [TIP]
 ====
@@ -289,20 +281,20 @@ Ray creates placement groups atomically, so if you have a minimum number of reso
 You can use placement groups for a few different purposes:
 
 * Pre-allocating resources
-* https://en.wikipedia.org/wiki/Gang_scheduling[Gang Scheduling] - ensuring that all tasks/actors will be scheduled and start at the same time.
+* https://en.wikipedia.org/wiki/Gang_scheduling[+++Gang Scheduling+++] - ensuring that all tasks/actors will be scheduled and start at the same time.
 * Organizing your tasks and actors inside your cluster:
 ** Maximizing data locality - ensuring placing off all your tasks and actors close to your data to avoid object transfer overheads.
 ** Load balancing - improving application availability by placing your actors or tasks into different physical machines as much as possible.
 
-Placement groups consist of both the desired resources for each worker, as well as the placement strategy. 
+Placement groups consist of both the desired resources for each worker, as well as the placement strategy.
 
 Since a placement group can span multiple workers, you must specify the desired resources (or resource bundle) for each worker. Each group of resources for a worker is known as a resource bundle and must be able to fit inside a single machine, otherwise the autoscaler will be unable to create the node types and the placement group will never be scheduled.
 
-Placement groups are collections of resource bundles, where a resource bundle is a collection of resources (CPU, GPU, etc.). You define the resource bundles with the same arguments. Each resource bundle must fit on a single machine. 
+Placement groups are collections of resource bundles, where a resource bundle is a collection of resources (CPU, GPU, etc.). You define the resource bundles with the same arguments. Each resource bundle must fit on a single machine.
 
 You control how Ray schedules your resource group by setting placement strategies. Your placement strategy can either try and reduce the number of nodes (improving locality), or spreading the work out more (improving reliability and load balancing). You have a few variations on these core strategies to choose from:
 
-* STRICT_PACK - all bundles must be placed into a single node on the cluster. 
+* STRICT_PACK - all bundles must be placed into a single node on the cluster.
 * PACK - all provided bundles are packed onto a single node on a best-effort basis. If strict packing is not feasible, bundles can be placed onto other nodes. This is the default placement group strategy.
 * STRICT_SPREAD - each bundle must be scheduled in a separate node.
 * SPREAD - Each bundle will be spread onto separate nodes on a best effort basis. If strict spreading is not feasible, some bundles can be collocated on nodes.
@@ -314,12 +306,12 @@ Multiple remote functions or actors can be in the same resource bundle. Any func
 
 The lifecycle of placement groups has the following stages:
 
-* _Creation:_ placement group creation request is sent to the Global Control Structure (GCS) that calculates how to distribute the bundles and sends resource reservation requests to all the nodes. Ray guarantees placement groups are placed _atomically_.
-* _Allocation:_ placement groups are pending creation. If existing Ray nodes can satisfy resource requirements for a given strategy, then placing groups are allocated and success is returned. Otherwise, the result depends on whether Ray is able to add nodes. If the autoscaler is not present or the node limit is reached, then placement group allocation fails and the error is returned, otherwise the autoscaler scales the cluster to ensure pending groups can be allocated.
-* _Node’s failure:_ when worker nodesfootnote:[Ray’s cluster head node is a single point of failure, so if it fails, the whole cluster will fail, as mentioned in <<fault-tolerance>>.] that contain some bundles of a placement group die, all the bundles will be rescheduled on different nodes by GCS. This means that the placement group creation _atomicity_ only applies to initial placement creation. Once a placement group is created, it can become partial due to node failures.
-* _Cleanup:_ Ray automatically removes placement groups when the job that created the placement group is finished. If you’d like to keep the placement group alive regardless of the job that created it, you should specify lifetime=”detached” during placement group creation. You can also explicitly free a placement group at any time by calling pass:[<em>remove_placement_group</em>].
+* *Creation*: placement group creation request is sent to the Global Control Structure (GCS) that calculates how to distribute the bundles and sends resource reservation requests to all the nodes. Ray guarantees placement groups are placed _atomically_.
+* *Allocation*: placement groups are pending creation. If existing Ray nodes can satisfy resource requirements for a given strategy, then placing groups are allocated and success is returned. Otherwise, the result depends on whether Ray is able to add nodes. If the autoscaler is not present or the node limit is reached, then placement group allocation fails and the error is returned, otherwise the autoscaler scales the cluster to ensure pending groups can be allocated.
+* *Node’s failure*: when worker nodesfootnote:[Ray’s cluster head node is a single point of failure, so if it fails, the whole cluster will fail, as mentioned in <<fault-tolerance>>.] that contain some bundles of a placement group die, all the bundles will be rescheduled on different nodes by GCS. This means that the placement group creation _atomicity_ only applies to initial placement creation. Once a placement group is created, it can become partial due to node failures.
+* *Cleanup*: Ray automatically removes placement groups when the job that created the placement group is finished. If you’d like to keep the placement group alive regardless of the job that created it, you should specify lifetime=”detached” during placement group creation. You can also explicitly free a placement group at any time by calling _remove_placement_group_.
 
-To make a placement group you will need a few extra imports, shown in <<placement_group_imports>>. If you are working with Ray in local mode, it's harder to see the effect of placement groups since there is only one node. You can still create  CPU only bundles together into a placement group. Once you've created the placement group you can use `options` to run a function or actor in a specific bundle as shown in <<placement_group>>.
+To make a placement group you will need a few extra imports, shown in <<placement_group_imports>>. If you are working with Ray in local mode, it's harder to see the effect of placement groups since there is only one node. You can still create CPU only bundles together into a placement group. Once you've created the placement group you can use `options` to run a function or actor in a specific bundle as shown in <<placement_group>>.
 
 .Placement group imports
 [[placement_group_imports]]
@@ -341,7 +333,7 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=placement_group]
 
 If you are running Ray on a cluster you can create a more complex resource group. If you have some GPU nodes in your cluster, you can create more complex placement groups. When we run a <<mixed_placement_group>> on our test cluster, the auto scaler allocates a node with a GPU. Once you’re finished with your placement group you can delete it with `remove_placement_group(pg)`.
 
-.Mixed CPU & GPU Placement group
+.Mixed CPU and GPU Placement group
 [[mixed_placement_group]]
 ====
 [source, python]
@@ -352,11 +344,12 @@ include::examples/ray_examples/concepts/Ray-Concepts-Remote.py[tags=mixed_placem
 
 .Ray Scheduler
 ****
-Ray uses a https://www.usenix.org/system/files/osdi18-moritz.pdf[Bottom-Up Distributed Scheduler], which consists of a global scheduler and per-node local schedulers. On task creation, the task is always first submitted to the node’s local scheduler, which encourages task locality. If the local node is overloaded (its local task queue exceeds a predefined threshold) or it cannot satisfy the task’s requirements (for example, lacks GPU), the local scheduler calls the global scheduler to take over.
+Ray uses a https://www.usenix.org/system/files/osdi18-moritz.pdf[+++Bottom-Up Distributed Scheduler+++], which consists of a global scheduler and per-node local schedulers. On task creation, the task is always first submitted to the node’s local scheduler, which encourages task locality. If the local node is overloaded (its local task queue exceeds a predefined threshold) or it cannot satisfy the task’s requirements (for example, lacks GPU), the local scheduler calls the global scheduler to take over.
 
 The global scheduler first identifies the set of nodes that have enough resources to satisfy the task's requirements and then selects the one that provides the lowest estimated waiting time - a sum of the estimated time the task will be queued at that node (task queue size times average task execution), and the estimated transfer time of the task’s remote inputs (total size of remote inputs divided by average bandwidth).
 
-Each worker sends a periodic heartbeat with resource availability and queue depth to the global scheduler. The global scheduler also has access to the location of the task’s inputs and their sizes from the GCS when deciding where to schedule. Once the global scheduler picks the node, it calls the node's local scheduler, which schedules the task. 
+Each worker sends a periodic heartbeat with resource availability and queue depth to the global scheduler. The global scheduler also has access to the location of the task’s inputs and their sizes from the GCS when deciding where to schedule. Once the global scheduler picks the node, it calls the node's local scheduler, which schedules the task.
+
 Additional improvements to this basic algorithm are described https://medium.com/princeton-systems-course/investigating-scheduling-and-object-management-in-ray-7c2aa9e284dd[here] and include:
 
 * Parallel retrieval of task arguments
@@ -365,7 +358,7 @@ Additional improvements to this basic algorithm are described https://medium.com
 * Dependency aware task scheduling
 ****
 
-You can assign placement groups names. You can achieve this by specifying a parameter pass:[<em>name="desired_name"</em>] at the point of placement group creation. This allows you to retrieve and use the placement group from any job in the Ray cluster by name rather than passing a placement group handle.
+You can assign placement groups names. You can achieve this by specifying a parameter _name="desired_name"_ at the point of placement group creation. This allows you to retrieve and use the placement group from any job in the Ray cluster by name rather than passing a placement group handle.
 
 === Namespaces
 
@@ -382,7 +375,7 @@ You can get the current namespace by calling `ray.get_runtime_context().namespac
 
 One of the big draws of Python is the amazing ecosystem of tools available. Ray supports managing dependencies with both conda and virtualenv. Ray dynamically creates these virtual environments inside of your larger container as needed and launches workers using the matching environment.
 
-The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from the https://pypi.org/[Python Package Index (PyPI)] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
+The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from thttps://pypi.org/[+++he Python Package Index (PyPI)+++] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
 
 .pip package list
 [[pip_pkg_list]]
@@ -393,7 +386,7 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_list]
 ----
 ====
 
-This works well for a few dependencies, but if you've got a requirements.txt like Holden's link:$$https://github.com/holdenk/print-the-world$$[print the world] project, you can also just point this to your local `requirements.txt` as shown in <<pip_pkg_reqs>>.
+This works well for a few dependencies, but if you've got a requirements.txt like Holden's link:$$https://github.com/holdenk/print-the-world$$%5Bprint[+++https://github.com/holdenk/print-the-world$$[print+++] the world] project, you can also just point this to your local `requirements.txt` as shown in <<pip_pkg_reqs>>.
 
 .pip package requirements file
 [[pip_pkg_reqs]]
@@ -411,14 +404,12 @@ If you have an even more complex setup using Conda, you can make a runtime conte
 
 Once you've created a runtime context you can specify it either globally when creating your ray client, like in <<runtime_env_init>>, or inside of the ray.remote decorator <<ex_local_ctx>>.
 
-
 [WARNING]
 ====
 Not all dependencies are well suited to the dynamically created execution context. Anything involving large native code compilation without a pre-existing wheel takes too long, for example Tensorflow on ARM.
 ====
 
 Adding certain packages to a runtime execution context can result in a slower start & scale-up. Think of, for example, how long it takes to install Tensorflow without a wheel. If Ray had to do that for each time it started another worker, this would be much slower. You can solve this by creating conda environments in your cluster or container. We discuss how to do this in <<app_deploying>>.
-
 
 === Deploying Ray Applications with the Ray Job API
 
@@ -430,17 +421,18 @@ In addition to connecting your job to an existing cluster with `ray.init`, Ray o
 
 .Why another API?
 ****
-Although you can theoretically attach your program to the existing Ray cluster using the Ray https://docs.ray.io/en/latest/cluster/ray-client.html[client], it often does not always work, especially when Ray is deployed on a Kubernetes cluster. The issue here is that Ray node’s gRPC interface is using insecure gRPC, which is not supported by the majority of https://kubernetes.io/docs/concepts/services-networking/ingress/[Kubernetes Ingress] implementations. To overcome this issue, Ray has introduced a new https://docs.ray.io/en/latest/ray-job-submission/overview.html#ray-job-sdk[Ray job SDK], using HTTP instead of gRPC. The job API is on port 8625 and <<appa_deploying>> covers how to make this available.
+Although you can theoretically attach your program to the existing Ray cluster using the Ray https://docs.ray.io/en/latest/cluster/ray-client.html[+++client+++], it often does not always work, especially when Ray is deployed on a Kubernetes cluster. The issue here is that Ray node’s gRPC interface is using insecure gRPC, which is not supported by the majority of https://kubernetes.io/docs/concepts/services-networking/ingress/[+++Kubernetes Ingress+++] implementations. To overcome this issue, Ray has introduced a new https://docs.ray.io/en/latest/ray-job-submission/overview.html#ray-job-sdk[+++Ray job SDK+++], using HTTP instead of gRPC. The job API is on port 8625 and <<appa_deploying>> covers how to make this available.
 ****
 
 A job request consists of:
 
-. a directory containing a collection of files and configurations that defines an application, 
+. a directory containing a collection of files and configurations that defines an application,
 . an entrypoint for the execution
-. A runtime Environments consisting of any needed files, Python libraries, and environment variables, etc. 
+. A runtime Environments consisting of any needed files, Python libraries, and environment variables, etc.
 
-The code below shows you how tofootnote:[The complete code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/misc/script_with_parameters.py[github]] run your code on a Ray cluster with the job API. Below is the example of the Ray code that we want to submit to the cluster:
+The code below shows you how tofootnote:[The complete code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/misc/script_with_parameters.py[+++github+++]] run your code on a Ray cluster with the job API. Below is the example of the Ray code that we want to submit to the cluster:
 
+[source, python]
 ----
 class ParseKwargs(argparse.Action):
    def __call__(self, parser, namespace, values, option_string=None):
@@ -448,35 +440,35 @@ class ParseKwargs(argparse.Action):
        for value in values:
            key, value = value.split('=')
            getattr(namespace, self.dest)[key] = value
-  
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-k', '--kwargs', nargs='*', action=ParseKwargs)
 args = parser.parse_args()
-  
+
 numberOfIterations = int(args.kwargs["iterations"])
 print(f"Requested number of iterations is: {numberOfIterations}")
-  
+
 print(f'Environment variable MY_VARIABLE has a value of {os.getenv("MY_VARIABLE")}')
-  
+
 ray.init()
-  
+
 @ray.remote
 class Counter:
    def __init__(self):
        self.counter = 0
-  
+
    def inc(self):
        self.counter += 1
 
    def get_counter(self):
        return self.counter
-  
+
 counter = Counter.remote()
-  
+
 for _ in range(numberOfIterations):
    ray.get(counter.inc.remote())
    print(ray.get(counter.get_counter.remote()))
-  
+
 print("Requests", requests.__version__)
 print("Qiskit", qiskit.__version__)
 ----
@@ -489,9 +481,10 @@ In addition to the Ray code itself, the example above shows several additional t
 
 With this in place you can now submit your job to the Ray cluster as follows:
 
+[source, python]
 ----
 client = JobSubmissionClient("<your Ray URL>")
-  
+
 job_id = client.submit_job(
    # Entrypoint shell command to execute
    entrypoint="python script_with_parameters.py --kwargs iterations=7",
@@ -504,18 +497,18 @@ job_id = client.submit_job(
 )
 
 print(f"Submitted job with ID : {job_id}")
-  
+
 while True:
    status = client.get_job_status(job_id)
    print(f"status: {status}")
    if status in {JobStatus.SUCCEEDED, JobStatus.STOPPED, JobStatus.FAILED}:
        break
    time.sleep(5)
-  
+
 logs = client.get_job_logs(job_id)
 print(f"logs: {logs}")
 ----
 
 === Conclusion
 
-In this chapter, you've gained a deeper understanding of how Ray works. Your knowledge of serialization will help you understand which work to distribute and which to keep in the same process. You now know your different options and how to choose the right scaling technique. You have a few different techniques to manage Python dependencies, even conflicting ones, on your Ray cluster. You are well set up to learn about the higher-level building blocks covered in the next part of the book.
+In this chapter, you've gained a deeper understanding of how Ray works. Your knoweledge of serialization will help you understand which work to distribute and which to keep in the same process. You now know your different options and how to choose the right scaling technique. You have a few different techniques to manage Python dependencies, even conflicting ones, on your Ray cluster. You are well set up to learn about the higher-level building blocks covered in the next part of the book.

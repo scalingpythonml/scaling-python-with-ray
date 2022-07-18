@@ -1,0 +1,249 @@
+[[ch12]]
+== Ray In The Enterprise
+
+Deploying software in enterprise environments often comes with additional requirements, especially regarding security. Enterprise deployments tend to involve multiple stakeholders and need to provide service to a larger group of scientists/engineers. While not required, many enterprise clusters tend to have some form of multi-tenancy to allow more efficient use of resourcesfootnote:[Including human resources, e.g. operational staff.].
+
+=== Ray Dependency Security issues
+
+Unfortunately, Ray's default requirements file brings in some insecure libraries. Many enterprise environments have some kind of container scanning or similar system to detect such issues.footnote:[Some common ones include Grype, Anchore, and Dagda.] In some cases, you can simply remove or upgrade the dependency issues flagged, but when Ray includes the dependencies in its wheel (e.g. the log4j issue), limiting yourself to pre-built wheels has serious drawbacks. If you find a Java or native library flagged, you will need to rebuild Ray from source with the version upgraded, as described in <<appendix_deploying>>. Derwen.ai has an example of doing this for Docker in their https://github.com/DerwenAI/ray_base[+++ray_base+++] repo.
+
+=== Interacting with the existing tools
+
+Enterprise deployments often involve interaction with existing tools and the data they produce. Some potential points for integration here are using Ray's Dataset generic Apache Arrow interface to interact with other tools. When data is stored "at rest," Parquet is the best format for interaction with other tools.
+
+=== Using Ray with CI/CD tools
+
+When working in large teams, continuous integration and delivery are important parts of effective collaboration on projects. The simplest option for using Ray with CI/CD is to use Ray in local mode and treat it like a normal Python project. Alternatively, you can submit test jobs using Ray's job submission AP and verify the result. This can allow you to test Ray jobs beyond the scale of a single machine. Regardless of whether you use Ray's job API or Ray's local mode, you can use Ray with any CICD tool and virtual environment.
+
+=== Authentication with Ray
+
+Ray's default deployment makes it easy for you to get started, and as such, it leaves out any authentication between the client and server. The lack of authentication means that anyone who can connect to your Ray server can potentially submit jobs and execute arbitrary code. Generally, enterprise environments require a higher level of access control than the default configuration provides.
+
+Ray's gRPC endpoints, not the job server, can be configured to use TLS for mutual authentication between the client and the server. Ray uses the same TLS communication mechanism between the client and head node as between the workers. <<ray_tls>> generates
+
+[WARNING]
+====
+Ray's TLS implementation requires that the clients have the private key. You should consider Ray's TLS implementation to be akin to "shared secret" encryption, but slower.
+====
+
+Another option, which works the job serverfootnote:[Making this work with the gRPC client is more complicated as Ray's workers need to be able to talk to the headnode and redis server, which breaks when using localhost for binding.], is to leave the endpoints insecure but restrict who can talk to the endpoint. This can be done using ingress controllers, networking rules, or even as an integrated part of a VPN like https://tailscale.com/blog/grafana-auth/[+++tailscales RBAC rules example for Grafana+++]footnote:[One of the authors has friends who work at Tailscale, other solutions are totally OK too.]. Thankfully, Ray's dashboard, and by extension, the job server endpoint, already binds to `localhost/127.0.0.1` and runs on port 8265. For example, if you have your Ray head node on Kubernetes using traefik for ingress you could expose the job API with basic authentication as shown below:
+
+[source, yaml]
+----
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: basicauth
+  namespace: ray-cluster
+spec:
+  basicAuth:
+    secret: basic-auth
+-
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: longhorn-ingress
+  namespace: longhorn-system
+annotations:
+  traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  traefik.ingress.kubernetes.io/router.tls.certresolver: le
+  traefik.ingress.kubernetes.io/router.tls: "true"       
+  kubernetes.io/ingress.class: traefik
+  traefik.ingress.kubernetes.io/router.middlewares: longhorn-system-lhauth@kubernetescrd
+        spec:
+          rules:
+            - host: "mymagicendpoints.pigscanfly.ca"
+              http:
+                paths:
+                - pathType: Prefix
+                  path: "/"
+                  backend:
+                    service:
+                      name: ray-head-svc
+                      port:
+                        number: 8265
+----
+
+Depending on restricting endpoint access has the downside that anyone who can access that computer can submit jobs to your cluster, so it does not work well for shared compute resources.
+
+=== Multi-tenancy on Ray
+
+Out of the box, Ray clusters support multiple running jobs. When all jobs are from the same user and you are not concerned about isolation between jobs, you don't need to consider multi-tenancy implications.
+
+In our opinion, tenant isolation is less developed than other parts of Ray. Ray achieves per-user multi-tenancy security by binding separate workers to a job, reducing the chance of accidental information leakage between separate users. As with Ray's execution environments, your users can have different Python libraries installed, but Ray does not isolate system-level libraries (like, for example, CUDA).
+
+We like to think of tenant isolation in Ray as locks on doors. It's there to keep honest people honest and prevent accidental disclosures. However, named resources, such as named actors, can be called from any other job. This is an intended function of named actors, but as cloudpickle is used frequently throughout Ray, you should consider any named actor as having the _potential_ of allowing a malicious actor on the same cluster to be able to execute arbitrary code in your job.
+
+[WARNING]
+====
+Named resources break Ray's tenant isolation.
+====
+
+While Ray does have some support for multi-tenancy, we instead recommend deploying multi-tenant Kubernetes or YARN clusters.
+
+Multi-tenancy leads nicely into the next problem, of providing credentials for data sources.
+
+=== Credentials for Data Sources
+
+Multi-tenancy complicates credentials for Data Sources as you can not fall back on instance-based roles/profiles. By adding env_vars to your runtime environment you can specify credentials across the entirety of your job. Ideally, you should not hard code these credentials in your source code, but instead, fetch them from something like a Kubernetes secret and propagate the values through.
+
+[source, python]
+----
+ray.init(
+                runtime_env={
+                    "env_vars": {
+                        "AWS_ACCESS_KEY_ID": "key",
+                        "AWS_SECRET_ACCESS_KEY": "secret",
+                    }
+                }
+            )
+----
+
+You can also use this same technique to assign per-function credentials (e.g. if only one actor should have write permissions) by assigning a runtime environment with `.option`. However, in practice keeping track of the separate credentials can become a headache.
+
+=== Permanent vs Ephemeral clusters
+
+When deploying Ray you have to choose between permanent and ephemeral clusters. With permanent clusters, issues of multi-tenancy and ensuring the auto-scaler can scale down (e.g. no hanging resources) are especially important. However, as more enterprises have adopted Kubernetes or other "cloud-native" technologies, we think that ephemeral clusters will increase in appeal.
+
+==== Ephemeral Clusters
+
+Ephemeral clusters have a great number of benefits, two of the most important of which are low cost and not needing multi-tenant clusters. Ephemeral clusters allow for resources to be fully released when the computation is finished. You can often avoid multi-tenancy issues by provisioning ephemeral clusters, which can reduce the operational burden. Ephemeral clusters make experimenting with new versions of Ray and new native libraries comparatively lightweight. This can also serve to prevent the issues that come with forced migrations, where each team can run their own versions of Rayfootnote:[In practice, we recommend only supporting a few versions of Ray as it is quickly evolving.].
+
+There are some drawbacks to ephemeral clusters you should be aware of when making this choice. Two of the clearest drawbacks with ephemeral clusters you may experience are having to wait for the cluster to start up on top of your application start time and not being able to use cache/persistence on the cluster. Starting an ephemeral cluster depends on being able to allocate compute resources, which depending on your environment and budget can take anywhere from seconds to days (during cloud issues). If your computations depend on a large amount of state or data, each time your application is started on a new cluster it starts by reading back a lot of information, which can be quite slow.
+
+==== Permanent Clusters
+
+In addition to cost and multi-tenancy issues, permanent clusters bring some additional drawbacks. Permanent clusters are more likely to accumulate configuration "artifacts" which can be harder to re-create when it comes time to migrate to a new cluster. These clusters can become brittle with time as the underlying hardware ages. This is true even in the cloud, where long-running instances become increasingly likely to experience outages. Long-lived resources in permanent clusters may end up containing information that needs to be purged for regulatory reasons.
+
+Permanent clusters have some important benefits which can be useful. From a developer's point of view it’s the ability to have long-lived actors or other resources. From an operations point of view, permanent clusters do not take the same spin-up time, so if you find yourself needing to do a new task you don't have to wait for a cluster to become available.
+
+.Comparison Chart
+|===
+| |Transient / Ephemeral Clusters |Permanent Clusters
+|Resource Cost |Normally lower unless running, unless workloads that could bin-pack or share resources between users. |Higher when resource leaks prevent auto-scaler from scaling down.
+|Library Isolation |Flexible (including native) |Only venv/conda env level isolation
+|Ability to try new versions of Ray |Yes, may require code changes for new APIs. |Higher overhead
+|Longest Actor Life |Ephemeral (with the cluster) |"Permanent" (excluding cluster crashes/redeploys)
+|Shared Actors |No |Yes
+|Time to launch new application |Potentially long (cloud-dependent) |Varies (if the cluster has spare capacity nearly instant, otherwise cloud-dependent)
+|Data Read Amortization |No (each cluster must-read in any shared data sets) |Possible (if well structured)
+|===
+
+The choice between ephemeral and permanent clusters depends on your use cases and requirements. It is possible that in some deployments a mix of ephemeral clusters and permanent clusters may offer the correct tradeoffs.
+
+=== Monitoring
+
+As the size or number of Ray clusters in your organization grows, monitoring becomes increasingly important. Ray has built-in metrics reporting through both its internal dashboard or Prometheus, although Prometheus is disabled by default.
+
+[NOTE]
+====
+Ray's internal dashboard is installed when you install `ray[default]`, but not just `ray`.
+====
+
+Ray's dashboard is excellent for when you are working by yourself or debugging a production issue. If installed, Ray will print an info log message with a link to the dashboard (e.g. `View the Ray dashboard at http://127.0.0.1:8265[+++http://127.0.0.1:8265+++]`) as well as the `ray.init` result contains `webui_url` which points to the metrics dashboard. However, Ray's dashboard does not have the ability to create alerts and is therefore only good when you know something is wrong. Ray's dashboard UI is being upgraded in Ray 2, the old dashboard is shown at <<old_dashboard>> and new at <<new_dashboard>>.
+
+// AU: please add this image file to images/ch12
+[[old_dashboard]]
+.The old (pre-2.0) dashboard
+image::images/ch12/old_dash.png[]
+
+// AU: please add this image file to images/ch12
+[[new_dashboard]]
+.The new dashboard
+image::images/ch12/new_dash.png[]
+
+As you can see the new dashboard did not evolve organically; rather, it was intentionally designed and contains some new information. Both versions of the dashboard contain information about the executor processes and memory usage. The new dashboard also has a web UI for looking up objects by ID.
+
+[WARNING]
+====
+The dashboard is something that should not be exposed publicly, and the same port is used for the job API.
+====
+
+Ray metrics can also be exported to Prometheus, and by default, Ray will pick a random port for this. You can find the port by looking at `metrics_export_port` in the result of ray.init, or specify a fixed port when launching Ray's head node with `--metrics-export-port=`. Ray's integration with Prometheus not only provides integration with metrics visualization tools, like Grafana (see <<sample-grafana-dashboard-for-ray>>)footnote:[You can find code for this dashboard in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/enterprise/Ray%20metrics-1650932823424.json[+++Github+++]] but importantly adds alerting capabilities when some of the parameters are going outside of predetermined ranges.
+
+[[sample-grafana-dashboard-for-ray]]
+.Sample Grafana dashboard for Ray
+image::images/ch12/fig_12-01.png[]
+
+To obtain exported metrics, Prometheus needs to be configured for which hosts/pods to scrape. For users with a static cluster, this is as simple as providing a host file, but for dynamic users, you https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config[+++have many options+++]. Kubernetes users can use https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/enterprise/ray-pod-monitor.yaml[+++podmonitors+++] to configure Prometheus pod scraping. Because Ray cluster does not have a unifying label for all nodes, here we are using two podmonitors - one for the head node and one for workers.
+
+Non-Kubernetes users can use Prometheus https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config[+++file-based discovery+++] to use files that Ray automatically generates on the head node at `/tmp/ray/prom_metrics_service_discovery.json` you can use for this.
+
+In addition to monitoring Ray itself, you can also instrument your code inside of Ray. You can either add your own metrics to Ray's Prometheus metrics or integrate with Opentelemetry. The correct metrics/instrumentation largely depends on what the rest of your organization uses. Comparing Opentelemetry and Prometheus is beyond the scope of this book.
+
+==== Instrumenting your Code with Ray Metrics
+
+Ray's built-in metrics do an excellent job of reporting cluster health, but we often care about application health. For example, a cluster with low memory usage because all of the jobs are stuck might look good at the cluster level but what we actually care about (serving users, training models, etc.) isn't happening. Thankfully, you can add your own metrics to Ray to monitor your application usage.
+
+[TIP]
+====
+The metrics that you add to Ray metrics are exposed as prometheus metrics just like Ray's built in metrics.
+====
+
+Ray metrics support the https://prometheus.io/docs/concepts/metric_types/#counter[+++Counter+++], https://prometheus.io/docs/concepts/metric_types/#gauge[+++Gauge+++], https://prometheus.io/docs/concepts/metric_types/#histogram[+++Histogram+++] metrics types inside `ray.util.metrics`. These metrics objects are not serializable as they reference C objects. You need to create the metric explicitly before you can record any values in the metric. When creating a new metric you can specify a name, description, and tags. A common tag used is the name of the actor a metric is used inside of, for actor sharding. Since they are not serializable you need to either create and use them inside of actors as in <<ray_counters_actor>> or https://python-patterns.guide/gang-of-four/singleton/[+++use the lazy singleton+++ +++pattern+++] as in <<ray_counters_singleton>>.
+
+// AU: please add example file to repo
+[[ray_counters_actor]]
+.Using Ray Counters inside of an actor
+====
+[source, python]
+----
+include::examples/ray_examples/enterprise/Ray-Enterprise.py[tags=ray_counters_actor]
+----
+====
+
+[[ray_counters_singleton]]
+.Using the global singleton hack to use Ray counters with remote functions
+====
+[source, python]
+----
+include::./examples/ray/enterprise/Ray-Enterprise.py[tags=ray_counters_singleton]
+----
+====
+
+Open Telemetry is available across many languages, including Python. Ray has a basic open-telemetry implementation, but it is not used as widely as its Prometheus plugin.
+
+=== Wrapping custom programs with Ray
+
+One of the powerful features of Python is the ability to launch child processes using the https://realpython.com/python-subprocess/[+++subprocess module+++].footnote:[Special thanks to Michael Behrendt for suggesting the implementation approach discussed in this section.] These processes can be any shell command or any application on your system. This capability allows for a lot of interesting options within Ray implementation. One of the options, which we will show here, is the ability to run any custom docker image as part of Ray executionfootnote:[This will work only for the cloud installations where Ray nodes are using Ray installation on the VM. Reffer to Appendix B. Deploying Ray to see how to do this on IBM Cloud and AWS.]. An example below demonstrates how this can be done:
+
+[source, python]
+----
+ray.init(address='ray://<your IP>:10001')
+
+@ray.remote(num_cpus=6)
+def runDocker(cmd):
+   with open("result.txt", "w") as output:
+       result = subprocess.run(
+           cmd,
+           shell=True,  # pass single string to shell, let it handle.
+           stdout=output,
+           stderr=output
+       )
+
+   print(f"return code {result.returncode}")
+   with open("result.txt", "r") as output:
+       log = output.read()
+   return log
+
+cmd='docker run --rm busybox echo "Hello world"'
+
+result=runDocker.remote(cmd)
+print(f"result: {ray.get(result)}")
+----
+
+This code contains a simple remote function that executes an external command and returns the execution result. The main passes to it a simple docker run command and then prints the invocation result.
+
+This approach allows you to execute any existing docker image as part of Ray remote function execution, which in turn allows polyglot Ray implementation or even executing Python with specific library requirements without the necessity of creating a virtual environment for this remote function run. It also allows for easy inclusion of pre-built images in the Ray execution.
+
+Running Docker images is just one of the useful applications of usage of subprocess inside Ray. In general any application installed on the Ray node, can be invoked using this approach.
+
+=== Conclusion
+
+Although Ray was initially created in a research lab, you can start bringing Ray to the mainstream enterprise computing infrastructure with the implementation enchancements described here. Specifically, be sure to:
+
+* carefully evaluate the security and multi-tenancy issues that this can create
+* Be mindful ofintegration with CI/CD and observability tools.
+* decide whether you need permanent or ephemeral Ray clusters.
+
+These considerations will change based on your enterprise environment and specific use cases for Ray usage.

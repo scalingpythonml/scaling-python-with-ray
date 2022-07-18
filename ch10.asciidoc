@@ -1,0 +1,469 @@
+[[ch10]]
+== How Ray powers Machine Learning
+
+You now have a solid grasp of everything in Ray needed to get your data ready to train ML models. In this chapter, you will learn how to use the following popular Ray libraries - https://scikit-learn.org/stable/[+++Scikit-learn+++], https://xgboost.readthedocs.io/en/stable/[+++XGBoost+++], and https://pytorch.org/[+++Pytorch+++]. This chapter is not intended to introduce these libraries, so if you aren't familiar with any of them you should pick one (and we suggest Scikit-learn) to read up on first. Even for those familiar with these libraries, refreshing your memory by consulting your favorite tools' documentation will be beneficial. This chapter is about how Ray is used to power machine learning, rather than a tutorial on machine learning.
+
+[NOTE]
+====
+If you are interested in going deeper into machine learning with Ray, "Learning Ray" is a full-length book focused on machine learning with Ray where you can expand your ML skillset.
+====
+
+Ray has two built-in libraries for machine learning. You will also learn how to use Ray’s Reinforcement learning library - https://docs.ray.io/en/master/rllib/index.html[+++RLlIB+++] with Tensorflow and generic Hyperparameter Tuning - https://docs.ray.io/en/master/tune/index.html[+++Tune+++] that can be used with any ML library.
+
+=== Using Scikit-Learn with Ray 
+
+Scikit-Learn is one of the most widely used tools in the ML community, offering dozens of easy-to-use machine learning algorithms. It was initially developed by David Cournapeau as a Google Summer of Code project in 2007. It provides a wide range of supervised and unsupervised learning algorithms via a consistent interface.
+
+Scikit-learn's ML algorithms include:
+
+* Clustering: for grouping unlabeled data such as KMeans.
+* Supervised Models: a large amount, including generalized linear models, discriminant analysis, naive Bayes, lazy methods, neural networks, support vector machines, and decision trees.
+* Ensemble methods: for combining the predictions of multiple supervised models.
+
+Scikit-Learn also contains important tooling to support machine learning:
+
+* Cross-Validation: for estimating the performance of supervised models on unseen data.
+* Datasets: for test datasets and for generating datasets with specific properties for investigating model behavior.
+* Dimensionality Reduction: for reducing the number of attributes in data for summarization, visualization, and feature selection such as Principal component analysis.
+* Feature extraction: for defining attributes in image and text data.
+* Feature selection: for identifying meaningful attributes from which to create supervised models.
+* Parameter Tuning: for getting the most out of supervised models.
+* Manifold Learning: For summarizing and depicting complex multi-dimensional data.
+
+Although you can use most of the Scikit-Learn APIs directly with Ray for tuning the model’s hyperparameters, things get a bit more involved when you want to parallelize execution.
+
+If we take the basic code used for the creation of the model in Chapter 7, and try to optimize parameters for the decision tree, our code will look as in <<skex>>:
+
+[[skex]]
+.Using Scikit-Learn to build wine quality model
+====
+[source, python]
+----
+include::examples/ray_examples/ml/sklearn/wine-quality.py[tags=skex]
+----
+====
+
+Note that here, in the _GridSearchCV_footnote:[In this example we are using GridSearchCV, which implements an exhaustive search. Although this works for this simple example, Scikit-learn currently provides a new library https://github.com/ray-project/tune-sklearn[+++Tune-sklearn+++], that provides more powerful https://medium.com/distributed-computing-with-ray/how-to-speed-up-scikit-learn-model-training-aaf17e2d1e1[+++tune algorithms+++] providing a significant tuning speed up. This said, the same joblib backend works for these algorithms the same way.], we are using parameter n_jobs=-1 which instructs the implementation to run model evaluation in parallel using all available processors. Running model evaluation in parallel, even on a single machine, can result in an order of magnitude performance improvement.
+
+Unfortunately, this does not work out of the box with Ray clusters. GridSearchCV, and many other Scikit-Learn algorithms, use https://joblib.readthedocs.io/en/latest/[+++Joblib+++] for parallel execution. Joblib does not work with Ray out of the box.
+
+Ray https://docs.ray.io/en/master/ray-more-libs/joblib.html[+++implements+++] a backend for joblib with Ray actors pool (see chapter 4) instead of local processes. This allows you to simply change the joblib backend to switch scikit learn from using local processes to Ray.
+
+Concretely, to make the above code <<skex>> run using Rayfootnote:[Complete code for this implementation can be found on https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/sklearn/wine-quality-ray.py[+++github+++]] you need to register Ray backend for joblib and use it for the _GridSearchCV_, execution as in <<skex_joblib>>.
+
+[[skex_joblib]]
+.Using Ray joblib backend with Scikit-Learn to build wine quality model
+====
+[source, python]
+----
+include::examples/ray_examples/ml/sklearn/wine-quality.py[tags=skex]
+----
+====
+
+.Using the Ray joblib backend for Scikit-Learn
+****
+This code works, but if we compare the execution time for the default and Ray backends, you can see that using the Ray backend is slower in our examplefootnote:[During testing we saw 8.2s with Joblib while with Ray we saw 25.1 s]. see that execution with default backend. To understand this difference, you need to return back to ch3, which explains an overhead that is incurred when using Ray’s remote functions. This result basically reemphasizes that Ray remote execution is advantageous only when remote execution takes enough time to offset such an overhead, which is not the case for this toy example.
+
+The advantage of Ray’s implementation starts to grow as the sizes of the model, data, and cluster grow.
+****
+
+=== Using boosting algorithms with Ray
+
+Boosting algorithms are well suited to parallel computing as they train multiple models. You can train each sub-model independently and then train another model on how to combine the results. The two most popular boosting libraries today are
+
+* XGBoost - an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable. It implements machine learning algorithms under the https://en.wikipedia.org/wiki/Gradient_boosting[+++Gradient Boosting+++] framework. XGBoost provides a parallel tree boosting (also known as GBDT, GBM) that solves many data science problems in a fast and accurate way. The same code runs on many distributed environments (Hadoop, SGE, MPI) and can solve problems beyond billions of examples.
+* https://lightgbm.readthedocs.io/en/latest/[+++LightGBM+++] - a fast, distributed, high-performance gradient https://courses.analyticsvidhya.com/courses/ensemble-learning-and-ensemble-learning-techniques?utm_source=blog&utm_medium=which-algorithm-takes-the-crown-light-gbm-vs-xgboost[+++boosting+++] framework based on a decision tree algorithm, used for ranking, classification, and many other machine learning tasks.
+
+We will compare how Ray parallelizes training with XGBoost and LightGBM, but comparing the details of the libraries is beyond the scope of this book. If you're interested in the difference between the libraries, a good comparison is found in this great https://neptune.ai/blog/xgboost-vs-lightgbm[+++blog post+++].
+
+==== Using XGBoost
+
+Continuing with our wine quality example, we build a model using XGBoost and the code to do so is presented in <<xgboost>>.
+
+[[xgboost]]
+.Using XGBoost to build wine quality model
+====
+[source, python]
+----
+include::examples/ray_examples/ml/boosting/wine-quality-xgboost.py[tags=train]
+----
+====
+
+One of the reasons XGBoost is so performant is that it uses https://www.openmp.org/[+++openMP+++] to create tree’s branches independently, which does not directly support Ray. Ray integrates with XGBoost by providing an xgboost-ray library that replaces OpenMP with Ray actor pools. You can use this library either with XGBoost or scikit-learn APIs. In the latter case, the library provides a drop-in replacement for the following estimators:
+
+* _RayXGBClassifier_
+* _RayXGRegressor_
+* _RayXGBRFClassifier_
+* _RayXGBRFRegressor_
+* _RayXGBRanker_
+
+It also provides RayParams that allows you to explicitly define the execution parameters for Ray. Using this library we can modify our code <<xgboost>> to make it work with Ray as follows in <<xgboost_ray>>.footnote:[The full code for this implementation can be found on https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/boosting/wine-quality-xgboost_ray.py[+++github+++].]
+
+[[xgboost_ray]]
+.Using XGBoost Ray library to build wine quality model
+====
+[source, python]
+----
+include::examples/ray_examples/ml/boosting/wine-quality-xgboost_ray.py[tags=ray]
+----
+====
+
+Here we used rayParams to specify the size of Ray’s actor pool used for parallelization. Alternatively, you can use the _n_jobs_ parameter in _RayXGBClassifier_ to achieve the same.
+
+==== Using LightGBM
+
+Building wine quality model using LightGBM is presented in <<lightGBM>>.
+
+[[lightGBM]]
+.Using LightGBM to build wine quality model
+====
+[source, python]
+----
+include::examples/ray_examples/ml/boosting/wine-quality-lightgbm.py[tags=train]
+----
+====
+
+Similar to XGBoost, LightGBM is using OpenMP for parallelization. As a result, Ray offers the https://docs.ray.io/en/master/ray-more-libs/lightgbm-ray.html[+++Distributed LightGBM on Ray+++] library, which implements parallelization using Ray’s actor pool. Similar to the xgboost-ray library, this library supports both native and scikit-learn APIs. In the latter case the library implements the following estimators:
+
+* RayLGBMClassifier
+* RayLGBMRegressor
+
+As with XGBoost, RayParams is provided, allowing you to define execution parameters for Ray. Using this library we can modify our code <<lightGBM>> to make it work with Ray as in <<lightGBM_ray>>.footnote:[The full code for this implementation can be found on https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/boosting/wine-quality-lightgbm_ray.py[+++github+++].]
+
+[[lightGBM_ray]]
+.Using LightGBM Ray library to build wine quality model
+====
+[source, python]
+----
+include::examples/ray_examples/ml/boosting/wine-quality-lightgbm_ray.py[tags=ray]
+----
+====
+
+Here we used rayParams to specify the size of Ray’s actor pool used for parallelization. Alternatively, you can use the _n_jobs_ parameter in _RayLGBMClassifier_ to achieve the same.
+
+.Using the Ray boosting libraries
+****
+This code works, but if we compare the execution time using OpenMP and Ray Actor pool, we will see that usage of OpenMP for our toy example is much faster.footnote:[In our testing, for XGBoost it is 0.15 vs 14.4 sec and for LightGBM it is 0.24 vs 12.4 sec.] Similar to the case of Scikit-learn this is due to the overhead of remoting and changes as data & model sizes grow.
+****
+
+=== Using PyTorch with Ray
+
+Another very popular machine learning framework is https://github.com/pytorch/pytorch[+++PyTorch+++], an open-source Python library for deep learning developed and maintained by Facebook.
+
+PyTorch is simple and flexible, making it a favorite for many academics and researchers in the development of new deep learning models and applications. Many extensions for specific applications (such as text, computer vision, and audio data) have been implemented for PyTorch. There are also a lot of pre-trained models that you can use directly. If you are not familiar with PyTorch, take a look at this https://machinelearningmastery.com/pytorch-tutorial-develop-deep-learning-models/[+++tutorial+++] for an introduction to its structure, capabilities, and usage for solving different problems.
+
+We will continue with our wine quality problem and show how to use PyTorch to build a Multilayer Perceptrons (MLP) model for predicting wine quality. To do this you need to start from creating a custom PyTorch https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset[+++Dataset class+++] that can be extended and customized to load your dataset. For our wine quality example the custom dataset class looks as follows in <<torch_data>>.
+
+// AU: in the following `include`, I changed the tag `data` to `dataset`. Is this correct?
+[[torch_data]]
+.PyTorch dataset class for loading wine quality data
+====
+[source, python]
+----
+include::examples/ray_examples/ml/torch/wine-quality_torch.py[tags=dataset]
+----
+====
+
+Note that here, in addition to the minimum requirements, we have implemented an additional method get_splits, that splits an original dataset into 2: one for training and one for testing.
+
+Once you have your data class defined, you can use PyTorch to make a model. To define a model in PyTorch you extend the base PyTorch https://pytorch.org/docs/stable/nn.html#module[+++Module class+++]. Model class for our purposes is presented in <<torch_model>>.
+
+[[torch_model]]
+.PyTorch model class for wine quality
+====
+[source, python]
+----
+include::examples/ray_examples/ml/torch/wine-quality_torch.py[tags=model]
+----
+====
+
+This class constructor builds the model - defines the layers of the model and their connectivity and the forward() method defines how to forward propagate input through the model.
+
+With these two classes in place, the overall codefootnote:[The complete code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/torch/wine-quality_torch.py[+++github+++].] looks like <<torch_train>>.
+
+[[torch_train]]
+.PyTorch implementation of wine quality model building
+====
+[source, python]
+----
+include::examples/ray_examples/ml/torch/wine-quality_torch.py[tags=train]
+----
+====
+
+The code in <<torch_train>> works, but Ray is integrated with https://towardsdatascience.com/from-pytorch-to-pytorch-lightning-a-gentle-introduction-b371b7caaf09[+++Lightning PyTorch+++], not PyTorch. Lightning structures your PyTorch code so it can abstract the details of training. This makes AI research scalable and fast to iterate on.
+
+To convert our PyTorch code <<torch_train>> to lightning PyTorch, we first need to modify the model <<torch_model>>. In Lightning PyTorch it needs to be derived from https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html[+++lightning_module+++] not module, which means that we need to add 2 methods to our model (<<ltorch_add>>).
+
+[[ltorch_add]]
+.Lightning PyTorch model additional functions for wine quality
+====
+[source, python]
+----
+include::examples/ray_examples/ml/torch/wine-quality_ltorch.py[tags=add]
+----
+====
+
+Here the `training_step` method defines a single step, while configure_optimized defines which optimizer to use. When you compare this to code <<torch_model>> you will notice that some code from there is just moved into these two methods (here instead of _BCELoss_ optimizer we are using _Adam_ optimizer). With this updated model class, the model training looks like <<ltorch_train>>.footnote:[The full code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/torch/wine-quality_ltorch.py[+++github+++].]
+
+[[ltorch_train]]
+.Lightning PyTorch implementation of wine quality model building
+====
+[source, python]
+----
+include::examples/ray_examples/ml/torch/wine-quality_ltorch.py[tags=train]
+----
+====
+
+Note that unlike PyTorch code <<torch_train>>, where training is implemented programmatically, Lightning PyTorch introduces a trainer class, which internally implements a trainer loop. This approach allows all required optimization to be in the training loop.
+
+Both PyTorch and PyTorch Lightning are using joblib to distributed training through the built-in https://pytorch.org/tutorials/intermediate/ddp_tutorial.html[+++ddp_cpu+++] backend or more generally https://github.com/horovod/horovod[+++Horovod+++]. As with other libraries, to allow distributed PyTorch Lightning on Ray, Ray has a library https://docs.ray.io/en/master/ray-more-libs/ray-lightning.html[+++Distributed PyTorch Lightning Training+++] that adds new PyTorch Lightning plugins for distributed training using Ray. These PyTorch Lightning Plugins on Ray allow you to quickly and easily parallelize training while still getting all the benefits of PyTorch Lightning and using your desired training protocol, either ddp_cpu or https://github.com/horovod/horovod[+++Horovod+++].
+
+Once you add the plugins to your PyTorch Lightning Trainer, you can configure them to parallelize training to all the cores in your laptop, or across a massive multi-node, multi-GPU cluster with no additional code changes. This library also comes with integration with https://pythonrepo.com/ray-project/ray_lightning/blob/main/tune.io[+++Ray Tune+++] so you can perform distributed hyperparameter tuning experiments.
+
+The RayPlugin class provides Distributed Data-Parallel (DDP) training on a Ray cluster. PyTorch DDP is used as the distributed training protocol by PyTorch, and Ray is used in this case to launch and manage the training worker processes. The base code using this plugin is shown in <<ltorch_train>>.footnote:[The full code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/torch/wine-quality_ltorch_ray.py[+++github+++].]
+
+[[ltorch_train]]
+.Enabling Lightning PyTorch implementation of wine quality model building to run on Ray
+====
+[source, python]
+----
+include::examples/ray_examples/ml/torch/wine-quality_ltorch_ray.py[tags=train]
+----
+====
+
+The two additional plugins included in the library include:
+
+* HorovodRayPlugin, which integrates with https://github.com/horovod/horovod[+++Horovod+++] as the distributed training protocol.
+* RayShardedPlugin, which integrates with https://github.com/facebookresearch/fairscale[+++FairScale+++] to provide sharded DDP training on a Ray cluster. With sharded training, you can leverage the scalability of data-parallel training while drastically reducing memory usage when training large models.
+
+.Usage of the Distributed PyTorch Lightning Training
+****
+This code works, but if we compare the execution time using all three implementations, we will see that usage of PyTorch for our toy example takes 16.6 sec, Lightning PyTorch takes 8.2 sec and distributed Lightning Pytorch with Ray takes 25.2 sec. Similar to the previous two cases – Scikit-learn and Boosting algorithms – this is due to the overhead of remoting.
+****
+
+=== Reinforcement Learning with Ray
+
+Ray was initially created as a platform for Reinforcement Learning(RL), which is one of the hottest research topics in the field of modern Artificial Intelligence and its popularity is only growing. RL is a type of machine learning technique that enables an agent to learn in an interactive environment by trial and error using feedback from its own actions and experiences.
+
+[[different-types-of-machine-learning]]
+.Different types of machine learning
+image::images/ch10/fig_10-01.png[]
+
+Both supervised and reinforcement learning create the mapping between input and output, but unlike supervised learning which is using a set of known inputs and output for training, reinforcement learning uses rewards and punishments as signals for positive and negative behavior. Both unsupervised and reinforcement learning leverage experiment data, but they have different goals. While in unsupervised learning we are finding similarities and differences between data points, in the case of reinforcement learning we are trying to find a suitable action model that would maximize the total cumulative reward - and improve the model.
+
+[[reinforcement-model-implementation]]
+.Reinforcement model implementation
+image::images/ch10/fig_10-02.png[]
+
+The key components of an RL implementation are (<<reinforcement-model-implementation>>):
+
+. Environment - Physical world in which the agent operates
+. State - Current state of agent
+. Reward - Feedback to the agent from the environment
+. Policy - Method to map agent’s state to actions
+. Value - Future reward that an agent would receive by taking an action in a particular state
+
+Reinforcement learning is a huge topic and its details are beyond the scope of this book (we are just trying to explain how to start using the library with a simple example), but if you are interested in learning more about it, this https://towardsdatascience.com/reinforcement-learning-101-e24b50e1d292[+++blog post+++] is an excellent starting point.
+
+Ray’s RLlib is a library for RL, which allows for production-level, highly distributed RL workloads while providing unified and simple APIs for a large variety of applications for different industries.
+
+It supports both https://en.wikipedia.org/wiki/Model-free_(reinforcement_learning)[+++model-free+++] and https://bair.berkeley.edu/blog/2019/12/12/mbpo/[+++model-based+++] reinforcement learning.
+
+[[rllib-components]]
+.RLlib components
+image::images/ch10/fig_10-03.png[]
+
+As shown in <<rllib-components>>, RLlib is built on top of Ray and offers off-the-shelf, highly distributed algorithms, policies, loss functions, and default models.
+
+*Policy* encapsulates the core numerical components of RL algorithms. A policy includes a policy model that determines actions based on environment changes and a loss function defining the result of the action based on the post-processed environment. Depending on the environment, RL can have a single agent and property, a single policy for multiple agents, or multiple policies, each controlling one or more agents.
+
+Everything agents interact with is called an *environment*. The environment is the outside world and it comprises everything outside the agent.
+
+.Environments types
+****
+There are different types of environment:
+
+* *Deterministic environment* is an environment where the outcome is known based on the current state.
+* A *stochastic environment* is an environment where the outcome is uncertain based on the current state.
+* A *fully observable environment* is an environment where an agent can determine the state of the system at all times.
+* A *partially observable environment* is an environment where an agent cannot determine the state of the system at all times.
+* A *discrete environment* is an environment where only a finite state of actions is available for moving from one state to another.
+* A *continuous environment* is an environment where there is an infinite state of actions available for moving from one state to another..
+* *Episodic and non-episodic environment.* In an episodic environment, an agent's current action will not affect a future action, whereas, in a non-episodic environment, an agent's current action will affect future action.
+* *Single and multi-agent environment. A* single-agent environment has only a single agent and a multi-agent environment has multiple agents.
+****
+
+Given an environment and policy, policy evaluation is done by the *worker*. RLlib provides a https://github.com/ray-project/ray/blob/master/rllib/evaluation/rollout_worker.py[+++RolloutWorker+++] class that is used in most RLlib algorithms.
+
+At a high level, RLlib provides https://docs.ray.io/en/latest/rllib-concepts.html#trainers[*+++trainer+++* +++classes+++] that hold a policy for environment interaction. Through the trainer interface, the policy can be trained, checkpointed, or an action computed. In multi-agent training, the trainer manages the querying and optimization of multiple policies at once. The trainer classes coordinate the distributed workflow of running rollouts and optimizing policies. They do this by leveraging Ray https://docs.ray.io/en/latest/iter.html[+++parallel iterators+++].
+
+Beyond environments defined in Python, Ray supports batch training on https://docs.ray.io/en/latest/rllib-offline.html[+++offline datasets+++] through *input readers*. This is an important use case for RL when it's not possible to run traditional training and rollout in a physical environment (like a chemical plant or assembly line) and a suitable simulator doesn't exist. In this approach, data for past activity is used to train a policy.
+
+From single processes to large clusters, all data interchange in RLlib uses https://github.com/ray-project/ray/blob/master/rllib/policy/sample_batch.py[+++sample batches+++]. Sample batches encode one or more fragments of data. Typically, RLlib collects batches of size _rollout_fragment_length_ from rollout workers and concatenates one or more of these batches into a batch of size _train_batch_size_ that is the input to SGD (stochastic gradient descent).
+
+The main features of RLlib are:
+
+* Support for the most popular deep-learning frameworks including PyTorch and Tensorflow
+* Implementation of highly distributed learning, RLlib algorithms (https://openai.com/blog/openai-baselines-ppo/[+++PPO+++] or https://arxiv.org/pdf/1802.01561.pdf[+++Impala+++] ) allow you to set the num_workers config parameter, such that your workloads can run on 100s of CPUs/nodes thus parallelizing and speeding up learning.
+* Support for https://towardsdatascience.com/ive-been-thinking-about-multi-agent-reinforcement-learning-marl-and-you-probably-should-be-too-8f1e241606ac[+++Multi-agent RL+++] allows for training your agents supporting any of the following strategies:
+** Cooperative with https://github.com/ray-project/ray/blob/master/rllib/examples/centralized_critic.py[+++shared+++] or https://github.com/ray-project/ray/blob/master/rllib/examples/two_step_game.py[+++separate+++] policies and/or value functions.
+** Adversarial scenarios using https://github.com/ray-project/ray/blob/master/rllib/examples/self_play_with_open_spiel.py[+++self-play+++] and https://github.com/ray-project/ray/blob/master/rllib/examples/self_play_league_based_with_open_spiel.py[+++league-based training+++].
+** https://github.com/ray-project/ray/blob/master/rllib/examples/multi_agent_independent_learning.py[+++Independent learning+++] of neutral/co-existing agents.
+* Support APIs for an external pluggable simulators environment which comes with a pluggable, off-the-shelve https://github.com/ray-project/ray/blob/master/rllib/examples/serving/cartpole_client.py[+++client+++]/ https://github.com/ray-project/ray/blob/master/rllib/examples/serving/cartpole_server.py[+++server+++] setup that allows you to run 100s of independent simulators on the “outside” connecting to a central RLlib Policy-Server that learns and serves actions.
+
+Additionally, RLlib provides simple APIs to customize all aspects of your training and experimental workflows. For example, you may code your own https://docs.ray.io/en/master/rllib-env.html#configuring-environments[+++environments+++] in python using https://gym.openai.com/[+++openAI’s gym+++] or https://deepmind.com/research/open-source/openspiel[+++DeepMind’s OpenSpiel+++], provide custom https://docs.ray.io/en/master/rllib-models.html#tensorflow-models[+++TensorFlow/Keras+++] or, https://docs.ray.io/en/master/rllib-models.html#torch-models[+++Torch models+++], and write your own https://docs.ray.io/en/master/rllib-concepts.html#policies[+++policy- and loss definitions+++], or define custom https://docs.ray.io/en/master/rllib-training.htmlexploration-api[+++exploratory behavior+++].
+
+Simple code for implementing RL training to address the inverted pendulum (https://towardsdatascience.com/reinforcement-learning-concept-on-cart-pole-with-dqn-799105ca670[+++CartPole+++]) problem (the environment exists in https://gym.openai.com/envs/CartPole-v1/#id1[+++OpenApi gym+++]) is shown in <<rl_train>>.footnote:[Complete code for this implementation is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/rl/simpleRL.py[+++github+++].]
+
+[[rl_train]]
+.Cart pole reinforcement learning
+====
+[source, python]
+----
+include::examples/ray_examples/ml/rl/simpleRL.py[tags=code]
+----
+====
+
+The code <<rl_train>> starts by creating a configuration for a trainer. The configuration defines an environment (here we use an existing https://gym.openai.com/envs/CartPole-v1/#id1[+++OpenApi gym+++] environment, so we can just use its name), the number of workers (we use 4), framework (we use Tensorflow 2), model, train batch size, and additional execution parameters. This configuration is used for the creation of the trainer. We then execute several training iterations and display results. That's all it takes to implement a simple RL.
+
+You can easily extend this simple example by creating your specific https://towardsdatascience.com/ray-and-rllib-for-fast-and-parallel-reinforcement-learning-6d31ee21c96c[+++environment+++] or introducing your own https://medium.com/distributed-computing-with-ray/model-based-reinforcement-learning-with-ray-rllib-73f47df33839[+++algorithms+++].
+
+Numerous examples of Ray RLlIB usage are described https://www.anyscale.com/blog/best-reinforcement-learning-talks-from-ray-summit-2021[+++here+++].
+
+=== Hyperparameter tuning with Ray
+
+When creating a machine learning model you are often faced with a variety of choices, from the type of model to feature selection techniques, and so on. A natural extension of machine learning is to use similar techniques to find the right values (or parameters) for the choices in building our model. Parameters that define the model architecture are referred to as *hyperparameters* and the process of searching for the ideal model architecture is referred to as _hyperparameter tuning_. Unlike the model parameters that specify how to transform the input data into the desired output, the hyperparameters define how to structure the model.
+
+Like with boosting algorithms, hyperparameter tuning is especially well suited to parallelization as it involves training and comparing many models. Depending on the search technique, training these separate models can be an "embarrassingly parallel" problem as there is little to no communication needed between them.
+
+.Popular Hyperparameter tuning approaches
+****
+The most popular hyperparameter tuning methods are:
+
+* *Grid search*. This is the most basic one. In this case, a model is built for each possible combination of provided hyperparameter values. Every model is evaluated for given criteria and the one producing the best result is selected.
+* *Random search*. Unlike Grid Search, which uses a discrete set of hyperparameter values, Random search leverages a statistical distribution for each hyperparameter from which values may be randomly sampled. This approach defines the number of iterations for search and for each iteration hyperparameter values are picked by sampling-defined statistical distribution
+* *Bayesian optimization*. In the above methods, individual experiments are building models for different parameter's hyperparameter values. The advantage of that approach is that such experiments are embarrassingly parallel and can be executed very efficiently. The disadvantage of such an approach is that it does not take advantage of information from previous experiments. Bayesian optimization belongs to a class of sequential model-based optimization (SMBO) algorithms that use the results of the previous iteration to improve the sampling method of the next iteration. This approach builds a probability model of the objective function and uses it to select the most promising hyperparameters to evaluate.
+****
+
+Some examples of hyperparameters include:
+
+* The degree of the polynomial feature that should be used for the linear model.
+* Maximum depth allowed for decision tree.
+* The minimum number of samples required at a leaf node in a decision tree.
+* The number of neurons for a neural network layer.
+* The number of layers for a neural network.
+* Learning rate for gradient descent.
+
+https://docs.ray.io/en/master/tune/index.html[+++Ray Tune+++] is the Ray-based native library for hyperparameter tuning. The main features of Tune are:
+
+* It provides distributed asynchronous optimization out of the box leveraging Ray.
+* The same code can be scaled from a single machine to a large distributed cluster.
+* It offers state-of-the-art algorithms including (but not limited to) https://ray.readthedocs.io/en/latest/tune-schedulers.html#asynchronous-hyperband[+++ASHA+++], https://ray.readthedocs.io/en/latest/tune-searchalg.html#bohb[+++BOHB+++], and https://ray.readthedocs.io/en/latest/tune-schedulers.html#population-based-training-pbt[+++Population-Based Training+++].
+* It integrates with https://www.tensorflow.org/get_started/summaries_and_tensorboard[+++TensorBoard+++] or https://github.com/mlflow/mlflow[+++MLFlow+++] to visualize tuning results.
+* It integrates with many optimization libraries such as http://ax.dev/[+++Ax/Botorch+++], https://github.com/hyperopt/hyperopt[+++HyperOpt+++], and https://github.com/fmfn/BayesianOptimization[+++Bayesian Optimization+++] and enables their transparently scaling.
+* It supports many machine learning frameworks, including PyTorch, TensorFlow, XGBoost, LightGBM, and Keras.
+
+The main components of Tune are:
+
+* *Trainable* - a training function, with an objective function. Tune offers two interface APIs for trainable: functional and class.
+* *Search space* - valid values for your hyperparameters and can specify how these values are sampled (e.g. from a uniform distribution or a normal distribution). Tune offers various functions to define search spaces and sampling methods.
+* *Search algorithm* - an algorithm used for the optimization of hyperparameters. Tune has SearchAlgorithms that integrate with many popular optimization libraries, such as https://docs.ray.io/en/latest/tune/api_docs/suggestion.html#nevergrad[+++Nevergrad+++] and https://docs.ray.io/en/latest/tune/api_docs/suggestion.html#tune-hyperopt[+++HyperOpt+++]. Tune automatically converts the provided search space into the search spaces the search algorithms/underlying library expect.
+* *Trial* - execution or run of a logical representation of a single hyperparameter configuration. Each trial is associated with an instance of a Trainable. And a collection of trials comprise an experiment. Tune uses Ray Actors as worker node's processes to run multiple trials in parallel.
+* *Experiment Analysis* - an object, returned by Tune, which has methods that can be used for analyzing your training. It can be integrated with TensorBoard and MLFlow for results visualization.
+
+To show how to use Tune, let's optimize our PyTorch implementation of wine quality model building <<torch_model>>. We will try to optimize 2 parameters of the optimizer used to build the model - _lr_ and _momentum_.
+
+.Meaning of the parameters we are optimizing
+****
+_Lr_ stands for https://machinelearningmastery.com/understand-the-dynamics-of-learning-rate-on-deep-learning-neural-networks/[+++learning rate+++]. Deep learning neural networks are trained using the stochastic gradient descent (SGD) algorithm. This algorithm estimates the error gradient for the current state of the model using examples from the training dataset, then updates the weights of the model using the back-propagation of errors algorithm, referred to as simply backpropagation.
+
+The amount that the weights are updated during training is referred to as the step size or the “learning rate.”
+
+_Momentum_ is a https://machinelearningmastery.com/learning-rate-for-deep-learning-neural-networks/[+++hyperparameter+++] of the SGD algorithm. It is an exponentially weighted average of the prior updates to the weight that can be included when the weights are updated. This change to stochastic gradient descent is called “momentum” and adds inertia to the update procedure, causing many past updates in one direction to continue in that direction in the future.
+****
+
+First we restructure our code (<<torch_train>>) to introduce 3 additional functions (<<tune_additions>>).footnote:[Complete code for this implementation is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/tune/wine-quality_tune.py[+++github+++].]
+
+[[tune_additions]]
+.Implementing support functions for Pytorch winequality model implementation
+====
+[source, python]
+----
+include::examples/ray_examples/ml/tune/wine-quality_tune.py[tags=new]
+----
+====
+
+In the code above we have introduced 3 supporting functions:
+
+* _Model_train_ - this function encapsulates model training
+* _Model_test_ - this function that encapsulates model quality evaluation
+* Train_winequality - this function implements all steps for model training and reporting them to Tune. This allows Tune to make decisions in the middle of training.
+
+With these three functions in place, integration with Tune is very straightforward (<<tune_additions>>):
+
+[[tune_additions]]
+.Integration of model building with Tune
+====
+[source, python]
+----
+include::examples/ray_examples/ml/tune/wine-quality_tune.py[tags=int]
+----
+====
+
+After loading the dataset, the code defines a search space - space for possible hypermarameters and invokes tuning using Tune run method. The parameters here are:
+
+* Callable defining a training function (_train_winequaliy_ in our case)
+* _Num_samples_ - maximum number of runs for Tune
+* Scheduler - here we are using use https://docs.ray.io/en/latest/tune/api_docs/schedulers.html#tune-scheduler-hyperband[+++ASHA+++], a scalable algorithm for https://blog.ml.cmu.edu/2018/12/12/massively-parallel-hyperparameter-optimization/[+++principled early stopping+++]. To make optimization process more efficient, ASHA scheduler terminates trials that are less promising and allocates more time and resources to more promising trials.
+* _Config_ - contains the search space for the algorithm
+
+Running of the code above produces the following result (<<tune_result>>):
+
+[[tune_result]]
+.Tuning model result
+[source]
+----
++-------------------------------+------------+-----------------+-------------+------------+----------+--------+------------------+
+
+| Trial name | status | loc | lr | momentum | acc | iter | total time (s) |
+
+|-------------------------------+------------+-----------------+-------------+------------+----------+--------+------------------|
+
+| train_winequality_8f6ab_00000 | TERMINATED | 127.0.0.1:29952 | 2.84411e-07 | 0.170684 | 0.513258 | 50 | 4.6005 |
+
+| train_winequality_8f6ab_00001 | TERMINATED | 127.0.0.1:29943 | 4.39914e-10 | 0.562412 | 0.530303 | 1 | 0.0829589 |
+
+| train_winequality_8f6ab_00002 | TERMINATED | 127.0.0.1:29944 | 5.72621e-06 | 0.734167 | 0.587121 | 16 | 1.2244 |
+
+| train_winequality_8f6ab_00003 | TERMINATED | 127.0.0.1:29947 | 0.104523 | 0.316632 | 0.729167 | 50 | 3.83347 |
+
+……………………………..
+
+| train_winequality_8f6ab_00037 | TERMINATED | 127.0.0.1:30049 | 5.87006e-09 | 0.566372 | 0.625 | 4 | 2.41358 |
+
+|| train_winequality_8f6ab_00043 | TERMINATED | 127.0.0.1:30069 | 0.000225694 | 0.567915 | 0.50947 | 1 | 0.130516 |
+
+| train_winequality_8f6ab_00044 | TERMINATED | 127.0.0.1:30052 | 2.01545e-07 | 0.525888 | 0.405303 | 1 | 0.208055 |
+
+| train_winequality_8f6ab_00045 | TERMINATED | 127.0.0.1:30054 | 1.84873e-07 | 0.150054 | 0.583333 | 4 | 2.47224 |
+
+| train_winequality_8f6ab_00046 | TERMINATED | 127.0.0.1:30070 | 0.136969 | 0.567186 | 0.742424 | 50 | 4.52821 |
+
+| train_winequality_8f6ab_00047 | TERMINATED | 127.0.0.1:30071 | 1.29718e-07 | 0.659875 | 0.443182 | 1 | 0.0634422 |
+
+| train_winequality_8f6ab_00048 | TERMINATED | 127.0.0.1:30072 | 0.00295002 | 0.349696 | 0.564394 | 1 | 0.107348 |
+
+| train_winequality_8f6ab_00049 | TERMINATED | 127.0.0.1:30080 | 0.363802 | 0.290659 | 0.725379 | 4 | 0.227807 |
+
++-------------------------------+------------+-----------------+-------------+------------+----------+--------+------------------+
+----
+
+As you can see from the <<tune_result>> although we have defined 50 iterations for model search, using ASHA significantly improves performance because ASHA uses significantly fewer runs on average (in this example more than 50% only used 1 iteration).
+
+=== Conclusion
+
+In this chapter you have learned how Ray constructs are leveraged for scaling execution of the different ML libraries (Scitit-Learn, XGBoost, LightGBM and LightPytorch) using the full capabilities of multi-machine Ray clusters.
+
+We showed you some of the very simple examples of porting your existing ML code to Ray, as well as some of the internals of how Ray extends ML libraries to scale. We also showed very simple examples of using Ray-specific implementations of Reinforcement learning and Hyperparameter tuning.
+
+We hope that looking at these relatively simple examples will give you a better idea of how to best use Ray in your day-to-day implementations.

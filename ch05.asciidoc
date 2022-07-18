@@ -27,8 +27,8 @@ Usage of GCS, centrally maintaining Ray’s state significantly simplifies overa
 
 Since remote functions do not contain any persistent state, recovering from their failure is relatively simple. Ray will try again until it succeeds or reaches a maximum number of retries. As seen in the previous chapter, you can control the number of retries through the max_retries parameter in the @ray.remote annotation. To try out and better understand Ray's fault tolerance, you should write a "flaky" remote function that fails some % of the time as shown in <<ex_flaky_ray>>.
 
-.Auto retry remote functions
 [[ex_flaky_ray]]
+.Auto retry remote functions
 ====
 [source, python]
 ----
@@ -77,8 +77,8 @@ Reference counting makes it especially important when defining objects to set th
 
 Ray objects are immutable, meaning they can not be modified. It's important to note that if you change an object you've read from Ray (e.g. with a ray.get) or stored in Ray (e.g. with a ray.put) it won't be reflected in the object store. For example <<ex_ray_immuteable>>.
 
-.Immutable Ray Objects
 [[ex_ray_immuteable]]
+.Immutable Ray Objects
 ====
 [source, python]
 ----
@@ -90,8 +90,8 @@ When you run the above code you can see that while you can mutate a value, the c
 
 If a parameter or return value is large and used more than once, or medium-sized and used frequently, then it can be worthwhile to store it as an object explicitly. You can then use the ObjectRef in place of the regular parameter, and it will automatically be translated for you, as shown in <<ex_use_ray_put>>.
 
-.Use Ray Put
 [[ex_use_ray_put]]
+.Use Ray Put
 ====
 [source, python]
 ----
@@ -123,8 +123,8 @@ It's possible that you may wish to fine-tune the object store settings. Dependin
 
 If you have a mixture of fast and slow disks (e.g. SSD, HDD, network), you should consider using the faster storage for spilled objects. Unlike the rest of the storage configs, you configure the spilled object storage location with a nested JSON blob. Like the rest of the object store settings, `object_spilling_config` is stored under `_system_config`. This is a bit counterintuitive, but if your machine had fast temporary storage at "/tmp/fast" you would configure Ray to use it as in <<ray_obj_storage>>.
 
-.Ray Object Store Configuration
 [[ray_obj_store_config]]
+.Ray Object Store Configuration
 ====
 [source, python]
 ----
@@ -154,8 +154,8 @@ If you are uncertain why some data is not serializable, you can either try looki
 
 When pickling classes, Cloudpickle still uses the same extension mechanisms (getnewargs, getstate, setstate, etc.) as pickling. You can write a custom serializer if you have a class with non-serializable components, such as a database connection. While this won't allow you to serialize things like database connections, you can instead serialize the information required to create a similar object. <<custom_serializer>> takes this approach by serializing a class containing a thread pool.
 
-.Custom serializer
 [[custom_serializer]]
+.Custom serializer
 ====
 [source, python]
 ----
@@ -165,8 +165,8 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=custom_serializer]
 
 Alternatively, Ray allows you to register serializers for classes. This approach allows you to change the serialization of classes that are not your own, as shown in <<custom_serializer_not_own_class>>.
 
-.Custom serializer, external class
 [[custom_serializer_not_own_class]]
+.Custom serializer, external class
 ====
 [source, python]
 ----
@@ -313,8 +313,8 @@ The lifecycle of placement groups has the following stages:
 
 To make a placement group you will need a few extra imports, shown in <<placement_group_imports>>. If you are working with Ray in local mode, it's harder to see the effect of placement groups since there is only one node. You can still create CPU only bundles together into a placement group. Once you've created the placement group you can use `options` to run a function or actor in a specific bundle as shown in <<placement_group>>.
 
-.Placement group imports
 [[placement_group_imports]]
+.Placement group imports
 ====
 [source, python]
 ----
@@ -322,8 +322,8 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=placement_group_imp
 ----
 ====
 
-.CPU Only Placement group
 [[placement_group]]
+.CPU Only Placement group
 ====
 [source, python]
 ----
@@ -333,8 +333,8 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=placement_group]
 
 If you are running Ray on a cluster you can create a more complex resource group. If you have some GPU nodes in your cluster, you can create more complex placement groups. When we run a <<mixed_placement_group>> on our test cluster, the auto scaler allocates a node with a GPU. Once you’re finished with your placement group you can delete it with `remove_placement_group(pg)`.
 
-.Mixed CPU and GPU Placement group
 [[mixed_placement_group]]
+.Mixed CPU and GPU Placement group
 ====
 [source, python]
 ----
@@ -377,8 +377,8 @@ One of the big draws of Python is the amazing ecosystem of tools available. Ray 
 
 The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from thttps://pypi.org/[+++he Python Package Index (PyPI)+++] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
 
-.pip package list
 [[pip_pkg_list]]
+.pip package list
 ====
 [source, python]
 ----
@@ -388,8 +388,8 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_list]
 
 This works well for a few dependencies, but if you've got a requirements.txt like Holden's link:$$https://github.com/holdenk/print-the-world$$%5Bprint[+++https://github.com/holdenk/print-the-world$$[print+++] the world] project, you can also just point this to your local `requirements.txt` as shown in <<pip_pkg_reqs>>.
 
-.pip package requirements file
 [[pip_pkg_reqs]]
+.pip package requirements file
 ====
 [source, python]
 ----

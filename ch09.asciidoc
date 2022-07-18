@@ -34,8 +34,8 @@ Apache Arrow defines a language-independent columnar memory format for flat and 
 
 Ray uses https://arrow.apache.org/[+++Apache Arrow+++] to load external data into Datasets, which supports a number of different file formats and file systems. The formats, at present, are csv, json, parquet, numpy, text, and raw binary. The functions for loading data follow the `read_[format]` pattern and are in the `ray.data` module.
 
-.Load Local Data
 [[load_csv_local_fs]]
+.Load Local Data
 ====
 [source, python]
 ----
@@ -59,8 +59,8 @@ When loading from a local filesystem it is up to you to ensure the file is avail
 
 Arrow, and by extension Ray, also uses fsspec which supports a wider array of filesystems, including https (when aiohttp is installed). Unlike with the "built-in" file systems, you need to manually specify the filesystem, as shown in <<ex_load_from_https>>.
 
-.Load Data Over HTTPS
 [[ex_load_from_https]]
+.Load Data Over HTTPS
 ====
 [source, python]
 ----
@@ -471,8 +471,8 @@ Ray's DataSet has support for a number of basic data operations. Ray Datasets do
 
 The core building block of most of the DataSet operations is `map_batches`. By default `map_batches` executes the function you provide across the blocks/batches that make up a Dataset and uses the results to make a new Dataset. `map_batches` is used to implement `filter`, `flat_map`, and `map`. You can see the flexibility of `map_batches` by looking at the wordcount example rewritten to directly use `map_batches` and also drop any word that only shows up once.
 
-.Ray Wordcount with Map Batches
 [[ray_wordcount_on_ds_filter_only_once_with_batches]]
+.Ray Wordcount with Map Batches
 ====
 [source, python]
 ----
@@ -482,8 +482,8 @@ include::examples/ray_examples/data/Ray-Datasets.py[tags=ray_wordcount_on_ds_fil
 
 `map_batches` takes a number of parameters to customize its behavior. For stateful operations, you can change the `compute` strategy to `actors` from its default `tasks`. The previous example used the default format, which is Ray's internal format, but you can also convert the data to `pandas` or `pyarrow`. You can see this in <<batch_op_on_pandas>> where we have Ray convert the data to pandas for me.
 
-.Ray map_batches with pandas to update a column
 [[batch_op_on_pandas]]
+.Ray map_batches with pandas to update a column
 ====
 [source, python]
 ----

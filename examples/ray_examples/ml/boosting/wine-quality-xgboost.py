@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 
 import xgboost as xgb
 
+#tag::train[]
 # Get data
 df = pd.read_csv("winequality-red.csv", delimiter=";")
 print(f"Rows, columns: {str(df.shape)}")
@@ -31,3 +32,4 @@ model.fit(X_train, y_train)
 print(f"executed XGBoost in {time.time() - start}")
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))
+#end::train[]

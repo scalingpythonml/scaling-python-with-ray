@@ -50,7 +50,7 @@ spec:
       containers:
         - name: ray
           imagePullPolicy: Always
-          image: rayproject/ray:1.9.0-py38-cpu
+          image: rayproject/ray:1.13.0-py38-cpu
           command: ["ray-operator"]
           env:
             - name: RAY_OPERATOR_POD_NAMESPACE

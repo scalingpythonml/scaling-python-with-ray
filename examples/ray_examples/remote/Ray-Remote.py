@@ -22,7 +22,6 @@ import random
 # In[ ]:
 
 
-
 #tag::variable_sleep_task[]
 @ray.remote
 def remote_task(x):

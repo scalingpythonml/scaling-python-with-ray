@@ -6,6 +6,7 @@ from ray import serve
 ray.init()
 serve.start()
 
+#tag::versioned_deploy[]
 @serve.deployment
 def version_one(data):
     return {"result": "version1"}
@@ -20,9 +21,11 @@ def version_two(data):
 
 
 version_two.deploy()
+#end::versioned_deploy[]
 
 # max_concurrent_queries is optional. By default, if you pass in an async
 # function, Ray Serve sets the limit to a high number.
+#tag::canary[]
 @serve.deployment(route_prefix="/versioned")
 class Canary:
     def __init__(self, canary_percent):
@@ -38,6 +41,7 @@ class Canary:
             return await self.version_one.remote(data=data)
         else:
             return await self.version_two.remote(data=data)
+#end::canary[]
 
 Canary.deploy(.3)
 

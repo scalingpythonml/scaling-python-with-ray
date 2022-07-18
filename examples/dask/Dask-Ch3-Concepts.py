@@ -5,9 +5,6 @@
 
 
 import dask
-import numpy as np
-import numpy.typing as npt
-from typing import *
 # Dask multithreading is only suited for mostly non-Python code (like pandas, numpy, etc.)
 #tag::threads[]
 dask.config.set(scheduler='threads')
@@ -23,18 +20,35 @@ dask.config.set({"multiprocessing.context": "forkserver", "scheduler": "processe
 # In[ ]:
 
 
+import numpy as np
+import numpy.typing as npt
+from typing import *
+
+
+# In[ ]:
+
+
+get_ipython().system('export')
+
+
+# In[ ]:
+
+
 #tag::make_dask_k8s_client[]
 import dask
 from dask.distributed import Client
 from dask_kubernetes import KubeCluster, make_pod_spec
+# Use load balancer to make it externally available, for purely internal
+# the default of "ClusterIP" is better.
+dask.config.set({"kubernetes.scheduler-service-type": "LoadBalancer"})
 worker_template = make_pod_spec(image='holdenk/dask:latest',
                          memory_limit='8G', memory_request='8G',
-                         cpu_limit=1, cpu_request=1, extra_container_config={ "imagePullPolicy": "Always" })
+                         cpu_limit=1, cpu_request=1)
 scheduler_template = make_pod_spec(image='holdenk/dask:latest',
                          memory_limit='4G', memory_request='4G',
-                         cpu_limit=1, cpu_request=1, extra_container_config={ "imagePullPolicy": "Always" })
+                         cpu_limit=1, cpu_request=1)
 cluster = KubeCluster(pod_template = worker_template, scheduler_pod_template = scheduler_template)
-cluster.adapt(minimum=1)    # or create and destroy workers dynamically based on workload
+cluster.adapt()    # or create and destroy workers dynamically based on workload
 from dask.distributed import Client
 client = Client(cluster)
 #end::make_dask_k8s_client[]
@@ -43,13 +57,13 @@ client = Client(cluster)
 # In[ ]:
 
 
-client
+
 
 
 # In[ ]:
 
 
-client.dashboard_link
+
 
 
 # In[ ]:
@@ -79,8 +93,8 @@ def fib(x):
 import timeit
 seq_time = timeit.timeit(lambda: seq_fib(14), number=1)
 dask_time = timeit.timeit(lambda: dask_fib(14), number=1)
-local_memoized_time = timeit.timeit(lambda: fib(14), number=1)
-print("In sequence {}, in parallel {}, local memoized {}".format(seq_time, dask_time, local_memoized_time))
+memoized_time = timeit.timeit(lambda: fib(14), number=1)
+print("In sequence {}, in parallel {}, memoized".format(seq_time, dask_time, memoized_time))
 #end::fib_task_hello_world[]
 
 
@@ -102,6 +116,44 @@ def bad_fun(x):
 if False:
     dask.compute(bad_fun(1))
 #end::fail_to_ser[]
+
+
+# In[ ]:
+
+
+# From ch2 for visualize
+@dask.delayed
+def crawl(url, depth=0, maxdepth=1, maxlinks=4):
+    links = []
+    link_futures = []
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        f = requests.get(url)
+        links += [(url, f.text)]
+        if (depth > maxdepth):
+            return links # base case
+        soup = BeautifulSoup(f.text, 'html.parser')
+        c = 0
+        for link in soup.find_all('a'):
+            if "href" in link:
+                c = c + 1
+                link_futures += crawl(link["href"], depth=(depth+1), maxdepth=maxdepth)
+                # Don't branch too much were still in local mode and the web is big
+                if c > maxlinks:
+                    break
+        for r in dask.compute(link_futures):
+            links += r
+        return links
+    except requests.exceptions.InvalidSchema:
+        return [] # Skip non-web links
+import dask.bag as db
+githubs = ["https://github.com/scalingpythonml/scalingpythonml", "https://github.com/dask/distributed"]
+initial_bag = db.from_delayed(map(crawl, githubs))
+words_bag = initial_bag.map(lambda url_contents: url_contents[1].split(" ")).flatten()
+#tag::visualize[]
+dask.visualize(words_bag.frequencies())
+#end::visualize[]
 
 
 # In[ ]:
@@ -202,57 +254,6 @@ ok_fun(1)
 # In[ ]:
 
 
-# From ch2 for visualize
-@dask.delayed
-def crawl(url, depth=0, maxdepth=1, maxlinks=4):
-    links = []
-    link_futures = []
-    try:
-        import requests
-        from bs4 import BeautifulSoup
-        f = requests.get(url)
-        links += [(url, f.text)]
-        if (depth > maxdepth):
-            return links # base case
-        soup = BeautifulSoup(f.text, 'html.parser')
-        c = 0
-        for link in soup.find_all('a'):
-            if "href" in link:
-                c = c + 1
-                link_futures += crawl(link["href"], depth=(depth+1), maxdepth=maxdepth)
-                # Don't branch too much were still in local mode and the web is big
-                if c > maxlinks:
-                    break
-        for r in dask.compute(link_futures):
-            links += r
-        return links
-    except requests.exceptions.InvalidSchema:
-        return [] # Skip non-web links
-import dask.bag as db
-githubs = ["https://github.com/scalingpythonml/scalingpythonml", "https://github.com/dask/distributed"]
-initial_bag = db.from_delayed(map(crawl, githubs))
-words_bag = initial_bag.map(lambda url_contents: url_contents[1].split(" ")).flatten()
-#tag::visualize[]
-dask.visualize(words_bag.frequencies())
-#end::visualize[]
-
-
-# In[ ]:
-
-
-dask.visualize(words_bag.frequencies(), filename="wc.pdf")
-
-
-# In[ ]:
-
-
-dir(cluster)
-
-
-# In[ ]:
-
-
-
 import dask.array as da
 #tag::make_chunked_array[]
 distributed_array = da.from_array(list(range(0, 10000)), chunks=10)
@@ -337,12 +338,6 @@ df.persist
 from distributed.client import futures_of
 list(map(lambda x: x.release(), futures_of(df)))
 #end::manual_persist[]
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:

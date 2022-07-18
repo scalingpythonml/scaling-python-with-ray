@@ -75,12 +75,10 @@ At present, the protocol is incorrectly stripped off, so you need to put it in t
 
 Ray has the ability to write in all of the formats it can read from. The writing functions, like the read functions, follow a pattern of `write_[format]`. There are a few minor differences between the read path and the write path. Instead of taking in a `parallelism` parameter, the write path always writes with the parallelism of the input DataSet:
 
-====
 [source, python]
 ----
 include::examples/ray_examples/data/Ray-Datasets.py[tags=wc_write]
 ----
-====
 
 If Ray does not have I/O support for your desired format or filesystem, you should check and see if any of the other tools that Ray supports does. Then, as covered in the next section, you can convert your DataSet from/to the desired tool.
 

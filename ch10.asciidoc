@@ -421,6 +421,7 @@ Running of the code above produces the following result (<<tune_result>>):
 
 [[tune_result]]
 .Tuning model result
+====
 [source]
 ----
 +-------------------------------+------------+-----------------+-------------+------------+----------+--------+------------------+
@@ -457,6 +458,7 @@ Running of the code above produces the following result (<<tune_result>>):
 
 +-------------------------------+------------+-----------------+-------------+------------+----------+--------+------------------+
 ----
+====
 
 As you can see from the <<tune_result>> although we have defined 50 iterations for model search, using ASHA significantly improves performance because ASHA uses significantly fewer runs on average (in this example more than 50% only used 1 iteration).
 

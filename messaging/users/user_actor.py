@@ -33,7 +33,11 @@ class UserActorBase():
         else:
             # TODO: handle e-mail
             username = msg.to
-            return User.objects.get(username=username)
+            try:
+                return User.objects.get(username=username)
+            except Exception as e:
+                print(f"Failed to get user: {username}?")
+                raise e
 
     def handle_message(self, input_msg: CombinedMessage):
         """

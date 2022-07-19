@@ -18,22 +18,28 @@ class UserActorForTesting(user_actor.UserActorBase):
         self.mailclient_pool = test_utils.FakeLazyNamedPool("mailclient", 5)
 
 
-class UserActorTests(unittest.TestCase):
+class UserActorTestBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        ray.init(num_cpus=4, num_gpus=0)
+        ray.init(num_cpus=8, num_gpus=0)
         # Sketchy to use shell but otherwise django gets unhappy
         # Also kind of slow move.
-        os.system(f"cd {django_path}; TEST_ID={test_id} python manage.py migrate")
+        cmd = f"cd {django_path}; TEST_ID={test_id} python manage.py migrate"
+        os.system(cmd)
 
     def setUp(self):
+        Device.objects.all().delete()
+        User.objects.all().delete()
         d1 = Device.objects.create(serial_number=1234)
         d2 = Device.objects.create(serial_number=1235)
         self.user_with_device_and_subscription = User.objects.create(
             username="farts", email="fart22@fart.com")
+        self.user_with_device_and_subscription.save()
         self.user_with_device = User.objects.create(username="mcgee")
+        self.user_with_device.save()
         self.standalone_user = User.objects.create(username="went")
+        self.standalone_user.save()
         d1.assign_to_user(self.user_with_device_and_subscription)
         d1.save()
         self.user_with_device_and_subscription.is_active = True
@@ -42,13 +48,20 @@ class UserActorTests(unittest.TestCase):
         d2.assign_to_user(self.user_with_device)
         d2.save()
 
+    def tearDown(self):
+        Device.objects.all().delete()
+        User.objects.all().delete()
+
     @classmethod
     def tearDownClass(cls):
         ray.shutdown()
 
+
+class UserActorTests(UserActorTestBase):
+
     def test_valid_user_inbound(self):
         test_text = "Farts mcgee went to the fart to fart fartly."
-        to = "farts"
+        to = self.user_with_device_and_subscription.username
         msg_from = "butts"
         input_msg = CombinedMessage(
             text=test_text,

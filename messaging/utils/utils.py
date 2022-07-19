@@ -36,10 +36,12 @@ class LazyNamedPool:
     def get_pool(self):
         new_actors = self._get_actors()
         # Wait for at least min_actors to show up
-        while len(new_actors) < self.min_actors:
+        c = 0
+        while len(new_actors) < self.min_actors and c < 10:
             print(f"Have {new_actors} waiting for {self.min_actors}")
             time.sleep(1)
             new_actors = self._get_actors()
+            c = c + 1
         # If we got more actors
         if (len(new_actors) > len(self._actors)):
             self._actors = new_actors

@@ -8,6 +8,7 @@ from messaging.utils.utils import LazyNamedPool
 import os
 from messaging.internal_types import CombinedMessage
 from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
+from email.utils import parseaddr
 
 
 class MailServerActorBase():
@@ -90,7 +91,10 @@ class MailServerActorBase():
         text = text.replace("\r\n", "\n").rstrip("\n")
         for rcpt in envelope.rcpt_tos:
             message = CombinedMessage(
-                text=text, to=rcpt, msg_from=envelope.mail_from, from_device=False,
+                text=text,
+                to=parseaddr(rcpt)[1].split('@')[0],
+                msg_from=envelope.mail_from,
+                from_device=False,
                 protocol=Protocol.EMAIL)
             self.user_pool.get_pool().submit(
                 lambda actor, message: actor.handle_message(message),

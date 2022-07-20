@@ -62,7 +62,7 @@
     }
 }
 
-@media screen and (max-width: 1220px) {
+@media  (max-width: 1220px) {
     .form-container {
         width: 100%;
         margin: 0 auto;
@@ -109,6 +109,10 @@
 .deco-text-frame--bottom {
     right: 5%;
     bottom: 29%; 
+
+    @media (max-height: 800px) {
+        bottom: 10%;
+    }
 }
 
 .form-footer {
@@ -152,7 +156,7 @@
     }
 }
 
-@media screen and (max-width: 1024px) {
+@media  (max-width: 1024px) {
     .form-body {
         position: static;
         &__footer {
@@ -161,7 +165,7 @@
             right: 16px;
             left: 16px;
 
-            @media screen and (max-height: 800px) {
+            @media  (max-height: 800px) {
                 position: static;
             }
 

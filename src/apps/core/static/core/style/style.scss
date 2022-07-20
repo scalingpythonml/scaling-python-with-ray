@@ -2,21 +2,10 @@
 @import './mixins/index';
 @import './function/index';
 
-* {
-    margin: 0;
-    outline: none;
-    padding: 0;
-    border: 0;
-    box-sizing: border-box;
-}
-
-a {
-    text-decoration: unset;
-}
-
 body {
     background-color: white;
 }
+
 .logo {
     display: block;
 
@@ -36,10 +25,11 @@ body {
 .h-100vh {
     min-height: 100vh;
 
-    @media screen and (max-width: 1024px) {
+    @media (max-width: 1024px) {
         min-height: calc(100vh - 100px)
     }
 }
+
 .btn {
     @include btn($outline: false);
 }

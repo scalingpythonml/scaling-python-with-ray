@@ -18,7 +18,7 @@
     width: calc(100% - width(10));
 }
 
-@media screen and (max-width: 1024px) {
+@media  (max-width: 1024px) {
     .side-nav {
         display: none;
     }

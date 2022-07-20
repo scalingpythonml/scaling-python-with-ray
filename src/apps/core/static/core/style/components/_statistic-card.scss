@@ -69,7 +69,7 @@
     }
 }
 
-@media screen and (max-width: 1360px) {
+@media  (max-width: 1360px) {
     .statistic-card {
         min-width: unset
 
@@ -84,7 +84,7 @@
     }
 }
 
-@media screen and (max-width: 1024px) {
+@media  (max-width: 1024px) {
     .statistic-layout {
         &--grid {
             grid-template-columns: repeat(1, 1fr);

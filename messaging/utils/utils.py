@@ -30,6 +30,9 @@ class LazyNamedPool:
             return []
 
     def _get_actors(self):
+        """
+        Get actors by name, caches result once we have the "full" set.
+        """
         if len(self._actors) < self.size:
             return list(flat_map(self._get_actor, range(0, self.size)))
 
@@ -46,6 +49,8 @@ class LazyNamedPool:
         if (len(new_actors) > len(self._actors)):
             self._actors = new_actors
             self._pool = ActorPool(new_actors)
+        if len(new_actors) < self.min_actors:
+            raise Exception("Could not find enough actors to launch pool.")
         return self._pool
 
 

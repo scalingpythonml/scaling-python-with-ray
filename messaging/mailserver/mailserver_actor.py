@@ -1,6 +1,8 @@
+import asyncio
 from email import message_from_bytes, policy
 from aiosmtpd.controller import Controller
 import ray
+from ray.util.metrics import Counter
 import logging
 import requests
 from typing import Optional
@@ -9,6 +11,7 @@ import os
 from messaging.internal_types import CombinedMessage
 from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
 from email.utils import parseaddr
+from messaging.settings import settings
 
 
 class MailServerActorBase():
@@ -27,17 +30,31 @@ class MailServerActorBase():
             hostname=hostname,
             ident="SpaceBeaver (PCFLabsLLC)",
             port=port)
+        self.emails_forwaded = Counter(
+            "emails_forwarded",
+            description="Emails forwarded",
+            tag_keys=("idx",),
+            )
+        self.emails_forwaded.set_default_tags(
+            {"idx": str(idx)})
+        self.emails_rejected = Counter(
+            "emails_rejected",
+            description="Rejected email messages",
+            tag_keys=("idx",),
+            )
+        self.emails_rejected.set_default_tags(
+            {"idx": str(idx)})
         self.server.start()
         self.label = label
         if label is not None:
-            self.apply_label()
+            self.update_label()
 
-    def apply_label(self):
+    def update_label(self, opp="add"):
         # See https://stackoverflow.com/questions/36147137/kubernetes-api-add-label-to-pod
         label = self.label
         patch_json = (
             "[{" +
-            f""" "op": "add", "path": "/metadata/labels/{label}", "value": "present" """ +
+            f""" "op": "{opp}", "path": "/metadata/labels/{label}", "value": "present" """ +
             "}]")
         kube_host = os.getenv("KUBERNETES_SERVICE_HOST")
         kube_port = os.getenv("KUBERNETES_PORT_443_TCP_PORT", "443")
@@ -54,10 +71,23 @@ class MailServerActorBase():
         """
         logging.info(f"RCPT to with {address} received.")
         if not address.endswith(f"@{self.domain}"):
+            self.emails_rejected.inc()
             return '550 not relaying to that domain'
         # Do we really want to support multiple e-mails? idk.
         envelope.rcpt_tos.append(address)
         return '250 OK'
+
+    async def prepare_for_shutdown(self):
+        """
+        Prepare for shutdown, so stop remove pod label (if present) then stop accepting connections.
+        """
+        if self.label is not None:
+            try:
+                self.update_label(opp="remove")
+                await asyncio.sleep(120)
+            except Exception:
+                pass
+        self.server.stop()
 
     async def handle_DATA(self, server, session, envelope):
         """
@@ -89,6 +119,7 @@ class MailServerActorBase():
                 body = parsed_email.get_payload(decode=True)
         text = f"{text}{body}"
         text = text.replace("\r\n", "\n").rstrip("\n")
+        self.emails_forwaded.inc()
         for rcpt in envelope.rcpt_tos:
             message = CombinedMessage(
                 text=text,
@@ -102,7 +133,7 @@ class MailServerActorBase():
         return '250 Message accepted for delivery'
 
 
-@ray.remote
+@ray.remote(max_restarts=-1, max_task_retries=settings.max_retries)
 class MailServerActor(MailServerActorBase):
     """
     Mail server actor class

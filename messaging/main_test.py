@@ -17,7 +17,5 @@ class MainTest(UserActorTestBase):
     def test_actors_created(self):
         self.satellite_actors = utils.LazyNamedPool("satellite", 2, min_size=2)
         self.mailserver_actors = utils.LazyNamedPool("mailserver", 2, min_size=2)
-        self.mailclient_actors = utils.LazyNamedPool("mailclient", 2, min_size=2)
         self.satellite_actors.get_pool()
         self.mailserver_actors.get_pool()
-        self.mailclient_actors.get_pool()

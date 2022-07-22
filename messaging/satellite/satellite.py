@@ -48,7 +48,8 @@ class SatelliteClientBase():
 
     async def run(self):
         internal_retries = 0
-        while True:
+        self.running = True
+        while self.running:
             try:
                 self._login()
                 while True:
@@ -59,6 +60,12 @@ class SatelliteClientBase():
                 internal_retries = internal_retries + 1
                 if (internal_retries > self.max_internal_retries):
                     raise e
+
+    async def prepare_for_shutdown(self):
+        """
+        Prepare for shutdown, so stop consuming messages from swarm.space API.
+        """
+        self.running = False
 
     def _login(self):
         res = self.session.post(
@@ -146,7 +153,7 @@ class SatelliteClientBase():
         )
 
 
-@ray.remote(max_restarts=-1)
+@ray.remote(max_restarts=-1, max_task_retries=settings.max_retries)
 class SatelliteClient(SatelliteClientBase):
     """
     Connects to swarm.space API.

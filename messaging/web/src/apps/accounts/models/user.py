@@ -16,6 +16,7 @@ from sorl.thumbnail import ImageField
 
 from apps.utils.stripe import create_customer
 
+from messaging.mailclient import MailClient
 
 __all__ = ("User",)
 

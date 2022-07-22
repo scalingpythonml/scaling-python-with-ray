@@ -1,3 +1,3 @@
-from messaging.mailclient.mailclient_actor import MailClient
+from messaging.mailclient.mailclient import MailClient
 
 __all__ = ["MailClient"]

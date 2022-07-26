@@ -4,12 +4,14 @@ from ray.util import ActorPool
 from messaging.satellite.satellite import SatelliteClient
 from messaging.mailserver.mailserver_actor import MailServerActor
 from messaging.users.user_actor import UserActor
+from messaging.settings.settings import Settings
 
 
 def do_launch(actor_count: int, grace_period: int = 240):
     """
     Launch the sect of actors that serve as the backend for the SpaceBeaver project.
     """
+    settings = Settings()
     actor_idxs = list(range(0, actor_count))
 
     # semi-gracefully shut down existing actors. Here we depend on a two facts:
@@ -35,8 +37,10 @@ def do_launch(actor_count: int, grace_period: int = 240):
                     pass
 
     def make_satellite_actor(idx: int):
-        return (SatelliteClient.options(name=f"satellite_{idx}")  # type: ignore
-                .remote(idx, actor_count))
+        return (SatelliteClient.options(  # type: ignore
+            name=f"satellite_{idx}",
+            max_task_retries=settings.max_retries)
+            .remote(settings, idx, actor_count))
 
     satellite_actors = list(map(make_satellite_actor, actor_idxs))
     # Since the satellite actors are polling, start them running.
@@ -46,7 +50,7 @@ def do_launch(actor_count: int, grace_period: int = 240):
 
     def make_user_actor(idx: int):
         return (UserActor.options(name=f"user_{idx}")  # type: ignore
-                .remote(idx, actor_count))
+                .remote(settings, idx, actor_count))
 
     user_actors = list(map(make_user_actor, actor_idxs))
     user_pool = ActorPool(user_actors)
@@ -66,7 +70,8 @@ def do_launch(actor_count: int, grace_period: int = 240):
                     name=f"mailserver_{idx}",
                     placement_group=mailserver_pg,
                     num_cpus=0.1,
-                    lifetime="detached")
+                    lifetime="detached",
+                    max_task_retries=settings.max_retries)
                 .remote(
                     idx=idx,
                     poolsize=actor_count,

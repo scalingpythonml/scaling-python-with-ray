@@ -11,7 +11,6 @@ import os
 from messaging.internal_types import CombinedMessage
 from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
 from email.utils import parseaddr
-from messaging.settings import settings
 
 
 class MailServerActorBase():
@@ -19,8 +18,8 @@ class MailServerActorBase():
     Base server mail actor class
     """
 
-    def __init__(self, idx: int, poolsize: int, port: int, hostname: str,
-                 label: Optional[str] = None):
+    def __init__(self, idx: int, poolsize: int, port: int,
+                 hostname: str, label: Optional[str] = None):
         self.idx = idx
         self.poolsize = poolsize
         self.user_pool = LazyNamedPool("user", poolsize)
@@ -34,14 +33,14 @@ class MailServerActorBase():
             "emails_forwarded",
             description="Emails forwarded",
             tag_keys=("idx",),
-            )
+        )
         self.emails_forwaded.set_default_tags(
             {"idx": str(idx)})
         self.emails_rejected = Counter(
             "emails_rejected",
             description="Rejected email messages",
             tag_keys=("idx",),
-            )
+        )
         self.emails_rejected.set_default_tags(
             {"idx": str(idx)})
         self.server.start()
@@ -49,6 +48,7 @@ class MailServerActorBase():
         if label is not None:
             self.update_label()
 
+#tag::update_label[]
     def update_label(self, opp="add"):
         # See https://stackoverflow.com/questions/36147137/kubernetes-api-add-label-to-pod
         label = self.label
@@ -64,19 +64,9 @@ class MailServerActorBase():
         headers = {"Content-Type": "application/json-patch+json"}
         result = requests.post(url, data=patch_json, headers=headers)
         logging.info(f"Got back {result} updating header.")
+#end::update_label[]
 
-    async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
-        """
-        Call back for RCPT. This only accept e-mail for us, no relaying.
-        """
-        logging.info(f"RCPT to with {address} received.")
-        if not address.endswith(f"@{self.domain}"):
-            self.emails_rejected.inc()
-            return '550 not relaying to that domain'
-        # Do we really want to support multiple e-mails? idk.
-        envelope.rcpt_tos.append(address)
-        return '250 OK'
-
+#tag::prepare_for_shutdown[]
     async def prepare_for_shutdown(self):
         """
         Prepare for shutdown, so stop remove pod label (if present) then stop accepting connections.
@@ -88,6 +78,20 @@ class MailServerActorBase():
             except Exception:
                 pass
         self.server.stop()
+#end::prepare_for_shutdown[]
+
+#tag::handle_data[]
+    async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
+        """
+        Call back for RCPT. This only accept e-mail for us, no relaying.
+        """
+        logging.info(f"RCPT to with {address} received.")
+        if not address.endswith(f"@{self.domain}"):
+            self.emails_rejected.inc()
+            return '550 not relaying to that domain'
+        # Do we really want to support multiple e-mails? idk.
+        envelope.rcpt_tos.append(address)
+        return '250 OK'
 
     async def handle_DATA(self, server, session, envelope):
         """
@@ -131,10 +135,13 @@ class MailServerActorBase():
                 lambda actor, message: actor.handle_message(message),
                 message)
         return '250 Message accepted for delivery'
+#end::handle_data[]
 
 
-@ray.remote(max_restarts=-1, max_task_retries=settings.max_retries)
+#tag::restarts[]
+@ray.remote(max_restarts=-1)
 class MailServerActor(MailServerActorBase):
     """
     Mail server actor class
     """
+#end::restarts[]

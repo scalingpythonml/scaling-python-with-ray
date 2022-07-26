@@ -10,6 +10,9 @@ def flat_map(f, xs):
     return ys
 
 
+# Tag for inclusion in Scaling Python w/Ray.
+
+#tag::lazypool[]
 class LazyNamedPool:
     """
     Lazily constructed pool by name.
@@ -52,6 +55,7 @@ class LazyNamedPool:
         if len(new_actors) < self.min_actors:
             raise Exception("Could not find enough actors to launch pool.")
         return self._pool
+#end::lazypool[]
 
 
 __all__ = ["flat_map", "LazyNamedPool"]

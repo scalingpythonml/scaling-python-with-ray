@@ -8,12 +8,13 @@ from messaging.internal_types import CombinedMessage
 from .models import Device, User, django_path
 from ..proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL  # type: ignore
 from . import user_actor
+from messaging.settings.settings import Settings
 
 
 @ray.remote
 class UserActorForTesting(user_actor.UserActorBase):
     def __init__(self, idx, poolsize):
-        user_actor.UserActorBase.__init__(self, idx, poolsize)
+        user_actor.UserActorBase.__init__(self, Settings(), idx, poolsize)
         self.satellite_pool = test_utils.FakeLazyNamedPool("satellite", 5)
         self.mailclient_pool = test_utils.FakeLazyNamedPool("mailclient", 5)
 
@@ -69,7 +70,7 @@ class UserActorTests(UserActorTestBase):
             msg_from=msg_from,
             protocol=EMAIL_PROTOCOL,
             from_device=False)
-        actor = user_actor.UserActorBase(0, 1)
+        actor = user_actor.UserActorBase(Settings(), 0, 1)
         actor.satellite_pool = test_utils.FakeLazyNamedPool("satellite", 5)
         actor.mailclient_pool = test_utils.FakeLazyNamedPool("mailclient", 5)
         actor.handle_message(input_msg)

@@ -4,7 +4,7 @@ import logging
 import base64
 import requests
 import json
-from messaging.settings import settings
+from messaging.settings.settings import Settings
 from messaging.internal_types import CombinedMessage
 from messaging.utils import utils
 from google.protobuf import text_format
@@ -21,7 +21,8 @@ class SatelliteClientBase():
     Base client class for talking to the swarm.space APIs.
     """
 
-    def __init__(self, idx: int, poolsize: int):
+    def __init__(self, settings: Settings, idx: int, poolsize: int):
+        self.settings = settings
         self.idx = idx
         self.poolsize = poolsize
         # Make sure we get enough messages for pool magic but also not too many
@@ -34,18 +35,19 @@ class SatelliteClientBase():
         self.delay = 60
         self._loginHeaders = {
             'Content-Type': 'application/x-www-form-urlencoded'}
-        self._loginParams = settings.swarm_login_params
+        self._loginParams = self.settings.swarm_login_params
         self._hdrs = {'Accept': 'application/json'}
         self._sendMessageHeaders = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'}
-        self._hiveBaseURL = settings.hiveBaseURL
+        self._hiveBaseURL = self.settings.hiveBaseURL
         self._loginURL = self._hiveBaseURL + '/login'
         self._getMessageURL = self._hiveBaseURL + '/api/v1/messages'
         self._ackMessageURL = self._hiveBaseURL + '/api/v1/messages/rxack/{}'
         self._sendMessageURL = self._hiveBaseURL + '/api/v1/messages'
         logging.info(f"Starting actor {idx}")
 
+#tag::poll_for_msgs[]
     async def run(self):
         internal_retries = 0
         self.running = True
@@ -60,6 +62,7 @@ class SatelliteClientBase():
                 internal_retries = internal_retries + 1
                 if (internal_retries > self.max_internal_retries):
                     raise e
+#end::poll_for_msgs[]
 
     async def prepare_for_shutdown(self):
         """
@@ -153,7 +156,7 @@ class SatelliteClientBase():
         )
 
 
-@ray.remote(max_restarts=-1, max_task_retries=settings.max_retries)
+@ray.remote(max_restarts=-1)
 class SatelliteClient(SatelliteClientBase):
     """
     Connects to swarm.space API.

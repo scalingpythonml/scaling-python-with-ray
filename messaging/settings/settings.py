@@ -1,13 +1,19 @@
 import os
 
-swarm_username = os.getenv("swarm_username")
-swarm_password = os.getenv("swarm_password")
-hiveBaseURL = os.getenv(
-    "hivebaseurl", 'https://bumblebee.hive.swarm.space/hive')
 
-swarm_login_params = {'username': swarm_username, 'password': swarm_password}
+class Settings(object):
+    def __init__(self):
+        self.swarm_username = os.getenv("swarm_username")
+        self.swarm_password = os.getenv("swarm_password")
+        self.hiveBaseURL = os.getenv(
+            "hivebaseurl", 'https://bumblebee.hive.swarm.space/hive')
 
-mail_server = os.getenv("mail_server")
-mail_username = os.getenv("mail_username")
-mail_password = os.getenv("mail_password")
-max_retries = int(os.getenv("max_retries", "10"), 10)
+        self.swarm_login_params = {
+            'username': self.swarm_username,
+            'password': self.swarm_password}
+
+        self.mail_server = os.getenv("mail_server")
+        self.mail_username = os.getenv("mail_username")
+        self.mail_password = os.getenv("mail_password")
+        self.mail_port = int(os.getenv("mail_port", "25"), 10)
+        self.max_retries = int(os.getenv("max_retries", "10"), 10)

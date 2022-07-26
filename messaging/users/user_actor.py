@@ -6,7 +6,7 @@ from messaging.utils import utils
 from messaging.mailclient import MailClient
 from .models import Device, User
 from messaging.proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL
-from messaging.settings import settings
+from messaging.settings.settings import Settings
 
 
 # Seperate out the logic from the actor implementation so we can sub-class
@@ -20,23 +20,24 @@ class UserActorBase():
     async.
     """
 
-    def __init__(self, idx: int, poolsize: int):
+    def __init__(self, settings: Settings, idx: int, poolsize: int):
+        self.settings = settings
         self.idx = idx
         self.poolsize = poolsize
         self.satellite_pool = utils.LazyNamedPool("satellite", poolsize)
-        self.mail_client = MailClient()
+        self.mail_client = MailClient(self.settings)
         self.messages_forwarded = Counter(
             "messages_forwarded",
             description="Messages forwarded",
             tag_keys=("idx",),
-            )
+        )
         self.messages_forwarded.set_default_tags(
             {"idx": str(idx)})
         self.messages_rejected = Counter(
             "messages_rejected",
             description="Rejected messages",
             tag_keys=("idx",),
-            )
+        )
         self.messages_rejected.set_default_tags(
             {"idx": str(idx)})
         logging.info(f"Starting user actor {idx}")
@@ -67,17 +68,7 @@ class UserActorBase():
         """
         Handle messages.
         """
-        # TODO: Update the Sms item
         user = self._fetch_user(input_msg)
-        # TODO: check subscriptions.
-        # TODO: rename these functions to be more english-ish.
-        # if user.customer_subscription is None:
-        #     # Ignore users without an active subscription
-        #     return
-        # TODO - handle blocked numbers
-        # blocked_numbers = BlockedNumber.object.get(user=user)
-        # TODO - handle quota
-        # Later TODO: handle more than e-mail
         self.messages_forwarded.inc()
         if (input_msg.from_device):
             msg = {
@@ -85,7 +76,8 @@ class UserActorBase():
                 "msg_from": f"{user.username}@spacebeaver.com",
                 "msg_to": input_msg.to
             }
-            self.mail_client.send_msg.remote(**msg)
+            # Underneath this calls a ray.remote method.
+            self.mail_client.send_message(**msg)
         else:
             msg = {
                 "protocol": EMAIL_PROTOCOL,
@@ -98,7 +90,7 @@ class UserActorBase():
                 msg)
 
 
-@ray.remote(max_restarts=-1, max_task_retries=settings.max_retries)
+@ray.remote(max_restarts=-1)
 class UserActor(UserActorBase):
     """
     Routes messages and checks the user account info.

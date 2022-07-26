@@ -6,6 +6,7 @@ import json
 import base64
 from ..utils import test_utils
 from ..proto.MessageDataPB_pb2 import MessageDataPB, EMAIL as EMAIL_PROTOCOL  # type: ignore
+from messaging.settings.settings import Settings
 
 os.environ["hivebaseurl"] = "http://www.farts.com"
 
@@ -37,23 +38,23 @@ raw_msg_item = json.loads(test_item)
 
 class StandaloneSatelliteTests(unittest.TestCase):
     def test_login_fails(self):
-        s = satellite.SatelliteClientBase(0, 1)
+        s = satellite.SatelliteClientBase(Settings(), 0, 1)
         self.assertRaises(Exception, s._login)
 
     async def decode_msg(self):
-        s = satellite.SatelliteClientBase(0, 1)
+        s = satellite.SatelliteClientBase(Settings(), 0, 1)
         messages = s._decode_message(raw_msg_item)
         async for message in messages:
             print(f"Message {message}")
 
     def test_decode_msg(self):
-        asyncio.get_event_loop().run_until_complete(self.decode_msg())
+        asyncio.run(self.decode_msg())
 
 
 @ray.remote
 class SatelliteClientForTesting(satellite.SatelliteClientBase):
     def __init__(self, idx, poolsize):
-        satellite.SatelliteClientBase.__init__(self, idx, poolsize)
+        satellite.SatelliteClientBase.__init__(self, Settings(), idx, poolsize)
         self.user_pool = test_utils.FakeLazyNamedPool("user", 1)
 
 
@@ -70,7 +71,7 @@ class RaySatelliteTests(unittest.TestCase):
         ray.shutdown()
 
     def test_satellite_client_construct(self):
-        mysatellite = satellite.SatelliteClient.remote(0, 1)  # noqa: F841
+        mysatellite = satellite.SatelliteClient.remote(Settings(), 0, 1)  # noqa: F841
 
     def test_satellite_client_test_construct(self):
         mysatellite = SatelliteClientForTesting.remote(0, 1)  # noqa: F841

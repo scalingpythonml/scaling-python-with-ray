@@ -1,3 +1,4 @@
+from email import message_from_bytes, policy
 import unittest
 import os
 import asyncio
@@ -38,7 +39,8 @@ class MailClientTest(unittest.TestCase):
         return '250 OK'
 
     async def handle_DATA(self, server, session, envelope):
-        self.msgs += envelope
+        self.msgs += [envelope]
+        return '250 Message accepted for delivery'
 
     async def bloop(self):
         """
@@ -47,9 +49,14 @@ class MailClientTest(unittest.TestCase):
         await asyncio.sleep(10)
 
     def test_mailclient(self):
-        self.client.send_message(
+        future = self.client.send_message(
             msg_from="farty@fart.com",
             msg_to="sirfarts@fart.com",
             data="Please send TP, I went to taco-bell.")
+        ray.get(future, timeout=10)
         asyncio.run(self.bloop())
-        self.assertEquals(self.msgs, [])
+        parsed_email = message_from_bytes(self.msgs[0].content, policy=policy.SMTPUTF8)
+        self.assertEquals(parsed_email["From"], "farty@fart.com")
+        self.assertEquals(parsed_email["To"], "sirfarts@fart.com")
+        self.assertEquals(parsed_email.get_body().get_content(),
+                          "Please send TP, I went to taco-bell.")

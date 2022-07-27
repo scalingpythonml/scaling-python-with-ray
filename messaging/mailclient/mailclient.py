@@ -1,7 +1,7 @@
 import ray
-import asyncio
-import aiosmtplib
-from email.message import EmailMessage
+from smtplib import SMTP
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import logging
 from messaging.settings.settings import Settings
 
@@ -22,16 +22,21 @@ class MailClient(object):
 
     @ray.remote(retry_exceptions=True)
     def send_msg(self, msg_from: str, msg_to: str, data: str):
-        message = EmailMessage()
+        message = MIMEMultipart("alternative")
         message["From"] = msg_from
         message["To"] = msg_to
-        message["Subject"] = "A satelite msg: f{data.take(10)}"
-        message.set_content(data)
-        logging.info(f"Sending {message}")
-        # TODO: Switch to built-in smtp client.
-        return asyncio.run(aiosmtplib.send(
-            message,
-            hostname=self.settings.mail_server,
-            port=self.settings.mail_port,
-            username=self.settings.mail_username,
-            password=self.settings.mail_password))
+        message["Subject"] = f"A satelite msg: f{data[0:20]}"
+        part1 = MIMEText(data, "plain")
+        # Possible later: HTML
+        message.attach(part1)
+
+        with SMTP(self.settings.mail_server, port=self.settings.mail_port) as smtp:
+            if self.settings.mail_username is not None:
+                smtp.login(self.settings.mail_username,
+                           self.settings.mail_password)
+            logging.info(f"Sending message {message}")
+            r = smtp.sendmail(
+                msg=str(message),
+                from_addr=msg_from,
+                to_addrs=msg_to)
+            return r

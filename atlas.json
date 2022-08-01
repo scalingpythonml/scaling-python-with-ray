@@ -15,6 +15,12 @@
     "ch07.asciidoc",
     "ch08.asciidoc",
     "ch09.asciidoc",
+    "ch10.asciidoc",
+    "ch11.asciidoc",
+    "ch12.asciidoc",
+    "appendix_a.asciidoc",
+    "appendix_b.asciidoc",
+    "appendix_c.asciidoc",
     "author_bio.html"
   ],
   "formats": {

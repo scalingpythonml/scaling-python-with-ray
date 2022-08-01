@@ -50,7 +50,6 @@ ray.get(trivial_ds.get_internal_block_refs())
 
 
 get_ipython().system('wget http://gender-pay-gap.service.gov.uk/viewing/download-data/2021')
-get_ipython().system('mv 2021 2021.csv')
 
 
 # In[ ]:
@@ -59,7 +58,10 @@ get_ipython().system('mv 2021 2021.csv')
 # If in local mode
 if local:
     #tag::load_csv_local_fs[]
-    ds = ray.data.read_csv("2021.csv")
+    ds = ray.data.read_csv(
+        "2021",
+        partition_filter=None # Since the file doesn't end in .csv
+    )                   
     #end::load_csv_local_fs[]
 
 
@@ -104,7 +106,9 @@ except Exception as e:
 fs = fsspec.filesystem('https')
 ds = ray.data.read_csv(
     "https://https://gender-pay-gap.service.gov.uk/viewing/download-data/2021",
-    filesystem=fs)
+    filesystem=fs,
+    partition_filter=None # Since the file doesn't end in .csv
+    )
 #end::load_from_https[]
 
 

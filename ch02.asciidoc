@@ -149,7 +149,7 @@ include::examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=ds]
 
 Ray 1.9 added `GroupedDataset` for supporting different kinds of aggregations. By calling `groupby` with either a column name or a function that returns a key, you get a `GroupedDataset`. GroupedDataset's have built in support for `count`, `max`, `min`, and other common aggregations. You can use GroupedDatasets to extend <<ds_hello>> into a wordcount example as shown in <<ds_wc>>.
 
-[[ds_hello]]
+[[ds_wc]]
 .Construct dataset of web pages
 ====
 [source, python]

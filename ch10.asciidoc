@@ -220,9 +220,9 @@ Both PyTorch and PyTorch Lightning are using joblib to distributed training thro
 
 Once you add the plugins to your PyTorch Lightning Trainer, you can configure them to parallelize training to all the cores in your laptop, or across a massive multi-node, multi-GPU cluster with no additional code changes. This library also comes with integration with https://pythonrepo.com/ray-project/ray_lightning/blob/main/tune.io[+++Ray Tune+++] so you can perform distributed hyperparameter tuning experiments.
 
-The RayPlugin class provides Distributed Data-Parallel (DDP) training on a Ray cluster. PyTorch DDP is used as the distributed training protocol by PyTorch, and Ray is used in this case to launch and manage the training worker processes. The base code using this plugin is shown in <<ltorch_train>>.footnote:[The full code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/torch/wine-quality_ltorch_ray.py[+++github+++].]
+The RayPlugin class provides Distributed Data-Parallel (DDP) training on a Ray cluster. PyTorch DDP is used as the distributed training protocol by PyTorch, and Ray is used in this case to launch and manage the training worker processes. The base code using this plugin is shown in <<ltorch_train_2>>.footnote:[The full code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/torch/wine-quality_ltorch_ray.py[+++github+++].]
 
-[[ltorch_train]]
+[[ltorch_train_2]]
 .Enabling Lightning PyTorch implementation of wine quality model building to run on Ray
 ====
 [source, python]
@@ -399,9 +399,9 @@ In the code above we have introduced 3 supporting functions:
 * _Model_test_ - this function that encapsulates model quality evaluation
 * Train_winequality - this function implements all steps for model training and reporting them to Tune. This allows Tune to make decisions in the middle of training.
 
-With these three functions in place, integration with Tune is very straightforward (<<tune_additions>>):
+With these three functions in place, integration with Tune is very straightforward (<<tune_additions_2>>):
 
-[[tune_additions]]
+[[tune_additions_2]]
 .Integration of model building with Tune
 ====
 [source, python]

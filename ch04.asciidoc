@@ -98,7 +98,7 @@ Like an ObjectRef, you can pass an actor handle as a parameter to another actor 
 
 Note that <<simple_remote_actor_creation>> uses `@ray.remote` annotation to define an ordinary Python class as a Ray remote actor. Alternatively, instead of using an annotation, you can leverage the following code to convert a Python class into a remote actor:
 
-[[make_actor]]
+[[make_actor_2]]
 .Create an instance of a Ray remote actor without the decorator
 ====
 [source, python]

@@ -359,11 +359,6 @@ class Settings:
     # ~~~~~~~~~~~~~~~~
     LIBS += ["django_countries"]
 
-    # STORAGES
-    # ~~~~~~~~
-    LIBS += ["storages"]
-    AWS_DEFAULT_ACL = None
-
     # CORESHEADERS
     # ~~~~~~~~~~~~
     LIBS += ["corsheaders"]

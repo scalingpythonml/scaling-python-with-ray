@@ -23,41 +23,6 @@ function file_env(){
 }
 
 
-
-function cache_ready(){
-file_env 'CACHE_NETLOC'
-python << END
-import os
-import sys
-import socket
-import kombu
-try:
-    connection = kombu.Connection("${CACHE_NETLOC}")
-    connection.connect()
-    connection.release()
-except socket.error:
-    sys.exit(-1)
-sys.exit(0)
-END
-}
-
-function broker_ready(){
-file_env 'BROKER_NETLOC'
-python << END
-import os
-import sys
-import socket
-import kombu
-try:
-    connection = kombu.Connection("${BROKER_NETLOC}")
-    connection.connect()
-    connection.release()
-except socket.error:
-    sys.exit(-1)
-sys.exit(0)
-END
-}
-
 function data_ready() {
 file_env 'DATA_NETLOC'
 python << END

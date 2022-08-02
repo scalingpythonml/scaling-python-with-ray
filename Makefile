@@ -1,4 +1,5 @@
 CONFIG=compose/development.yml
+PROD_CONFIG=compose/production.yml
 PROJECT=spacebeaver
 
 ifeq (shell, $(firstword $(MAKECMDGOALS)))
@@ -7,6 +8,9 @@ ifeq (shell, $(firstword $(MAKECMDGOALS)))
 endif
 
 
+.PHONY: crossbuild
+crossbuild:
+	docker buildx bake -f $(PROD_CONFIG) --progress=plain --set *.platform=linux/arm64,linux/amd64 --set app.tags.image=${DOCKERUSER}/$(PROJECT)-web app --push
 
 .PHONY: up
 up: export DOCKER_BUILDKIT := 1

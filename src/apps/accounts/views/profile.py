@@ -3,9 +3,10 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from apps.core.consts import ProfileStepsEnum
 
 from django_countries.widgets import CountrySelectWidget
+
+from apps.core.consts import ProfileStepsEnum
 
 
 User = get_user_model()
@@ -51,10 +52,10 @@ class ProfileView(View):
         form = self.form_class(request.POST, instance=request.user)
         if form.is_valid():
             form.save(commit=True)
-            if request.user.have_device:
-                User.objects.update_user_device_nickname(
-                    request.user, form.cleaned_data["device_nickname"]
-                )
+            # if request.user.have_device:
+            #     User.objects.update_user_device_nickname(
+            #         request.user, form.cleaned_data["device_nickname"]
+            #     )
         return render(
             request, self.template, {**self.base_context, "form": form}
         )
@@ -67,5 +68,5 @@ class ProfileView(View):
             "action": reverse("accounts:profile"),
             "action_button_name": "Save",
             "step": ProfileStepsEnum.SETTINGS.value,
-            "forget": True
+            "forget": True,
         }

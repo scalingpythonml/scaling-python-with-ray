@@ -1,5 +1,6 @@
-from django.views import View
 from django.shortcuts import render
+from django.views import View
+
 
 class NewPasswordView(View):
     template_name = "password_link.html"

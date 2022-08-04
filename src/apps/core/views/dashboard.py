@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
-from apps.core.consts import ProfileStepsEnum
 
+from apps.core.consts import ProfileStepsEnum
 from apps.core.outside_db.services import get_user_message_count
 
 
@@ -34,7 +34,7 @@ class DashboardView(View):
     @property
     def base_context(self):
         return {
-            "title": "Dashboard", 
+            "title": "Dashboard",
             "navname": "Dashboard",
-            "step" : ProfileStepsEnum.DASHBOARD.value
+            "step": ProfileStepsEnum.DASHBOARD.value,
         }

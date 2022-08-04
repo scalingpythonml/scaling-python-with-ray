@@ -23,7 +23,7 @@ def get_card_info_from_payment_method(payment_method: PaymentMethod):
             if card["exp_month"] >= 0
             else f'0{card["exp_month"]}'
         )
-        exp_year = str(card["exp_year"])[:-2]
+        exp_year = str(card["exp_year"])[-2:]
         return {
             "brand": card["brand"],
             "last4": card["last4"],

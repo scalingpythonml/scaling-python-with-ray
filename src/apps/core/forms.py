@@ -1,4 +1,5 @@
 from operator import truediv
+
 from django import forms
 from django.contrib.auth import get_user_model, password_validation
 
@@ -58,9 +59,7 @@ class LoginForm(forms.ModelForm):
     )
     password = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput(
-            attrs={"placeholder": "Enter password"}
-        ),
+        widget=forms.PasswordInput(attrs={"placeholder": "Enter password"}),
     )
 
     class Meta:
@@ -128,7 +127,7 @@ class NewPasswordForm(forms.ModelForm):
 
 
 class PersonalInfoForm(forms.ModelForm):
-    
+
     # full_name = forms.EmailField(
     #     label="Full name",
     #     widget=forms.TextInput(attrs={"placeholder": "Enter full name"}),
@@ -145,8 +144,11 @@ class PersonalInfoForm(forms.ModelForm):
         model = User
         fields = ["full_name", "company", "country"]
         widgets = {
-            "country": CountrySelectWidget(attrs={"class": "form-select field__input "})
+            "country": CountrySelectWidget(
+                attrs={"class": "form-select field__input "}
+            )
         }
+
 
 class BlockedNumberForm(forms.Form):
     number = forms.CharField(required=True)

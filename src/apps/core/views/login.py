@@ -24,14 +24,7 @@ def login_routing(user: User):
 
 
 class LoginView(BaseLoginView):
-    template_name = "login.html" 
-    form_class = LoginForm
-
-    def get(self, request):
-        form = self.form_class()
-        return render(
-            request, self.template_name, {"form": form}
-        )
+    template_name = "login.html"
 
     def get_success_url(self):
         return login_routing(self.request.user)

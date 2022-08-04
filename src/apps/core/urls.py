@@ -1,5 +1,6 @@
+from django.contrib.auth import views as auth_view
 from django.contrib.auth.decorators import login_required
-from django.urls import path
+from django.urls import path, reverse_lazy
 
 from apps.core.views import *
 
@@ -52,10 +53,37 @@ view_urlpatterns = [
         login_required(DeleteBlockedNumberView.as_view()),
         name="delete-blocked-number",
     ),
-    path("forget-password", ForgetPasswordView.as_view(), name="forget-password"),
-    path("new-password", NewPasswordView.as_view(), name="new-password"),
-    path("success-new-password", SuccessNewPasswordView.as_view(), name="success-new-password"),
-    path("new-password-link", NewPasswordView.as_view(), name="new-password-link"),
+    path(
+        "success-new-password/",
+        auth_view.PasswordResetDoneView.as_view(
+            template_name="success_chane_pass.html"
+        ),
+        name="success-new-password",
+    ),
+    path(
+        "reset/<uidb64>/<token>/",
+        auth_view.PasswordResetConfirmView.as_view(
+            template_name="new_password.html",
+            success_url=reverse_lazy("core:success-new-password"),
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "new-password-link/",
+        auth_view.PasswordResetDoneView.as_view(
+            template_name="password_link.html"
+        ),
+        name="new-password-link",
+    ),
+    path(
+        "forget-password/",
+        auth_view.PasswordResetView.as_view(
+            template_name="forget_password.html",
+            email_template_name="password_reset_email.txt",
+            success_url=reverse_lazy("core:new-password-link"),
+        ),
+        name="forget-password",
+    ),
 ]
 
 api_urlpatterns = [

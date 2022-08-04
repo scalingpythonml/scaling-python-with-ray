@@ -1,10 +1,26 @@
 {% extends 'dashboard-layout.html' %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'core/credit-card.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
-<script src="{% static 'core/js/loader.js' %}"></script>
-<script src="https://js.stripe.com/v3/"></script>
+
+  <link rel="stylesheet" href="{% static 'core/credit-card.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
+
+  <script src="{% static 'core/js/loader.js' %}"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+
+  .custom-btn {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+
+  .custom-cnt, .custom-card {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+  }
+
+  </style>
+
 {% endblock %}
 {% block content %}
 
@@ -59,7 +75,7 @@
                     <button class="btn-outline plan-card-simple__btn" type="button"
                         onclick="cancelSubscriptionConfirmation(true)">Cancel plan</button>
                     {% else %}
-                    <a href="{% url 'core:pick-plan' %}" class="btn-outline plan-card-simple__btn" type="button">Update
+                    <a href="{% url 'core:pick-plan' %}" class="btn-outline plan-card-simple__btn ms-lg-3" type="button">Update
                         plan</a>
 
                     {% endif %}
@@ -304,10 +320,11 @@
 
 <!-- OLD -->
 
-<div class="container">
+<div class="container custom-cnt" >
+
     <div class="row">
-        <div class="col-sm">
-            <div class="card">
+         <div class="col-sm custom-card mx-lg-2" >
+            <div class="card" >
                 <div class="card-header">
                     Current payment method
                 </div>
@@ -342,7 +359,7 @@
                     {% endif %}
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModalCenter"
+                    <button type="button" class="btn btn-success custom-btn" data-toggle="modal" data-target="#exampleModalCenter"
                         onclick="updatePaymentMethodModal(true)">
                         {% if card %}
                         Update
@@ -351,7 +368,7 @@
                         {% endif %}
                     </button>
                     {% if card %}
-                    <button class="btn btn-danger" onclick="deletePaymentMethodConfirmation(true)">
+                    <button class="btn btn-danger custom-btn" onclick="deletePaymentMethodConfirmation(true)">
                         Delete
                     </button>
                     {% endif %}
@@ -360,7 +377,7 @@
             </div>
 
         </div>
-        <div class="col-sm">
+        <div class="col-sm custom-card mt-3 mt-sm-0 mx-lg-2">
             <div class="card">
                 <div class="card-header">
                     Current plan
@@ -407,7 +424,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm">
+        <div class="col-sm custom-card mt-3">
             <div class="card">
                 <div class="card-header">
                     Invoices
@@ -496,14 +513,14 @@
             <div class="modal-body p-0">
                 <header class="form-header text-center">
                   <img class="form-header-icon" src="{% static 'core/img/svg/icon-warning.svg' %}" alt="">
-        
+
                   <h1 class="title title--sm">Are you sure what you want delete payment method?</h1>
                 </header>
                 <form action="#" id="delete-number-form" method="post" class="form">
                   {% csrf_token %}
                   <button type="button" id="delete-payment-method-button"  class="btn form-submit">Delete</button>
                   <button type="button" class="btn-outline form-submit" data-dismiss="modal">Close</button>
-        
+
                 </form>
               </div>
         </div>

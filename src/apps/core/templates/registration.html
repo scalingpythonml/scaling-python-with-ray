@@ -19,7 +19,7 @@
           integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
           crossorigin="anonymous"></script>
   <title>SB: {% block title %} {{ title }} {% endblock %}</title>
-  
+
   {% render_block "css" %}
   {% block extra_head %}  {% endblock %}
 </head>
@@ -58,11 +58,6 @@
           <a class="btn btn-primary text-uppercase" href="{% url 'core:login' %}">Login</a>
           <a class="btn btn-success text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
         {% endif %}
-        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
-        
-        <a class="btn btn-success text-uppercase" href="{% url 'core:success-new-password' %}"> success New pass</a>
-
-        <a class="btn btn-success text-uppercase" href="{% url 'core:new-password-link' %}"> New pass lnk</a>
 
       </div>
 
@@ -141,7 +136,7 @@
   </div>
 </div>
 {% block footer %}
-  
+
 {% endblock %}
 {% render_block "js" %}
 {% block extra_js %}  {% endblock %}

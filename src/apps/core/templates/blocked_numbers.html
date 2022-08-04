@@ -26,13 +26,13 @@
                     <path d="M5.646 18.372L18.372 5.646" stroke="#F480FF" stroke-width="1.8" stroke-linecap="round"
                       stroke-linejoin="round" />
                   </svg>
-      
-      
+
+
                 </div>
                 <div class="user-card__wrap">
                   <p class="user-card__name">Jacob Jones</p>
                 </div>
-      
+
               </div>
             </td>
             <td class="align-middle  d-none d-lg-block">
@@ -40,11 +40,11 @@
             </td>
             <td class="align-middle">
               <p class="user-tag user-tag--cancel">Blocked</p>
-      
+
             </td>
             <td class="align-middle text-end">
               {% url 'core:delete-blocked-number' number.id as action_url %}
-              <button class="link-btn" onclick="deleteNumberModal(true, '{{ action_url }}')">Unblock</button>
+              <button class="btn-success p-1" style="border-radius: 8px; width: 95px;"  onclick="deleteNumberModal(true, '{{ action_url }}')">Unblock</button>
             </td>
           </tr>
           {% endfor %}
@@ -64,8 +64,8 @@
           {% endif %}
         </ul>
       </nav>
-      
-      <button class="link-btn link-btn--underline" onclick="addNumberModal(true)">Add to block</button>
+
+      <button class="btn-danger" style="border-radius: 5px; width: 120px; padding: 3px" onclick="addNumberModal(true)">Add to block</button>
 <!-- DELETE NUMBER CONFIRMATION MODAL -->
 
 <div class="modal fade" id="delete-number" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -80,7 +80,7 @@
         </header>
         <form action="#" id="delete-number-form" method="post" class="form">
           {% csrf_token %}
-          <button type="button" class="btn form-submit">Unblock</button>
+          <button type="submit" class="btn form-submit">Unblock</button>
           <button type="button" class="btn-outline form-submit" data-dismiss="modal">Close</button>
 
         </form>
@@ -118,7 +118,7 @@
           </div>
 
           {% endfor %}
-          <button type="button" class="btn modal__footer-btn" data-dismiss="modal" data-toggle="modal"
+          <button type="submit" class="btn modal__footer-btn"
             data-target="#successfullyBlocked">Add to block</button>
 
         </form>

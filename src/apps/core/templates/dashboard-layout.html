@@ -41,42 +41,31 @@
                     <img class="logo__img" src="{% static 'core/img/svg/logo-with-beaver.svg' %}" alt="">
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                  
+
                     <img class="navbar-toggler__icon" src="{% static 'core/img/svg/burger.svg' %}" alt="">
                 </button>
-               
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item active">
-                            <a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a>
+                            <a class=" text-uppercase nav-link nav-link text-dark" href="{% url 'core:dashboard' %}">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'core:billing' %}">Billing</a>
+                            <a class=" text-uppercase nav-link nav-link text-dark" href="{% url 'core:billing' %}">Billing</a>
                         </li>
                         {% if request.user.is_authenticated %}
                         <li class="nav-item">
-                            <a class=" text-uppercase" href="{% url 'accounts:profile' %}">Profile</a>
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'accounts:profile' %}">Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class=" text-uppercase" href="{% url 'accounts:logout' %}">Logout</a>
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'accounts:logout' %}">Logout</a>
                         </li>
-                        <li class="nav-item">
-                        <a class=" text-uppercase" href="{% url 'core:new-password' %}">New pass</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class=" text-uppercase" href="{% url 'core:success-new-password' %}">
-                            success New pass</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class=" text-uppercase" href="{% url 'core:new-password-link' %}">
-                            New pass lnk</a>
-                            </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class=" text-uppercase" href="{% url 'core:login' %}">Login</a>
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'core:login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class=" text-uppercase" href="{% url 'core:sign-up' %}">sign up</a>
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'core:sign-up' %}">sign up</a>
                         </li>
                         {% endif %}
                         {% show_menu 0 100 100 100 "bootstrap_menu.html" %}

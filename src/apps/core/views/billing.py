@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.views import View
-from apps.core.consts import ProfileStepsEnum
 
 from djstripe.models import Customer
 from rest_framework import serializers, status
@@ -10,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.consts import ProfileStepsEnum
 from apps.utils.djstripe_data import (
     get_card_info_from_payment_method,
     get_plan_info_from_subscription,
@@ -57,7 +57,7 @@ class BillingView(View):
             "title": "Billing",
             "navname": "Billing",
             "stripe_api_key": settings.STRIPE_TEST_PUBLIC_KEY,
-            "step": ProfileStepsEnum.BILLING.value
+            "step": ProfileStepsEnum.BILLING.value,
         }
 
 

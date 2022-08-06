@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: spacebeaver-web-worker
@@ -22,12 +22,12 @@ spec:
           - secretRef:
               name: spacebeaver-secret
           - configMapRef:
-              name: spacebeaver-config
+              name: spacebeaver-web-config
           ports:
             - containerPort: 80
               name: web
 ---
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: spacebeaver-web
@@ -51,7 +51,7 @@ spec:
           - secretRef:
               name: spacebeaver-secret
           - configMapRef:
-              name: spacebeaver-config
+              name: spacebeaver-web-config
           env:
             - name: WEB_ONLY
               value: "TRUE"
@@ -127,6 +127,16 @@ spec:
                 name:  spacebeaver-web-svc
                 port:
                   number: 80
+    - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  spacebeaver-web-svc
+                port:
+                  number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -140,13 +150,23 @@ spec:
       - www.spacebeaver.com
     secretName: spacebeaver-tls-secret
   rules:
-  - host: *.spacebeaver.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: spacebeaver-web-svc
-            port:
-              number: 80
+    - host: spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80

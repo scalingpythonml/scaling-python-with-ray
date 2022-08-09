@@ -6,6 +6,7 @@ import logging
 from messaging.settings.settings import Settings
 
 
+#tag::code[]
 class MailClient(object):
     """
     Mail Client
@@ -40,3 +41,4 @@ class MailClient(object):
                 from_addr=msg_from,
                 to_addrs=msg_to)
             return r
+#end::code[]

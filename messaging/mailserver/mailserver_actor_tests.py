@@ -12,7 +12,7 @@ class Envelop:
         self.rcpt_tos = []
         self.mail_from = "random@sender.co"
 
-
+#tag::code[]
 @ray.remote
 class MailServerActorForTesting(mailserver_actor.MailServerActorBase):
     def __init__(self, idx, poolsize, port, hostname):
@@ -31,6 +31,7 @@ class MailServerActorTestCases(unittest.TestCase):
 
     def test_mail_server_actor_construct(self):
         mailserver_actor.MailServerActor.remote(0, 1, 7587, "localhost")
+#end::code[]
 
     def test_mail_server_actor_test_construct(self):
         MailServerActorForTesting.remote(0, 1, 7587, "localhost")

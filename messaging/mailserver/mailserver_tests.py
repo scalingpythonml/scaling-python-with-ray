@@ -7,6 +7,7 @@ from ..proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL  # type: ignore
 from . import mailserver_actor
 
 
+#tag::code[]
 class StandaloneMailServerActorTests(unittest.TestCase):
     port = 7779 + 100 * random.randint(0, 9)
 
@@ -33,6 +34,7 @@ class StandaloneMailServerActorTests(unittest.TestCase):
         self.assertEquals(self.pool.submitted[0][1].text, msg_text)
         self.assertEquals(self.pool.submitted[0][1].protocol, EMAIL_PROTOCOL)
         self.assertEquals(self.pool.submitted[0][1].from_device, False)
+#end::code[]
 
     def test_smpt_emailmessage_send(self):
         from email.message import EmailMessage

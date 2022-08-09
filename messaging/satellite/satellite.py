@@ -78,6 +78,7 @@ class SatelliteClientBase():
         if res.status_code != 200:
             raise Exception(f"Login failure, exiting actor {res}")
 
+#tag::check_msgs[]
     async def check_msgs(self):
         # TODO: Add message type
         res = self.session.get(
@@ -95,7 +96,9 @@ class SatelliteClientBase():
                 self.session.post(
                     self._ackMessageURL.format(item['packetId']),
                     headers=self.hdrs)
+#end::check_msgs[]
 
+#tag::process[]
     async def _decode_message(self, item: dict) -> AsyncIterator[CombinedMessage]:
         """
         Decode a message. Note: result is not serializable.
@@ -119,7 +122,7 @@ class SatelliteClientBase():
 
     async def _ser_decode_message(self, item: dict) -> List[CombinedMessage]:
         """
-        Decode a message. Serializeable but blocking
+        Decode a message. Serializeable but blocking. Exposed for testing.
         """
         gen = self._decode_message(item)
         # See PEP-0530
@@ -132,6 +135,7 @@ class SatelliteClientBase():
             self.user_pool.get_pool().submit(
                 lambda actor, msg: actor.handle_message,
                 message)
+#end::process[]
 
     async def send_message(self, protocol: int, msg_from: str, msg_to: int, data: str):
         # TODO: batch?
@@ -154,7 +158,6 @@ class SatelliteClientBase():
             data=request_encoded,
             headers=self._sendMessageHeaders
         )
-
 
 @ray.remote(max_restarts=-1)
 class SatelliteClient(SatelliteClientBase):

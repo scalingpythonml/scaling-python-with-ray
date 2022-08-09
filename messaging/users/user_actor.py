@@ -13,6 +13,7 @@ from messaging.settings.settings import Settings
 # since you can not directly sub-class actors.
 
 
+#tag::code[]
 class UserActorBase():
     """
     Base client class for talking to the swarm.space APIs.
@@ -95,3 +96,4 @@ class UserActor(UserActorBase):
     """
     Routes messages and checks the user account info.
     """
+#end::code[]

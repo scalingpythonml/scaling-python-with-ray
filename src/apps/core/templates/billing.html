@@ -311,7 +311,6 @@
 
                 </form>
 
-                <button class="link-btn link-btn--underline" data-bs-toggle="modal" data-bs-target="#delete-payment-method">Delete card</button>
 
             </section>
         </div>
@@ -496,8 +495,9 @@
                     <div id="card-element-errors" role="alert"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style=" width: 100%">Close</button>
+
                 </div>
             </form>
 
@@ -518,8 +518,8 @@
                 </header>
                 <form action="#" id="delete-number-form" method="post" class="form">
                   {% csrf_token %}
-                  <button type="button" id="delete-payment-method-button"  class="btn form-submit">Delete</button>
-                  <button type="button" class="btn-outline form-submit" data-dismiss="modal">Close</button>
+                  <button type="button" id="delete-payment-method-button"  class="btn form-submit" style="width: 80%; margin-left: 10%; margin-right: 10%;">Delete</button>
+                  <button type="button" class="btn-outline form-submit" data-dismiss="modal" style="width: 80%; margin-left: 10%; margin-right: 10%; margin-bottom: 25px">Close</button>
 
                 </form>
               </div>

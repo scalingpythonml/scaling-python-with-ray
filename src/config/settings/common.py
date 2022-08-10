@@ -71,12 +71,10 @@ class Settings:
             "SECRET_KEY",
             "SSL",
             "DOMAIN",
-            "CACHE_NETLOC",
             "DATA_NETLOC",
             "BROKER_NETLOC",
             "STATIC_URL",
             "MEDIA_URL",
-            "OUTSIDE_DATA_NETLOC",
             "STRIPE_LIVE_SECRET_KEY",
             "STRIPE_TEST_SECRET_KEY",
             "STRIPE_LIVE_PUBLIC_KEY",
@@ -110,7 +108,7 @@ class Settings:
 
     @property
     def DOMAIN_URL(self):
-        return f"{self.PROTO}://{self.DOMAIN}"
+        return f"{self.DOMAIN}"
 
     ROOT_URLCONF = "config.urls"
 
@@ -458,10 +456,6 @@ class Settings:
         return self._STRIPE_LIVE_SECRET_KEY
 
     @property
-    def STRIPE_TEST_SECRET_KEY(self):
-        return self._STRIPE_TEST_SECRET_KEY
-
-    @property
     def STRIPE_LIVE_PUBLIC_KEY(self):
         return self._STRIPE_LIVE_PUBLIC_KEY
 
@@ -470,8 +464,13 @@ class Settings:
         return self._STRIPE_TEST_PUBLIC_KEY
 
     @property
+    def STRIPE_TEST_SECRET_KEY(self):
+        return self._STRIPE_TEST_SECRET_KEY
+
+    @property
     def DJSTRIPE_WEBHOOK_SECRET(self):
         return self._DJSTRIPE_WEBHOOK_SECRET
+
 
     def _set_djstripe_test_db_params(self):
         try:
@@ -509,10 +508,6 @@ class Settings:
     @property
     def CELERY_BROKER_URL(self):
         return self._BROKER_NETLOC
-
-    @property
-    def CELERY_RESULT_BACKEND(self):
-        return self._CACHE_NETLOC
 
     CELERY_TASK_SERIALIZER = "json"
     CELERY_ACCEPT_CONTENT = ["application/json"]
@@ -577,11 +572,6 @@ class Settings:
     # DJANGO CMS PICTURE
     # -----------------------------------------------------------------------
     LIBS += ["djangocms_picture"]
-
-    # OUTSIDE DATABASE
-    # -----------------------------------------------------------------------
-    def OUTSIDE_DATA_NETLOC(self):
-        return self._OUTSIDE_DATA_NETLOC
 
     # APPS CONFIGURATION
     # -----------------------------------------------------------------------

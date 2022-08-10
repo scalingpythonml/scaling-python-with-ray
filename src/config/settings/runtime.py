@@ -44,18 +44,16 @@ class Runtime(Settings, Configuration):
         return [
             "ENVIRONMENT",
             "SECRET_KEY",
-            "SSL",
             "DOMAIN",
-            "CACHE_NETLOC",
             "DATA_NETLOC",
             "BROKER_NETLOC",
             "STATIC_URL",
             "MEDIA_URL",
-            "OUTSIDE_DATA_NETLOC",
-            "STRIPE_LIVE_SECRET_KEY",
-            "STRIPE_TEST_SECRET_KEY",
+            "SSL",
             "STRIPE_LIVE_PUBLIC_KEY",
+            "STRIPE_LIVE_SECRET_KEY",
             "STRIPE_TEST_PUBLIC_KEY",
+            "STRIPE_TEST_SECRET_KEY",
             "DJSTRIPE_WEBHOOK_SECRET",
         ]
 
@@ -72,14 +70,6 @@ class Runtime(Settings, Configuration):
     @property
     def ALLOWED_HOSTS(self):
         return super(Runtime, self).ALLOWED_HOSTS + ["app"]
-
-    @property
-    def INSTALLED_APPS(self):
-        base_apps = super().INSTALLED_APPS
-        base_apps.insert(
-            base_apps.index("django.contrib.staticfiles"), "collectfast"
-        )
-        return base_apps
 
     COLLECTFAST_STRATEGY = "collectfast.strategies.boto3.Boto3Strategy"
 

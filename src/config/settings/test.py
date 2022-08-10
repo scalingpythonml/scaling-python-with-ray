@@ -23,3 +23,11 @@ class Test(Settings, Configuration):
         return self._update_logging(
             super().LOGGING, level=level, formater="verbose", handler="console"
         )
+
+    @property
+    def STRIPE_TEST_SECRET_KEY(self):
+        return self._STRIPE_TEST_SECRET_KEY
+
+    @property
+    def STRIPE_TEST_PUBLIC_KEY(self):
+        return self._STRIPE_TEST_PUBLIC_KEY

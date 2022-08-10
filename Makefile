@@ -1,6 +1,7 @@
 CONFIG=compose/development.yml
 PROD_CONFIG=compose/production.yml
 PROJECT=spacebeaver
+DOCKERUSER=holdenk
 
 ifeq (shell, $(firstword $(MAKECMDGOALS)))
   RUN_ARGS := $(lastword $(MAKECMDGOALS))

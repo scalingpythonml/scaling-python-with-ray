@@ -1,6 +1,76 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    app: rabbitmq
+  name: rabbitmq
+  namespace: spacebeaver 
+spec:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: rabbitmq
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - image: rabbitmq
+          envFrom:
+            - configMapRef:
+                name: spacebeaver-web-config
+            - secretRef:
+                name: spacebeaver-secret
+          imagePullPolicy: Always
+          name: rabbitmq
+          ports:
+            - containerPort: 5671
+              protocol: TCP
+            - containerPort: 5672
+              protocol: TCP
+            - containerPort: 4369
+              protocol: TCP
+            - containerPort: 15672
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: spacebeaver
+spec:
+  ports:
+  - name: ampq1
+    port: 5671
+    protocol: TCP
+    targetPort: 5671
+  - name: ampq2
+    port: 5672
+    protocol: TCP
+    targetPort: 5672
+  selector:
+    app: rabbitmq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: spacebeaver-web-worker
   namespace: spacebeaver
   labels:
@@ -71,7 +141,7 @@ spec:
   - name: http
     port: 80
     protocol: TCP
-    targetPort: http
+    targetPort: web
   selector:
     app: spacebeaver-web
   sessionAffinity: None
@@ -109,6 +179,7 @@ spec:
   dnsNames:
   - spacebeaver.com
   - www.spacebeaver.com
+  - api.spacebeaver.com
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -128,6 +199,16 @@ spec:
                 port:
                   number: 80
     - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: api.spacebeaver.com
       http:
         paths:
           - path: /
@@ -161,6 +242,16 @@ spec:
                 port:
                   number: 80
     - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: api.spacebeaver.com
       http:
         paths:
           - path: /

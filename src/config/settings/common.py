@@ -102,14 +102,6 @@ class Settings:
     def DOMAIN_NAME(self):
         return self.DOMAIN
 
-    @property
-    def PROTO(self):
-        return "http" if not self.USE_HTTPS else "https"
-
-    @property
-    def DOMAIN_URL(self):
-        return f"{self.DOMAIN}"
-
     ROOT_URLCONF = "config.urls"
 
     # PATH CONFIGURATION

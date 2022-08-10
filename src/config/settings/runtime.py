@@ -59,17 +59,18 @@ class Runtime(Settings, Configuration):
 
     @property
     def CORS_ORIGIN_REGEX_WHITELIST(self):
-        proto = f"{self.PROTO}://"
-        prefix = rf"{proto}(.*\.)?"
-        segment = rf"{self.DOMAIN_URL.replace(proto, prefix)}"
-        suffix = self.DOMAIN.split(".")[-1]
-        return [rf"^{segment}\.{suffix}$"]
+        return [rf"^{self._DOMAN}$"]
 
     DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
 
     @property
     def ALLOWED_HOSTS(self):
-        return super(Runtime, self).ALLOWED_HOSTS + ["app"]
+        return super(Runtime, self).ALLOWED_HOSTS + [
+            "app",
+            f"api.{self._DOMAIN}",
+            f"www.{self._DOMAIN}",
+            self._DOMAIN,
+        ]
 
     COLLECTFAST_STRATEGY = "collectfast.strategies.boto3.Boto3Strategy"
 

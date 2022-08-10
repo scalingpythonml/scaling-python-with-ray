@@ -47,4 +47,4 @@ django-filer==2.2
 djangocms-text-ckeditor==5.0.1
 djangocms-link==3.0.0
 djangocms-picture==4.0.0
-
+reportlab==3.6.11

@@ -16,11 +16,13 @@ class PersonalInfoView(views.View):
 
     def get(self, request):
 
-        form = self.form_class(initial={
-            'full_name': request.user.full_name,
-            'company': request.user.company,
-            'country': request.user.country
-        })
+        form = self.form_class(
+            initial={
+                "full_name": request.user.full_name,
+                "company": request.user.company,
+                "country": request.user.country,
+            }
+        )
         return render(
             request, self.template, {"form": form, **self.base_context}
         )

@@ -59,7 +59,7 @@ class Runtime(Settings, Configuration):
 
     @property
     def CORS_ORIGIN_REGEX_WHITELIST(self):
-        return [rf"^{self._DOMAN}$"]
+        return [rf"^{self._DOMAIN}$"]
 
     DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
 

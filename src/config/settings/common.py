@@ -463,7 +463,6 @@ class Settings:
     def DJSTRIPE_WEBHOOK_SECRET(self):
         return self._DJSTRIPE_WEBHOOK_SECRET
 
-
     def _set_djstripe_test_db_params(self):
         try:
             reg_exp = "(.*?)://(.*?):(.*?)@(.*?):(.*?)/(.*)"

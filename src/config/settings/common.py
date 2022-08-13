@@ -583,6 +583,9 @@ class Settings:
     # ~~~~~~~~
     APPS += ["apps.pages.apps.Config"]
 
+    # News feed
+    APPS += ["newsfeed"]
+
     # -----------------------------------------------------------------------
     INSTALLED_APPS = FRAMEWORK + APPS + LIBS
     # -----------------------------------------------------------------------

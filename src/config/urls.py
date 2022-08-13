@@ -45,6 +45,7 @@ urlpatterns = [
     path("djstripe/", include("djstripe.urls", namespace="djstripe")),
     path("", include("apps.urls")),
     path("cms-settings/", include("cms.urls")),
+    path("newsfeed/", include("newsfeed.urls", namespace="newsfeed")),
 ]
 
 if settings.DEBUG or True:

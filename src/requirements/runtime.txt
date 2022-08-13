@@ -50,3 +50,4 @@ djangocms-picture==4.0.0
 reportlab==3.6.11
 svglib==1.3.0
 whitenoise
+django-newsfeed

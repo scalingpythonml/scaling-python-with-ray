@@ -9,6 +9,7 @@ app_name = "core"
 
 view_urlpatterns = [
     path("", IndexView.as_view(), name="index"),
+    path("device_lookup", DeviceLookup.as_view(), name="device-lookup"),
     path("sign-up/", SignUpView.as_view(), name="sign-up"),
     path(
         "personal-info/",
@@ -17,6 +18,11 @@ view_urlpatterns = [
     ),
     path(
         "add-device",
+        login_required(AddDeviceView.as_view()),
+        name="add-device",
+    ),
+    path(
+        "connect",
         login_required(AddDeviceView.as_view()),
         name="add-device",
     ),

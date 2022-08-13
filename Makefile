@@ -9,6 +9,10 @@ ifeq (shell, $(firstword $(MAKECMDGOALS)))
 endif
 
 
+.PHONY: format
+format:
+	python -m black ./src
+
 .PHONY: crossbuild
 crossbuild:
 	docker buildx bake -f $(PROD_CONFIG) --progress=plain --set *.platform=linux/arm64,linux/amd64 --set app.tags.image=${DOCKERUSER}/$(PROJECT)-web app --push

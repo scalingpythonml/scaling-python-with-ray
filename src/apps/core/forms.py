@@ -154,6 +154,16 @@ class BlockedNumberForm(forms.Form):
     number = forms.CharField(required=True)
 
 
+class DeviceLookupForm(forms.Form):
+    device_id = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(
+            attrs={"placeholder": "Serial number of your device"}
+        ),
+        required=True,
+    )
+
+
 class DeviceForm(forms.Form):
     serial_number = forms.CharField(
         max_length=100,

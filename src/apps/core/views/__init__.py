@@ -2,6 +2,7 @@ from .add_device import AddDeviceView
 from .billing import *
 from .blocked_numbers import *
 from .dashboard import DashboardView
+from .device_lookup import DeviceLookup
 from .device_owner import DeviceOwnerApiView
 from .forget_password import ForgetPasswordView
 from .index import IndexView

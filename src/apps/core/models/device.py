@@ -11,7 +11,7 @@ class DeviceManager(models.Manager):
             device = self.get(serial_number=serial_number)
             return not device.used and device.user is None
         except self.model.DoesNotExist:
-            return False
+            return True  # Allow registration for all serial numbers
 
     def delete_user_device(self, user: User):
         device = self.get(user_id=user.id)

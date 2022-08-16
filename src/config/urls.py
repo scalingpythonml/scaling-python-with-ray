@@ -8,13 +8,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.core.handlers import exception
 from django.http import HttpResponse
-from django.urls import include, path
+from django.urls import handler404, include, path
 from django.views.decorators.cache import cache_page
 from django.views.generic import View
 from django.views.i18n import JavaScriptCatalog
 
 from ratelimit.decorators import ratelimit
-
 
 logger = logging.getLogger(__name__)
 
@@ -57,3 +56,9 @@ if settings.DIST:
     urlpatterns += [
         path("", cache_page(3600 * 2)(IndexView.as_view()), name="index")
     ]
+
+
+from apps.core.views import Error404
+
+# Error pages
+handler404 = Error404

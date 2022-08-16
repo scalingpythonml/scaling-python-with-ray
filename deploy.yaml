@@ -86,7 +86,7 @@ spec:
         app: spacebeaver-web-worker
     spec:
       containers:
-        - image: holdenk/spacebeaver-web:latest
+        - image: holdenk/spacebeaver-web:v0.0.1
           name: spacebeaver-web
           envFrom:
           - secretRef:
@@ -115,7 +115,7 @@ spec:
         app: spacebeaver-web
     spec:
       containers:
-        - image: holdenk/spacebeaver-web:latest
+        - image: holdenk/spacebeaver-web:v0.0.1
           name: spacebeaver-web
           envFrom:
           - secretRef:
@@ -150,43 +150,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: spacebeaver-web-http-ingress
+  name: spacebeaver-web-https-ingress
   namespace: spacebeaver
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
-  rules:
-    - host: spacebeaver.com
-      http:
-        paths:
-          - path: /
-            pathType: Exact
-            backend:
-              service:
-                name:  spacebeaver-web-svc
-                port:
-                  number: 80
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: spacebeaver-tls-cert
-  namespace: spacebeaver
-spec:
-  secretName: spacebeaver-tls-secret
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
-  commonName: spacebeaver.com
-  dnsNames:
-  - spacebeaver.com
-  - www.spacebeaver.com
-  - api.spacebeaver.com
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: spacebeaver-web-http-ingress
-  namespace: spacebeaver
-spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - spacebeaver.com
+      - www.spacebeaver.com
+      - api.spacebeaver.com
+    secretName: spacebeaver-tls-secret
   rules:
     - host: spacebeaver.com
       http:
@@ -222,14 +199,50 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: spacebeaver-web-https-ingress
+  name: spacebeaver-web-http-ingress
+  namespace: spacebeaver
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  rules:
+    - host: spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: api.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spacebeaver-web-http-ingress
   namespace: spacebeaver
 spec:
-  tls:
-  - hosts:
-      - spacebeaver.com
-      - www.spacebeaver.com
-    secretName: spacebeaver-tls-secret
   rules:
     - host: spacebeaver.com
       http:

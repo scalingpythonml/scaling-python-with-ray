@@ -14,3 +14,4 @@ pytest-xdist==2.5.0
 django-test-plus==2.2.0
 sqlacodegen==2.3.0
 django-newsfeed
+django-health-check

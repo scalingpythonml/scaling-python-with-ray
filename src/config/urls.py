@@ -3,23 +3,23 @@ import logging
 import os
 
 from django.conf import settings
+from django.conf.urls import handler400, handler403, handler404
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.core.handlers import exception
 from django.http import HttpResponse
-from django.urls import handler404, include, path
+from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django.views.generic import View
 from django.views.i18n import JavaScriptCatalog
 
 from ratelimit.decorators import ratelimit
 
-logger = logging.getLogger(__name__)
+from apps.core.views import my_error404
 
-handler403 = "config.errors.forbidden"
-handler400 = "rest_framework.exceptions.bad_request"
-handler500 = "rest_framework.exceptions.server_error"
+
+logger = logging.getLogger(__name__)
 
 admin.site.login = ratelimit(
     key="ip", method=ratelimit.ALL, rate="3/m", block=True
@@ -57,8 +57,8 @@ if settings.DIST:
         path("", cache_page(3600 * 2)(IndexView.as_view()), name="index")
     ]
 
-
-from apps.core.views import Error404
-
 # Error pages
-handler404 = Error404
+handler403 = "config.errors.forbidden"
+handler400 = "rest_framework.exceptions.bad_request"
+handler500 = "rest_framework.exceptions.server_error"
+handler404 = my_error404

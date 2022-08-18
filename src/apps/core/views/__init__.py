@@ -4,9 +4,10 @@ from .blocked_numbers import *
 from .dashboard import DashboardView
 from .device_lookup import DeviceLookup
 from .device_owner import DeviceOwnerApiView
-from .errors import *
+from .errors import my_error404
 from .forget_password import ForgetPasswordView
 from .index import IndexView
+from .index_real import IndexRealView
 from .login import LoginView
 from .new_password import NewPasswordView
 from .payment_success import PaymentSuccessView

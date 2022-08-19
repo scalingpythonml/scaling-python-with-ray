@@ -1,0 +1,16 @@
+{% extends 'spacebeaver.html' %}
+{% load sign_up %}
+
+{% block content %}
+<div class="col-12 col-lg-6 d-flex align-items-center">
+  <div class="form-container form-container--centered centered">
+    <header class="form-header">
+      <h1 class="title">Sign up</h1>
+      <p class="subtitle">Get started with your account in Spacebeaver!</p>
+    </header>
+    <!-- <form class="form-body form" action="" method="post"> -->
+    {% sign_up form action "Create account" %}
+    <!-- </form> -->
+  </div>
+</div>
+{% endblock %}

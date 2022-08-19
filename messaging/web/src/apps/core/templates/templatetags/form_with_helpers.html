@@ -1,0 +1,128 @@
+
+<form method="post" action="{{ action }}" class="form-body form form-body__grid-layout">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="form-group field">
+
+      <label for="{{ field.id_for_label }}"  class="field__label {% if field.field.required %} field__label--required {% endif %}">{{ field.label_tag }}</label>
+      {% if field.field.widget.input_type == 'select' %}
+
+        {{ field }}
+      {% else %}
+        <input type="{{ field.field.widget.input_type }}"
+               {% if field.value %}value="{{ field.value }}"{% endif %}
+               class="field__input {% if field.errors %} field__input--invalid {% endif %}"
+               id="{{ field.id_for_label }}" name="{{ field.name }}"
+               aria-describedby="emailHelp" required="{{ field.field.required }}"
+               placeholder="{{ field.field.widget.attrs.placeholder }}"
+                {% if field.field.disabled %} disabled {% endif %}
+        >
+      {% endif %}
+      <button type="button"  class="field__change-btn btn-primary " style="border-radius: 5px; padding-left: 10px; padding-right: 10px"  data-toggle="modal" data-target="{% if field.name == 'password' %} #changePass {% else %} #changeEmail {% endif %}">Change</button>
+
+      {% if field.errors %}
+        <span class="field__input-error">
+          {{ field.errors }}
+        </span>
+      {% endif %}
+      <small id="emailHelp" class="form-text text-muted">{{ field.help_text }}</small>
+    </div>
+  {% endfor %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-warning" role="alert">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <footer class="form-body__footer d-flex">
+
+    <button type="submit" class="btn form-body__footer-btn" data-toggle="modal" data-target="#successfullyPaid">{{ button_name }}</button>
+</footer>
+</form>
+
+<div class="modal fade" id="changeEmail" tabindex="-1" aria-labelledby="changeEmailLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+          <div class="modal-body p-0">
+              <button type="button" class="close-btn" data-dismiss="modal" aria-label="Close">
+                <img class="close-btn__icon" src="{% static 'core/img/svg/icon-close-circle.svg' %}" alt="">
+              </button>
+
+              <header class="form-header text-center">
+                  <h1 class="title title--sm text-start">Change email</h1>
+                  <p class="subtitle  text-start">Please, enter your new email</p>
+
+              </header>
+              <form class="form-body  form" action="" method="post">
+                  <div class="field ">
+                      <label class="field__label" for="card">New email</label>
+                      <input type="text" id="card" class="field__input" placeholder="Enter new email">
+                      <span class="field__input-error"></span>
+                  </div>
+                  <button type="button" class="btn modal__footer-btn" data-dismiss="modal" data-toggle="modal" data-target="#emailConfirmation">Change email</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+<div class="modal fade" id="emailConfirmation" tabindex="-1" aria-labelledby="emailConfirmationLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+          <div class="modal-body p-0">
+              <header class="form-header text-center">
+                  <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+                  <h1 class="title title--sm">Confirmation</h1>
+                  <p class="subtitle">We’ll send a confirmation link to your new email</p>
+
+              </header>
+          </div>
+          <div class="modal-footer modal__footer p-0 border-0">
+              <button type="button" class="btn modal__footer-btn" data-dismiss="modal">Go to email</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="changePass" tabindex="-1" aria-labelledby="changePassLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+          <div class="modal-body p-0">
+              <button type="button" class="close-btn" data-dismiss="modal" aria-label="Close">
+                <img class="close-btn__icon" src="{% static 'core/img/svg/icon-close-circle.svg' %}" alt="">
+              </button>
+
+              <header class="form-header text-center">
+                  <h1 class="title title--sm text-start">Change password</h1>
+                  <p class="subtitle  text-start">Enter your email address and we'll send you a password reset link.</p>
+
+              </header>
+              <form class="form-body  form" action="" method="post">
+                  <div class="field ">
+                      <label class="field__label" for="card">Email</label>
+                      <input type="text" id="card" class="field__input" placeholder="Enter email">
+                      <span class="field__input-error"></span>
+                  </div>
+                  <button type="button" class="btn modal__footer-btn" data-dismiss="modal" data-toggle="modal" data-target="#passConfirmation">Send a link</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="passConfirmation" tabindex="-1" aria-labelledby="passConfirmationLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+          <div class="modal-body p-0">
+              <header class="form-header text-center">
+                  <img class="form-header-icon" src="{% static 'core/img/svg/icon-mail.svg' %}" alt="">
+                  <h1 class="title title--sm">Password link sent</h1>
+                  <p class="subtitle">Please, check your inbox  <span class="subtitle__bold">mike@gmail.com</span></p>
+
+              </header>
+          </div>
+          <div class="modal-footer modal__footer p-0 border-0">
+              <button type="button" class="btn modal__footer-btn" data-dismiss="modal">Go to email</button>
+          </div>
+      </div>
+  </div>
+</div>

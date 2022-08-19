@@ -1,0 +1,121 @@
+{% extends 'dashboard-layout.html' %}
+
+{% block content %}
+<div class="banner">
+    <div class="banner__back-wrap">
+        <img class="banner__back d-none d-md-block" src="{% static 'core/img/jpg/banner.jpg' %}" alt="">
+        <img class="banner__back d-block d-md-none banner__back--mobile" src="{% static 'core/img/jpg/banner-small.jpg' %}" alt="">
+    </div>
+    <div class="banner__text-wrap">
+        <h2 class="banner__title">You can quickly check all main stats</h2>
+        <p class="banner__subtitle">You could view recap with number of messages for this month, year and for today</p>
+    </div>
+</div>
+
+<div class="statistic-layout statistic-layout--grid">
+    <div class="statistic-card">
+        <header class="statistic-card__header d-flex align-items-center ">
+            <div
+                class="statistic-card__img-wrap statistic-card__img-wrap--purple d-flex align-items-center justify-content-center">
+                <img class="statistic-card__img" src="{% static 'core/img/svg/icon-sms.svg' %}" alt="">
+            </div>
+            <div class="statistic-card__text-wrap">
+                <p class="statistic-card__count">{{ monthly }}</p>
+                <p class="statistic-card__count-description">Number of messages this month
+                </p>
+            </div>
+        </header>
+        <div class="statistic-card__body">
+            <canvas id="month" ></canvas>
+        </div>
+    </div>
+    <div class="statistic-card">
+        <header class="statistic-card__header d-flex align-items-center ">
+            <div
+                class="statistic-card__img-wrap statistic-card__img-wrap--blue d-flex align-items-center justify-content-center">
+                <img class="statistic-card__img" src="{% static 'core/img/svg/icon-sms-tracking.svg' %}" alt="">
+            </div>
+            <div class="statistic-card__text-wrap">
+                <p class="statistic-card__count">{{ yearly }}</p>
+                <p class="statistic-card__count-description">Number of messages this year</p>
+            </div>
+        </header>
+        <div class="statistic-card__body">
+            <canvas id="year"></canvas>
+        </div>
+    </div>
+    <div class="statistic-card">
+        <header class="statistic-card__header d-flex align-items-center ">
+            <div
+                class="statistic-card__img-wrap statistic-card__img-wrap--gray d-flex align-items-center justify-content-center">
+                <img class="statistic-card__img" src="{% static 'core/img/svg/icon-sms-notification.svg' %}" alt="">
+            </div>
+            <div class="statistic-card__text-wrap">
+                <p class="statistic-card__count">{{ daily }}</p>
+                <p class="statistic-card__count-description">Number of messages this today</p>
+            </div>
+        </header>
+        <div class="statistic-card__body">
+            <canvas id="day" ></canvas>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+    const data = {
+        labels: [
+            'May 11',
+            'May 12',
+            'May 13',
+            'May 14',
+            'May 15',
+        ],
+        datasets: [
+            {
+                label: 'Sent',
+                backgroundColor: 'rgb(108, 47, 255)',
+                borderColor: 'rgb(108, 47, 255)',
+                data: [4, 10, 5, 30, 45, 2, 20],
+            },{
+                label: 'Recieved',
+                backgroundColor: 'rgba(246, 239, 255)',
+                borderColor: 'rgb(246, 239, 255)',
+                data: [7, 13, 4, 38 , 43, 6, 28],
+            }
+        ]
+    };
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                title: {
+                    display: false,
+                }
+            }
+        },
+    };
+
+    const month = new Chart(
+        document.getElementById('month'),
+        config
+    );
+    const year = new Chart(
+        document.getElementById('year'),
+        config
+    );
+    const day = new Chart(
+        document.getElementById('day'),
+        config
+    );
+</script>
+{% endblock %}

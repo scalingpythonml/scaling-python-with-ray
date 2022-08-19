@@ -1,0 +1,12 @@
+{% extends 'accounts_base.html' %}
+{% load bootstrap_form %}
+{% load bootstrap_save_form %}
+{% load form_with_helpers %}
+
+{% block tab_content %}
+  {% if request.path == settings_url %}
+    {% form_with_helpers form action 'Save' %}
+  {% else %}
+    {% bootstrap_save_form form action 'Save' %}
+  {% endif %}
+{% endblock %}

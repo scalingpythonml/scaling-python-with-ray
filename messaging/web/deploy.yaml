@@ -1,0 +1,293 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rabbitmq
+  name: rabbitmq
+  namespace: spacebeaver 
+spec:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: rabbitmq
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - image: rabbitmq
+          envFrom:
+            - configMapRef:
+                name: spacebeaver-web-config
+            - secretRef:
+                name: spacebeaver-secret
+          imagePullPolicy: Always
+          name: rabbitmq
+          ports:
+            - containerPort: 5671
+              protocol: TCP
+            - containerPort: 5672
+              protocol: TCP
+            - containerPort: 4369
+              protocol: TCP
+            - containerPort: 15672
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: spacebeaver
+spec:
+  ports:
+  - name: ampq1
+    port: 5671
+    protocol: TCP
+    targetPort: 5671
+  - name: ampq2
+    port: 5672
+    protocol: TCP
+    targetPort: 5672
+  selector:
+    app: rabbitmq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spacebeaver-web-worker
+  namespace: spacebeaver
+  labels:
+    app: spacebeaver-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spacebeaver-web-worker
+  template:
+    metadata:
+      labels:
+        app: spacebeaver-web-worker
+    spec:
+      containers:
+        - image: holdenk/spacebeaver-web:v0.0.4f
+          name: spacebeaver-web
+          envFrom:
+          - secretRef:
+              name: spacebeaver-secret
+          - configMapRef:
+              name: spacebeaver-web-config
+          ports:
+            - containerPort: 80
+              name: web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spacebeaver-web
+  namespace: spacebeaver
+  labels:
+    app: spacebeaver-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spacebeaver-web
+  template:
+    metadata:
+      labels:
+        app: spacebeaver-web
+    spec:
+      containers:
+        - image: holdenk/spacebeaver-web:v0.0.4f
+          name: spacebeaver-web
+          envFrom:
+          - secretRef:
+              name: spacebeaver-secret
+          - configMapRef:
+              name: spacebeaver-web-config
+          env:
+            - name: WEB_ONLY
+              value: "TRUE"
+          ports:
+            - containerPort: 80
+              name: web
+          livenessProbe:
+            httpGet:
+              httpHeaders:
+                - name: Host
+                  value: "www.spacebeaver.com"
+              path: /index_real
+              port: 80
+            periodSeconds: 30
+          startupProbe:
+            httpGet:
+              httpHeaders:
+                - name: Host
+                  value: "www.spacebeaver.com"
+              path: /index_real
+              port: 80
+            periodSeconds: 10
+            failureThreshold: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: spacebeaver-web
+  name: spacebeaver-web-svc
+  namespace: spacebeaver
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: web
+  selector:
+    app: spacebeaver-web
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spacebeaver-web-https-ingress
+  namespace: spacebeaver
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - spacebeaver.com
+      - www.spacebeaver.com
+      - api.spacebeaver.com
+    secretName: spacebeaver-tls-secret
+  rules:
+    - host: spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: api.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  spacebeaver-web-svc
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spacebeaver-web-http-ingress
+  namespace: spacebeaver
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  rules:
+    - host: spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: api.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spacebeaver-web-http-ingress
+  namespace: spacebeaver
+spec:
+  rules:
+    - host: spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: www.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80
+    - host: api.spacebeaver.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spacebeaver-web-svc
+                port:
+                  number: 80

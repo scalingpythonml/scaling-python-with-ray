@@ -1,0 +1,22 @@
+.main-layout {
+    position: relative;
+    padding: width(1);
+    padding-bottom: width(5);
+    width: calc(100% - width(10));
+
+    &__dashbord {
+        padding-top: 23px;
+        padding-bottom: width(1);
+        width: calc(100% - width(9));
+    }
+}
+
+@media  (max-width: 1024px) {
+    .main-layout {
+        width: 100%;
+        padding: 32px 16px 40px;
+        &__dashbord {
+            width: 100%;
+        }
+    }
+}

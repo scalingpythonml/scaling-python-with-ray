@@ -1,0 +1,121 @@
+.payment-card { 
+    position: relative;
+
+    &--big {
+
+        border: 1px solid #DCDCE1;
+        border-radius: 16px;
+        padding: 24px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #dcdce10c;
+        }
+    }
+    &-wrapp__input:checked ~ &--big {
+        border: 1px solid #316AFF !important;
+    }
+    &__img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: rgba(49, 106, 255, 0.2);
+        margin-right: 12px;
+        flex-shrink: 0;
+
+        &--blue {   
+           background: rgba(103, 114, 229, 0.2);
+        }
+    }
+
+    &__icon {
+        width: 24px;
+        height: 24px;
+
+        *{
+            stroke: #316AFF;;
+        }
+
+        &--blue *{   
+            stroke: unset;
+            fill: #6772E5
+         }
+    }
+
+    &__transaction-name {
+        @include text-config($font-weight: 700, $fs: 14px, $lh: 140%);
+        margin: 0;
+        margin-bottom: 2px;
+
+        &--big {
+            font-size: 18px;
+            line-height: 140%;
+            margin-bottom: 0;
+        }
+    }
+
+    &__transaction-date {
+        @include text-config($font-weight: 400, $fs: 12px, $lh: 150%);
+        margin: 0;
+    }
+}
+
+.payment-card-wrapp {
+    position: relative;
+
+    &__input {
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        z-index: -9999999;
+        right: 0;
+        top: 0;
+    } 
+}
+
+.transaction-amount,.transaction-pay-method {
+    @include text-config($font-weight: 700, $fs: 14px, $lh: 140%);
+    margin: 0;
+}
+
+.transaction-description,.user-number {
+    @include text-config($font-weight: 400, $fs: 14px, $lh: 140%);
+        margin: 0;
+
+}
+
+.transaction-tag, .user-tag {
+    @include tag($ft-size: 14px);
+    margin: 0;
+}
+
+.table tr td{
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(220, 220, 225, 0.6);
+
+}
+
+.col-title {
+    @include text-config($font-weight: 400, $fs: 12px, $lh: 150%);
+    border: unset;
+}
+
+.payment-type-layout{
+    margin-bottom: 32px;
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 16px;
+    }
+}
+
+@media  (max-width: 1024px) {
+    .payment-type-layout{
+    &__grid {
+        grid-template-columns: 1fr;
+
+    }
+    }
+}

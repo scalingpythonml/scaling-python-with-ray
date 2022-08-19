@@ -1,0 +1,24 @@
+@mixin tag($text-color: $secondary-gray, $back-color: #EDEDED, $ft-size: 12px) {
+    @include text-config($font-weight: 400, $fs: $ft-size, $lh: 140%);
+    padding: 2px 8px 3px 8px;
+    display: inline-block;
+    border-radius: 16px;
+    margin-left: 8px;
+
+    &--active {
+        color: #6BAF4B;
+        background: rgba(177, 255, 140, 0.4);
+    }
+
+    &--deactivated {
+        color: #BD51C7;
+        background: rgba(244, 128, 255, 0.4);
+    }
+
+    &--cancel, &--paid {
+        color: $secondary-gray;
+        background-color: #EDEDED;
+    }
+
+    
+}

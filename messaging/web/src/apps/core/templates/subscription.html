@@ -1,0 +1,172 @@
+{% extends 'registration.html' %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'core/loader.css' %}">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    .card-container {
+      margin: 20px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="centered col-md-4">
+    <form id="payment-form">
+      <div class="card-container">
+
+        <div id="card-element">
+          <!-- Elements will create input elements here -->
+        </div>
+      </div>
+
+      <!-- We'll put the error messages in this element -->
+      <div id="card-element-errors" role="alert"></div>
+
+
+      <footer class="form-body__footer d-flex">
+        <button type="button" class="btn-outline form-body__footer-btn gap-right">Back</button>
+        <button id="submit" type="submit" class="btn form-body__footer-btn" data-toggle="modal" data-target="#successfullyPaid">Next</button>
+    </footer>
+    </form>
+  </div>
+  <div id="loader-container">
+    <div class="loader-item spinner-border text-primary" role="status">
+    </div>
+  </div>
+
+  <div class="modal fade" id="successfullyPaid" tabindex="-1" aria-labelledby="successfullyPaidLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+        <div class="modal-body p-0">
+            <header class="form-header text-center">
+                <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+
+                <h1 class="title title--sm">Successfully paid</h1>
+                <p class="subtitle">You have successfully paid 200$</p>
+
+            </header>
+        </div>
+        <div class="modal-footer modal__footer p-0 border-0">
+          <button type="button" class="btn modal__footer-btn" data-dismiss="modal" data-toggle="modal" data-target="#successfullyActivated">Activate your account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div class="modal fade" id="successfullyActivated" tabindex="-1" aria-labelledby="successfullyActivatedLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal__content">
+        <div class="modal-body p-0">
+            <header class="form-header text-center">
+                <img class="form-header-icon" src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+                <h1 class="title title--sm">Successfully activated</h1>
+                <p class="subtitle">Your account has been successfully activated and the serial number confirmed</p>
+
+            </header>
+        </div>
+        <div class="modal-footer modal__footer p-0 border-0">
+          <a  href="{% url 'core:dashboard' %}" class="btn modal__footer-btn" >Go to Dashboard</a>
+          <!-- data-bs-dismiss="modal" -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    let stripe = Stripe("{{ stripe_api_key }}");
+    let elements = stripe.elements();
+    let card = elements.create('card');
+
+
+    card.mount('#card-element');
+    card.on('change', function (event) {
+      displayError(event);
+    });
+
+
+    function setErrorText(text) {
+      let displayError = document.getElementById('card-element-errors');
+      displayError.textContent = text;
+    }
+
+    function displayError(event) {
+      if (event.error) {
+        setErrorText(event.error.message);
+      } else {
+        setErrorText("");
+      }
+    }
+
+    function setLoading(status) {
+      const loader = document.getElementById('loader-container');
+      loader.style.display = status ? 'block' : 'none'
+
+    }
+
+    function createSubscription({paymentMethodId}) {
+      return (
+              fetch('/create-subscription', {
+                method: 'post',
+                headers: {
+                  'Content-type': 'application/json',
+                  'X-CSRFToken': "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                  paymentMethodId: paymentMethodId,
+                }),
+              })
+                      .then(res => res.json())
+                      .then(res => {
+                        console.log(res);
+                        if (res.error) {
+                          setErrorText(res.error);
+                        } else if (res.object === "subscription" && res.status === "active") {
+                          window.location.replace(`${location.origin}{% url "core:payment-success" %}`)
+                        } else {
+                          setErrorText("Payment error")
+                        }
+                      })
+                      .catch(err => {
+                        console.log('catch', err)
+                      })
+                      .finally(() => setLoading(false))
+      );
+    }
+
+    function createPaymentMethod({card}) {
+      stripe
+              .createPaymentMethod({
+                type: 'card',
+                card: card,
+                billing_details: {
+                  name: "{{ request.user.full_name }}",
+                  email: "{{ request.user.email }}"
+                },
+              })
+              .then((result) => {
+                if (result.error) {
+                  displayError(result);
+                  setLoading(false);
+                } else {
+                  createSubscription({
+                    paymentMethodId: result.paymentMethod.id,
+                  });
+                }
+              });
+    }
+
+    const form = document.getElementById('payment-form');
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      setLoading(true);
+      createPaymentMethod({card});
+    });
+  </script>
+{% endblock %}

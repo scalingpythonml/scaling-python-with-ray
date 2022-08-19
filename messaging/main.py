@@ -86,4 +86,13 @@ def do_launch(actor_count: int, grace_period: int = 240):
 
 
 if __name__ == "__main__":
-    do_launch(actor_count=2)
+    import argparse
+    parser = argparse.ArgumentParser(description='Handle some satellite messags')
+    parser.add_argument('ray-head', type=str,
+                        help='Head node to submit to')
+    parser.add_argument('actor-count', type=int, default=2,
+                        help='number of actors')
+    args = parser.parse_args()
+    if args.ray_head is not None:
+        ray.init(args.ray_head)
+    do_launch(actor_count=args.actor_count)

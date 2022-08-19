@@ -1,7 +1,0 @@
-{% block subject %}
-  SpaceBeaver - Email Changed
-{% endblock %}
-
-{% block plain %}
-  Your email successfully changed
-{% endblock %}

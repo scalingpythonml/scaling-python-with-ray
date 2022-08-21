@@ -11,6 +11,7 @@ def do_launch(actor_count: int, grace_period: int = 240):
     """
     Launch the sect of actors that serve as the backend for the SpaceBeaver project.
     """
+    print(f"Launching actors (parallelism {actor_count}")
     settings = Settings()
     actor_idxs = list(range(0, actor_count))
 
@@ -88,11 +89,14 @@ def do_launch(actor_count: int, grace_period: int = 240):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Handle some satellite messags')
-    parser.add_argument('ray-head', type=str,
+    parser.add_argument('--ray-head', type=str, required=False,
                         help='Head node to submit to')
-    parser.add_argument('actor-count', type=int, default=2,
-                        help='number of actors')
+    parser.add_argument('--actor-count', type=int, default=2,
+                        required=False, help='number of actors')
     args = parser.parse_args()
     if args.ray_head is not None:
-        ray.init(args.ray_head)
-    do_launch(actor_count=args.actor_count)
+        ray.init(args.ray_head, namespace="farts")
+    else:
+        ray.init(namespace="farts")
+    result = do_launch(actor_count=args.actor_count)
+    print(f"Got back {result} from launch")

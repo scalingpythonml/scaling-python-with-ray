@@ -13,6 +13,7 @@ ray.init()
 # Start Serve
 serve.start()
 #define deployment
+#tag::rf_serve[]
 @serve.deployment(route_prefix="/randomforest")
 class RandomForestModel:
     def __init__(self, path):
@@ -38,6 +39,7 @@ class RandomForestModel:
         ]
         prediction = self.model.predict([input_vector])[0]
         return {"result": str(prediction)}
+#end::rf_serve[]
 
 RandomForestModel.deploy(RANDOM_FOREST_MODEL_PATH)
 # list current deploymente

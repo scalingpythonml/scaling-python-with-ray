@@ -8,6 +8,7 @@ print(ray.__version__)
 # Start Serve
 serve.start()
 #define deployment
+#tag::deploy_scaled[]
 @serve.deployment(num_replicas=3)
 class Converter:
     def __init__(self):
@@ -31,7 +32,7 @@ class Converter:
 Converter.deploy()
 # list current deploymente
 print(serve.list_deployments())
-
+#end::deploy_scaled[]
 
 # Query our endpoint over HTTP.
 print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&type=CF").text)

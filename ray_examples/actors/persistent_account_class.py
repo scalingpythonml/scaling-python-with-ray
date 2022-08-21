@@ -4,6 +4,7 @@ from os.path import exists
 # Start Ray
 ray.init()
 
+#tag::base[]
 class BasePersitence:
     def exists(self, key:str) -> bool:
         pass
@@ -11,7 +12,9 @@ class BasePersitence:
         pass
     def restore(self, key:str) -> dict:
         pass
+#end::base[]
 
+#tag::file[]
 class FilePersistence(BasePersitence):
     def __init__(self, basedir: str = '.'):
         self.basedir = basedir
@@ -31,7 +34,9 @@ class FilePersistence(BasePersitence):
             with open(self.basedir + '/' + key, "rb") as f:
                 bytes = f.read()
             return ray.cloudpickle.loads(bytes)
+#end::file[]
 
+#tag::actor[]
 @ray.remote
 class Account:
     def __init__(self, balance: float, minimal_balance: float, account_key: str,
@@ -77,6 +82,7 @@ class Account:
     def storestate(self):
         self.persistence.save(self.key,
                     {'balance' : self.balance, 'minimal' : self.minimal})
+#end::actor[]
 
 account_actor = Account.options(name='Account').remote(balance=100.,minimal_balance=20.,
                                     account_key='1234567', persistence=FilePersistence())

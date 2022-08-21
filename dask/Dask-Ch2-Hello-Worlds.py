@@ -50,7 +50,7 @@ f
 # In[ ]:
 
 
-# Note: if we were on a cluster we'd have to do more magislowish_result = map(dask.delayed(slow_task), things)c to install it on all the nodes in the cluster.
+# Note: if we were on a cluster we'd have to do more magic to install it on all the nodes in the cluster.
 get_ipython().system('pip install bs4')
 
 

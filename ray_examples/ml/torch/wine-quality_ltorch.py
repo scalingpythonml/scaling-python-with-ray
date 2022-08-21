@@ -83,6 +83,7 @@ class WineQualityModel(LightningModule):
         X = self.hidden3(X)
         X = self.act3(X)
         return X
+#tag::add[]
     # training step
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -92,6 +93,7 @@ class WineQualityModel(LightningModule):
     # optimizer
     def configure_optimizers(self):
         return Adam(self.parameters(), lr=0.02)
+#end::add[]
 # Ensure reproducibility
 seed_everything(42)
 
@@ -107,9 +109,11 @@ test_dl = DataLoader(test, batch_size=32, shuffle=False)
 # Train the model
 model = WineQualityModel(11)
 start = time.time()
+#tag::train[]
 # train
 trainer = Trainer(max_steps=1000)
 trainer.fit(model, train_dl)
+#end::train[]
 print(f"Build model in {time.time() - start}")
 print(model)
 # evaluate a model

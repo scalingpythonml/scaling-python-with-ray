@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 import joblib
 from ray.util.joblib import register_ray
 
+#tag::skex[]
 # Get data
 df = pd.read_csv("winequality-red.csv", delimiter=";")
 print(f"Rows, columns: {str(df.shape)}")
@@ -38,9 +39,11 @@ mode = GridSearchCV(DecisionTreeClassifier(random_state=1),
                      param_grid=param_model,
                      scoring='accuracy',
                      n_jobs=-1)
+#tag::joblib_train[]
 register_ray()
 with joblib.parallel_backend('ray'):
     model = mode.fit(X_train, y_train)
+#end::joblib_train[]
 
 model = model.fit(X_train, y_train)
 print(f"executed in {time.time() - start}, nodes {model.best_estimator_.tree_.node_count}, "
@@ -48,4 +51,4 @@ print(f"executed in {time.time() - start}, nodes {model.best_estimator_.tree_.no
 
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))
-
+#end::skex[]

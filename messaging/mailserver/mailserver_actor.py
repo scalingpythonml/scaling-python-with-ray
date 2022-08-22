@@ -7,6 +7,7 @@ import logging
 import requests
 from typing import Optional
 from messaging.utils.utils import LazyNamedPool
+import subprocess
 import os
 from messaging.internal_types import CombinedMessage
 from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
@@ -56,14 +57,28 @@ class MailServerActorBase():
             "[{" +
             f""" "op": "{opp}", "path": "/metadata/labels/{label}", "value": "present" """ +
             "}]")
-        kube_host = os.getenv("KUBERNETES_SERVICE_HOST")
-        kube_port = os.getenv("KUBERNETES_PORT_443_TCP_PORT", "443")
-        pod_namespace = os.getenv("POD_NAMESPACE")
-        pod_name = os.getenv("POD_NAME")
-        url = f"https://{kube_host}:{kube_port}/api/v1/namespace/{pod_namespace}/pods/{pod_name}"
-        headers = {"Content-Type": "application/json-patch+json"}
-        result = requests.post(url, data=patch_json, headers=headers)
-        logging.info(f"Got back {result} updating header.")
+        try:
+            kube_host = os.getenv("KUBERNETES_SERVICE_HOST")
+            kube_port = os.getenv("KUBERNETES_PORT_443_TCP_PORT", "443")
+            pod_namespace = os.getenv("POD_NAMESPACE")
+            pod_name = os.getenv("POD_NAME")
+            url = f"http://{kube_host}:{kube_port}/api/v1/namespace/{pod_namespace}/pods/{pod_name}"
+            headers = {"Content-Type": "application/json-patch+json"}
+            result = requests.post(url, data=patch_json, headers=headers)
+            logging.info(f"Got back {result} updating header.")
+        except Exception as e:
+            print(f"Got an error trying to patch with https API {e}")
+            with open("patch.json", "w") as f:
+                f.write(patch_json)
+                p = subprocess.run([
+                    "kubectl",
+                    "patch",
+                    "pod",
+                    "-n",
+                    pod_namespace,
+                    pod_name,
+                    "--patch-file",
+                    "patch.json"])
 #end::update_label[]
 
 #tag::prepare_for_shutdown[]

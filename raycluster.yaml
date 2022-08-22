@@ -47,7 +47,7 @@ provider:
       name: autoscaler
     rules:
       - apiGroups: [""]
-        resources: ["pods", "pods/status", "pods/exec", "services"]
+        resources: ["pods", "pods/status", "pods/exec", "services", "certificates"]
         verbs: ["get", "watch", "list", "create", "delete", "patch"]
 
   # RoleBinding created by the autoscaler for the head node pod that it runs
@@ -111,6 +111,8 @@ available_node_types:
       rayStartParams:
         num-cpus: 2
       spec:
+        serviceAccount: podsa
+        serviceAccountName: podsa
         restartPolicy: Never
         volumes:
           - name: dshm
@@ -129,6 +131,19 @@ available_node_types:
                   name: spacebeaver-secret
               - secretRef:
                   name: spacebeaver-ray-secret
+            env:
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: POD_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
             # This volume allocates shared memory for Ray to use for its plasma
             # object store. If you do not provide this, Ray will fall back to
             # /tmp which cause slowdowns if is not a shared memory volume.

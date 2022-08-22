@@ -301,9 +301,9 @@ dask.compute(
 # In[ ]:
 
 
-#tag::static_group[]
+#tag::agg_entire[]
 raw_grouped = sf_covid_df.groupby(lambda x: 0)
-#end::static_group[]
+#end::agg_entire[]
 
 #tag::max_mean[]
 dask.compute(

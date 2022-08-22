@@ -87,6 +87,7 @@ class WineQualityModel(Module):
         X = self.act3(X)
         return X
 
+#tag::new[]
 # train function
 def model_train(model, optimizer, criterion, train_loader):
     # for every mini batches
@@ -145,9 +146,10 @@ def train_winequality(config):
         if i % 5 == 0:
             # This saves the model to the trial directory
             torch.save(model.state_dict(), "./model.pth")
-
+#end::new[]
 # ensure reprodusability
 torch.manual_seed(42)
+#tag::int[]
 # load the dataset
 dataset = WineQualityDataset("winequality-red.csv")
 
@@ -162,5 +164,5 @@ analysis = tune.run(
     scheduler=ASHAScheduler(metric="mean_accuracy", mode="max"),
     config=search_space
 )
-
+#end::int[]
 print(f"Done {analysis}")

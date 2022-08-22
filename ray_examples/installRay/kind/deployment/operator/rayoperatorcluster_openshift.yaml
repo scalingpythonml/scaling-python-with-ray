@@ -39,7 +39,7 @@ spec:
           containers:
             - name: ray-node
               imagePullPolicy: Always
-              image: rayproject/ray:1.9.0-py38-cpu
+              image: rayproject/ray:1.13.0-py38-cpu
               # Do not change this command - it keeps the pod alive until it is
               # explicitly killed.
               command: ["/bin/bash", "-c", "--"]
@@ -93,7 +93,7 @@ spec:
           containers:
             - name: ray-node
               imagePullPolicy: Always
-              image: rayproject/ray:1.9.0-py38-cpu
+              image: rayproject/ray:1.13.0-py38-cpu
               command: ["/bin/bash", "-c", "--"]
               args: ["trap : TERM INT; sleep infinity & wait;"]
               # This volume allocates shared memory for Ray to use for its plasma

@@ -1,5 +1,6 @@
 import ray
 from ray.rllib import agents
+#tag::code[]
 ray.init()
 config = {
     # Environment (RLlib understands openAI gym registered strings).
@@ -9,6 +10,8 @@ config = {
     "num_workers": 4,
     'framework': 'tf2',
     'eager_tracing': True,
+    # This is just our model arch, choosing the right one is beyond the scope
+    # of this book.
     'model': {
         'fcnet_hiddens': [64, 64],
         'fcnet_activation': 'relu',
@@ -37,3 +40,4 @@ for i in range(5):
 # Evaluate the trained Trainer (and render each timestep to the shell's
 # output).
 trainer.evaluate()
+#end::code[]

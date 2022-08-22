@@ -40,7 +40,8 @@ def do_launch(actor_count: int, grace_period: int = 240):
     def make_satellite_actor(idx: int):
         return (SatelliteClient.options(  # type: ignore
             name=f"satellite_{idx}",
-            max_task_retries=settings.max_retries)
+            max_task_retries=settings.max_retries,
+            lifetime="detached")
             .remote(settings, idx, actor_count))
 
     satellite_actors = list(map(make_satellite_actor, actor_idxs))
@@ -50,7 +51,7 @@ def do_launch(actor_count: int, grace_period: int = 240):
     satellite_pool = ActorPool(satellite_actors)
 
     def make_user_actor(idx: int):
-        return (UserActor.options(name=f"user_{idx}")  # type: ignore
+        return (UserActor.options(name=f"user_{idx}", lifetime="detached")  # type: ignore
                 .remote(settings, idx, actor_count))
 
     user_actors = list(map(make_user_actor, actor_idxs))
@@ -59,7 +60,7 @@ def do_launch(actor_count: int, grace_period: int = 240):
     # Schedule some of the mail actors, since Kube services doesn't let us dynamically
     # bind different ports we only want to do one per-host, but we avoid STRICT_SPREAD
     # because of the automatic placement restrictions.
-    mailserver_resources = list(map(lambda x: {"CPU": 0.1}, actor_idxs))
+    mailserver_resources = list(map(lambda x: {"CPU": 1}, actor_idxs))
     mailserver_pg = ray.util.placement_group(
         mailserver_resources,
         strategy="SPREAD",
@@ -88,6 +89,9 @@ def do_launch(actor_count: int, grace_period: int = 240):
 
 if __name__ == "__main__":
     import argparse
+    import time
+    print("Waiting....")
+    time.sleep(30)
     parser = argparse.ArgumentParser(description='Handle some satellite messags')
     parser.add_argument('--ray-head', type=str, required=False,
                         help='Head node to submit to')
@@ -97,6 +101,6 @@ if __name__ == "__main__":
     if args.ray_head is not None:
         ray.init(args.ray_head, namespace="farts")
     else:
-        ray.init(namespace="farts")
+        ray.init("auto", namespace="farts")
     result = do_launch(actor_count=args.actor_count)
     print(f"Got back {result} from launch")

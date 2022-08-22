@@ -26,7 +26,7 @@ class MailServerActorBase():
         self.domain = "spacebeaver.com"
         self.server = Controller(
             handler=self,
-            hostname=hostname,
+            hostname="0.0.0.0",
             ident="SpaceBeaver (PCFLabsLLC)",
             port=port)
         self.emails_forwaded = Counter(

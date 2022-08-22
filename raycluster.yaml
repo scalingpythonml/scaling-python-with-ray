@@ -47,7 +47,7 @@ provider:
       name: autoscaler
     rules:
       - apiGroups: [""]
-        resources: ["pods", "pods/status", "pods/exec"]
+        resources: ["pods", "pods/status", "pods/exec", "services"]
         verbs: ["get", "watch", "list", "create", "delete", "patch"]
 
   # RoleBinding created by the autoscaler for the head node pod that it runs
@@ -105,6 +105,11 @@ available_node_types:
       metadata:
         # Automatically generates a name for the pod with this prefix.
         generateName: ray-ray-worker-
+      # See https://github.com/ray-project/ray/issues/21706
+      resources: {"CPU": 2, "GPU": 0, "memory": "8g"}
+      # the auto-scaler doesn't pick CPU from above so add it here.
+      rayStartParams:
+        num-cpus: 2
       spec:
         restartPolicy: Never
         volumes:
@@ -132,10 +137,11 @@ available_node_types:
                 name: dshm
             resources:
               requests:
-                cpu: 1000m
-                memory: 10G
+                cpu: 2
+                memory: 8G
               limits:
-                memory: 12G
+                cpu: 2
+                memory: 9G
   head_node:
     node_config:
       apiVersion: v1
@@ -152,7 +158,7 @@ available_node_types:
         # or want to provide your own.
         serviceAccountName: autoscaler
 
-        restartPolicy: Never
+        restartPolicy: OnFailure
 
         # This volume allocates shared memory for Ray to use for its plasma
         # object store. If you do not provide this, Ray will fall back to
@@ -188,10 +194,11 @@ available_node_types:
                 name: dshm
             resources:
               requests:
-                cpu: 1000m
-                memory: 2G
+                cpu: 2
+                memory: 8G
               limits:
-                memory: 3G
+                cpu: 2
+                memory: 8G
 
 # Command to start ray on the head node. You don't need to change this.
 # Note dashboard-host is set to 0.0.0.0 so that kubernetes can port forward.
@@ -200,9 +207,11 @@ head_start_ray_commands:
   - ulimit -n 65536; ray start --head --autoscaling-config=~/ray_bootstrap_config.yaml --dashboard-host 0.0.0.0
 
 # Command to start ray on worker nodes. You don't need to change this.
+# We do change this because of some limitations with the Ray CPU disco with modern K8s.
 worker_start_ray_commands:
   - ray stop
   - ulimit -n 65536; ray start --address=$RAY_HEAD_IP:6379
 
+# If we didn't have the packages pre-installed in the container we could bootstrap here.
 #head_setup_commands: ["pip install aiosmtpd 'protobuf<4.0.0,>=3.15.3' 'Django>=3.2.14' psycopg2-binary"]
 #worker_setup_commands: ["pip install aiosmtpd 'protobuf<4.0.0,>=3.15.3' 'Django>=3.2.14' psycopg2-binary"]

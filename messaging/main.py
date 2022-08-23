@@ -60,10 +60,10 @@ def do_launch(actor_count: int, grace_period: int = 240):
     # Schedule some of the mail actors, since Kube services doesn't let us dynamically
     # bind different ports we only want to do one per-host, but we avoid STRICT_SPREAD
     # because of the automatic placement restrictions.
-    mailserver_resources = list(map(lambda x: {"CPU": 1}, actor_idxs))
+    mailserver_resources = list(map(lambda x: {"CPU": 0.1}, actor_idxs))
     mailserver_pg = ray.util.placement_group(
         mailserver_resources,
-        strategy="SPREAD",
+        strategy="STRICT_SPREAD",
         lifetime="detached")
 
     def make_mailserver_actor(idx: int):
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Handle some satellite messags')
     parser.add_argument('--ray-head', type=str, required=False,
                         help='Head node to submit to')
-    parser.add_argument('--actor-count', type=int, default=2,
+    parser.add_argument('--actor-count', type=int, default=5,
                         required=False, help='number of actors')
     args = parser.parse_args()
     if args.ray_head is not None:

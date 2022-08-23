@@ -10,6 +10,7 @@ from messaging.utils import utils
 from google.protobuf import text_format
 from messaging.proto.MessageDataPB_pb2 import MessageDataPB  # type: ignore
 from typing import AsyncIterator, List
+import platform
 
 
 # Seperate out the logic from the actor implementation so we can sub-class
@@ -22,6 +23,7 @@ class SatelliteClientBase():
     """
 
     def __init__(self, settings: Settings, idx: int, poolsize: int):
+        print(f"Running on {platform.machine()}")
         self.settings = settings
         self.idx = idx
         self.poolsize = poolsize
@@ -57,8 +59,10 @@ class SatelliteClientBase():
                 while True:
                     await asyncio.sleep(self.delay)
                     await self.check_msgs()
+                    internal_retires = 0  # On success reset retry counter.
             except Exception as e:
-                logging.info(f"Error {e}, retrying")
+                print(f"Error {e} while checking messages.")
+                logging.error(f"Error {e}, retrying")
                 internal_retries = internal_retries + 1
                 if (internal_retries > self.max_internal_retries):
                     raise e
@@ -81,6 +85,7 @@ class SatelliteClientBase():
 #tag::check_msgs[]
     async def check_msgs(self):
         # TODO: Add message type
+        print("Checking messages...")
         res = self.session.get(
             self.getMessageURL,
             headers=self.hdrs,
@@ -96,6 +101,7 @@ class SatelliteClientBase():
                 self.session.post(
                     self._ackMessageURL.format(item['packetId']),
                     headers=self.hdrs)
+        print("Done!")
 #end::check_msgs[]
 
 #tag::process[]
@@ -130,10 +136,9 @@ class SatelliteClientBase():
 
     async def _process_message(self, item: dict):
         messages = self._decode_message(item)
-        # TODO: Update the count and check user
         async for message in messages:
             self.user_pool.get_pool().submit(
-                lambda actor, msg: actor.handle_message,
+                lambda actor, msg: actor.handle_message.remote(msg),
                 message)
 #end::process[]
 

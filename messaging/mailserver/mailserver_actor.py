@@ -12,6 +12,7 @@ import os
 from messaging.internal_types import CombinedMessage
 from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
 from email.utils import parseaddr
+import platform
 
 
 class MailServerActorBase():
@@ -21,6 +22,7 @@ class MailServerActorBase():
 
     def __init__(self, idx: int, poolsize: int, port: int,
                  hostname: str, label: Optional[str] = None):
+        print(f"Running on {platform.machine()}")
         self.idx = idx
         self.poolsize = poolsize
         self.user_pool = LazyNamedPool("user", poolsize)
@@ -28,7 +30,7 @@ class MailServerActorBase():
         self.server = Controller(
             handler=self,
             hostname="0.0.0.0",
-            ident="SpaceBeaver (PCFLabsLLC)",
+            ident=f"SpaceBeaver (PCFLabsLLC)",
             port=port)
         self.emails_forwaded = Counter(
             "emails_forwarded",
@@ -57,6 +59,7 @@ class MailServerActorBase():
             "[{" +
             f""" "op": "{opp}", "path": "/metadata/labels/{label}", "value": "present" """ +
             "}]")
+        print(f"Preparing to patch with {patch_json}")
         try:
             kube_host = os.getenv("KUBERNETES_SERVICE_HOST")
             kube_port = os.getenv("KUBERNETES_PORT_443_TCP_PORT", "443")
@@ -64,21 +67,29 @@ class MailServerActorBase():
             pod_name = os.getenv("POD_NAME")
             url = f"http://{kube_host}:{kube_port}/api/v1/namespace/{pod_namespace}/pods/{pod_name}"
             headers = {"Content-Type": "application/json-patch+json"}
+            print(f"Patching with url {url}")
             result = requests.post(url, data=patch_json, headers=headers)
             logging.info(f"Got back {result} updating header.")
+            print(f"Got patch result {result}")
+            if result.status_code != 200:
+                raise Exception(f"Got back a bad status code")
         except Exception as e:
             print(f"Got an error trying to patch with https API {e}")
-            with open("patch.json", "w") as f:
-                f.write(patch_json)
-                p = subprocess.run([
-                    "kubectl",
-                    "patch",
-                    "pod",
-                    "-n",
-                    pod_namespace,
-                    pod_name,
-                    "--patch-file",
-                    "patch.json"])
+            patch_cmd = [
+                "kubectl",
+                "patch",
+                "pod",
+                "-n",
+                pod_namespace,
+                pod_name,
+                "--type=json",
+                f"-p={patch_json}"]
+            print("Running cmd:")
+            print(" ".join(patch_cmd))
+            out = subprocess.check_output(patch_cmd)
+            print(f"Got {out} from patching pod.")
+        print("Pod patched?")
+                
 #end::update_label[]
 
 #tag::prepare_for_shutdown[]
@@ -147,7 +158,7 @@ class MailServerActorBase():
                 from_device=False,
                 protocol=Protocol.EMAIL)
             self.user_pool.get_pool().submit(
-                lambda actor, message: actor.handle_message(message),
+                lambda actor, message: actor.handle_message.remote(message),
                 message)
         return '250 Message accepted for delivery'
 #end::handle_data[]

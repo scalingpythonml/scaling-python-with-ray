@@ -2,14 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: message-backend-svc
+  namespace: spacebeaver
 spec:
   selector:
-    mailbackend: present
+    mail_ingress: present
   ports:
-    - protocol: TCP
+    - name: smtp
+      protocol: TCP
       port: 25
       targetPort: 7420
   type: LoadBalancer
-  healthCheckNodePort: 7420
   loadBalancerIP: 23.177.16.210
   sessionAffinity: None

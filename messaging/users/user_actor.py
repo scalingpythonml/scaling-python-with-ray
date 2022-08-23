@@ -7,7 +7,7 @@ from messaging.mailclient import MailClient
 from .models import Device, User
 from messaging.proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL
 from messaging.settings.settings import Settings
-
+import platform
 
 # Seperate out the logic from the actor implementation so we can sub-class
 # since you can not directly sub-class actors.
@@ -22,6 +22,7 @@ class UserActorBase():
     """
 
     def __init__(self, settings: Settings, idx: int, poolsize: int):
+        print(f"Running on {platform.machine()}")
         self.settings = settings
         self.idx = idx
         self.poolsize = poolsize
@@ -41,7 +42,7 @@ class UserActorBase():
         )
         self.messages_rejected.set_default_tags(
             {"idx": str(idx)})
-        logging.info(f"Starting user actor {idx}")
+        print(f"Starting user actor {idx}")
 
     def _fetch_user(self, msg: CombinedMessage) -> User:
         """
@@ -53,6 +54,7 @@ class UserActorBase():
         else:
             # TODO: handle e-mail
             username = msg.to
+            print(f"Fetching user {msg.to}")
             try:
                 return User.objects.get(username=username)
             except Exception as e:
@@ -69,6 +71,7 @@ class UserActorBase():
         """
         Handle messages.
         """
+        print(f"Handling message {input_msg}")
         user = self._fetch_user(input_msg)
         self.messages_forwarded.inc()
         if (input_msg.from_device):
@@ -87,7 +90,7 @@ class UserActorBase():
                 "data": input_msg.text
             }
             self.satellite_pool.get_pool().submit(
-                lambda actor, msg: actor.send_message(**msg),
+                lambda actor, msg: actor.send_message.remote(**msg),
                 msg)
 
 

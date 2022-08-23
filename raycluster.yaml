@@ -97,7 +97,7 @@ provider:
 head_node_type: head_node
 available_node_types:
   worker_node:
-    min_workers: 1
+    min_workers: 0
     max_workers: 10
     node_config:
       apiVersion: v1
@@ -201,6 +201,19 @@ available_node_types:
                   name: spacebeaver-secret
               - secretRef:
                   name: spacebeaver-ray-secret
+            env:
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: POD_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
             # This volume allocates shared memory for Ray to use for its plasma
             # object store. If you do not provide this, Ray will fall back to
             # /tmp which cause slowdowns if is not a shared memory volume.

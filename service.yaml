@@ -37,26 +37,25 @@ metadata:
   name: spacebeaver-phone-api-ingress
   namespace: spacebeaver
   annotations:
-    # nginx
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
     cert-manager.io/cluster-issuer: letsencrypt
     cert-manager.io/issue-temporary-certificate: "true"
     acme.cert-manager.io/http01-edit-in-place: "true"
-  spec:
-    ingressClassName: nginx
-    tls:
-      - hosts:
-          - phone-api.pigscanfly.ca
-          secretName: phone-api-tls-secret
-    rules:
-      - host: "phone-api.pigscanfly.ca"
-        http:
-          paths:
-            - pathType: Prefix
-              path: "/"
-              backend:
-                service:
-                  name: phone-api-svc
-                  port:
-                    number: 80
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - phone-api.pigscanfly.ca
+    secretName: phone-api-tls-secret
+  rules:
+    - host: "phone-api.pigscanfly.ca"
+      http:
+        paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: phone-api-svc
+              port:
+                number: 80

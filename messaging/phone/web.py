@@ -1,22 +1,18 @@
-import requests
+from messaging.utils import utils
 from pydantic import BaseModel
-from fastapi import FastAPI, Field, Query
+from fastapi import FastAPI, Field
 from ray import serve
 from messaging.settings.settings import Settings
 from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
 from messaging.internal_types import CombinedMessage
+from typing import Optional
+
 
 # 1: Define a FastAPI app and wrap it in a deployment with a route handler.
 app = FastAPI()
 
-# See https://dev.bandwidth.com/docs/messaging/webhooks/
-class InboundMessageParams(BaseModel):
-    time: str,
-    description: str,
-    to: str,
-    message: BandwidthMessage,
-    msg_type: Optional[str] = Field(None, alias="type")
 
+# See https://dev.bandwidth.com/docs/messaging/webhooks/
 class BandwidthMessage(BaseModel):
     time: str
     owner: str
@@ -25,15 +21,23 @@ class BandwidthMessage(BaseModel):
     message_from: str = Field(None, alias='from')
     text: str
     applicationId: str
-    media: array[str]
+    media: list[str]
     segmentCount: int
+
+
+class InboundMessageParams(BaseModel):
+    time: str
+    description: str
+    to: str
+    message: BandwidthMessage
+    msg_type: Optional[str] = Field(None, alias="type")
+
 
 # See https://github.com/Bandwidth-Samples/messaging-send-receive-sms-python/blob/main/main.py
 class CreateBody(BaseModel):
     to: str
     text: str
 
-    
 
 @serve.deployment(num_replicas=3, route_prefix="/")
 @serve.ingress(app)
@@ -46,27 +50,26 @@ class PhoneWeb:
 
     # FastAPI will automatically parse the HTTP request for us.
     @app.get("/callbacks/inbound/messaging")
-    async def inbound_message(self, messages: array[InboundMessageParams] ) -> str:
+    async def inbound_message(self, messages: list[InboundMessageParams]) -> str:
         for message in messages:
             internal_message = CombinedMessage(
                 text=message.text, to=message.to, protocol=Protocol.SMS,
                 msg_from=message.message_from, from_device=False
             )
-            user_pool.get_pool().submit(
+            self.user_pool.get_pool().submit(
                 lambda actor, msg: actor.handle_message.remote(msg), internal_message)
         return True
 
     @app.post('/callbacks/outbound/messaging/status')
-    async def handle_outbound_status(request: Request):
-        status_body_array = await request.json()
+    async def handle_outbound_status(status_body_array: list[dict]) -> int:
         status_body = status_body_array[0]
         if status_body['type'] == "message-sending":
             print("message-sending type is only for MMS")
         elif status_body['type'] == "message-delivered":
-            print("your message has been handed off to the Bandwidth's MMSC network, but has not been confirmed at the downstream carrier")
+            print("your message has been handed off to the Bandwidth's MMSC network")
         elif status_body['type'] == "message-failed":
-            print("For MMS and Group Messages, you will only receive this callback if you have enabled delivery receipts on MMS.")
+            print("Message delivery failed")
         else:
-            print("Message type does not match endpoint. This endpoint is used for message status callbacks only.")
+            print("Message type does not match endpoint.")
 
         return 200

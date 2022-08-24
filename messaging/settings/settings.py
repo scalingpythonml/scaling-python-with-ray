@@ -17,3 +17,7 @@ class Settings(object):
         self.mail_password = os.getenv("mail_password")
         self.mail_port = int(os.getenv("mail_port", "25"), 10)
         self.max_retries = int(os.getenv("max_retries", "10"), 10)
+        self.BW_USERNAME = os.getenv("BW_USERNAME", "")
+        self.BW_PASSWORD = os.getenv("BW_PASSWORD", "")
+        self.BW_MESSAGING_APPLICATION_ID = os.getenv("BW_MESSAGING_APPLICATION_ID", "")
+        self.BW_ACCOUNT_ID = os.getenv("BW_ACCOUNT_ID", "")

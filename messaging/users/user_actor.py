@@ -4,7 +4,7 @@ from messaging.internal_types import CombinedMessage
 from messaging.utils import utils
 from messaging.mailclient import MailClient
 from .models import Device, User
-from messaging.proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL
+from messaging.proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL, SMS as SMS_PROTOCOL
 from messaging.settings.settings import Settings
 import platform
 
@@ -50,7 +50,7 @@ class UserActorBase():
         if (msg.from_device):
             device = Device.objects.get(serial_number=msg.msg_from)
             return device.user
-        elif (msg.protocol == Protocol.EMAIL):
+        elif (msg.protocol == EMAIL_PROTOCOL):
             username = msg.to
             print(f"Fetching user {msg.to}")
             try:
@@ -58,13 +58,15 @@ class UserActorBase():
             except Exception as e:
                 print(f"Failed to get user: {username}?")
                 raise e
-        else:
+        elif (msg.protocol == SMS_PROTOCOL):
             print(f"Looking up user for phone {msg.to}")
             try:
                 return User.objects.get(twillion_number=str(msg.to))
             except Exception as e:
                 print(f"Failed to get user: {username}?")
                 raise e
+        else:
+            raise Exception(f"Unhandled protocol? - {msg.protocol}")
 
     def prepare_for_shutdown(self):
         """
@@ -89,7 +91,7 @@ class UserActorBase():
             self.mail_client.send_message(**msg)
         else:
             msg = {
-                "protocol": EMAIL_PROTOCOL,
+                "protocol": input_msg.protocol,
                 "msg_from": input_msg.msg_from,
                 "msg_to": user.device.serial_number,
                 "data": input_msg.text

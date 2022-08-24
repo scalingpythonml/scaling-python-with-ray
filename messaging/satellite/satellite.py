@@ -87,7 +87,7 @@ class SatelliteClientBase():
         # TODO: Add message type
         print("Checking messages...")
         res = self.session.get(
-            self.getMessageURL,
+            self._getMessageURL,
             headers=self.hdrs,
             params={'count': self._page_request_size, 'status': 0})
         messages = res.json()

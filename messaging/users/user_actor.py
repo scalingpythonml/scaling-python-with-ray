@@ -50,12 +50,18 @@ class UserActorBase():
         if (msg.from_device):
             device = Device.objects.get(serial_number=msg.msg_from)
             return device.user
-        else:
-            # TODO: handle e-mail
+        elif (msg.protocol == Protocol.EMAIL):
             username = msg.to
             print(f"Fetching user {msg.to}")
             try:
                 return User.objects.get(username=username)
+            except Exception as e:
+                print(f"Failed to get user: {username}?")
+                raise e
+        else:
+            print(f"Looking up user for phone {msg.to}")
+            try:
+                return User.objects.get(twillion_number=str(msg.to))
             except Exception as e:
                 print(f"Failed to get user: {username}?")
                 raise e

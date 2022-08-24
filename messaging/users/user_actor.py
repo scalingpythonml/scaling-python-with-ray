@@ -1,5 +1,4 @@
 import ray
-import logging
 from ray.util.metrics import Counter
 from messaging.internal_types import CombinedMessage
 from messaging.utils import utils

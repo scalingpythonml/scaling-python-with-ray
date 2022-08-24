@@ -30,7 +30,7 @@ class MailServerActorBase():
         self.server = Controller(
             handler=self,
             hostname="0.0.0.0",
-            ident=f"SpaceBeaver (PCFLabsLLC)",
+            ident="SpaceBeaver (PCFLabsLLC)",
             port=port)
         self.emails_forwaded = Counter(
             "emails_forwarded",
@@ -72,7 +72,7 @@ class MailServerActorBase():
             logging.info(f"Got back {result} updating header.")
             print(f"Got patch result {result}")
             if result.status_code != 200:
-                raise Exception(f"Got back a bad status code")
+                raise Exception(f"Got back a bad status code {result.status_code}")
         except Exception as e:
             print(f"Got an error trying to patch with https API {e}")
             patch_cmd = [
@@ -89,7 +89,7 @@ class MailServerActorBase():
             out = subprocess.check_output(patch_cmd)
             print(f"Got {out} from patching pod.")
         print("Pod patched?")
-                
+
 #end::update_label[]
 
 #tag::prepare_for_shutdown[]

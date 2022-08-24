@@ -89,9 +89,8 @@ def do_launch(actor_count: int, grace_period: int = 240):
 
 if __name__ == "__main__":
     import argparse
-    import time
     print("Waiting....")
-    time.sleep(30)
+    time.sleep(10)
     parser = argparse.ArgumentParser(description='Handle some satellite messags')
     parser.add_argument('--ray-head', type=str, required=False,
                         help='Head node to submit to')

@@ -12,6 +12,7 @@ class Envelop:
         self.rcpt_tos = []
         self.mail_from = "random@sender.co"
 
+
 #tag::code[]
 @ray.remote
 class MailServerActorForTesting(mailserver_actor.MailServerActorBase):

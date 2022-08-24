@@ -59,7 +59,7 @@ class SatelliteClientBase():
                 while True:
                     await asyncio.sleep(self.delay)
                     await self.check_msgs()
-                    internal_retires = 0  # On success reset retry counter.
+                    internal_retries = 0  # On success reset retry counter.
             except Exception as e:
                 print(f"Error {e} while checking messages.")
                 logging.error(f"Error {e}, retrying")
@@ -163,6 +163,7 @@ class SatelliteClientBase():
             data=request_encoded,
             headers=self._sendMessageHeaders
         )
+
 
 @ray.remote(max_restarts=-1)
 class SatelliteClient(SatelliteClientBase):

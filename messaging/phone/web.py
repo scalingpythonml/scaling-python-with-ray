@@ -1,9 +1,10 @@
+from typing import List
 from messaging.utils import utils
-from pydantic import BaseModel
-from fastapi import FastAPI, Field
+from pydantic import BaseModel, Field
+from fastapi import FastAPI
 from ray import serve
 from messaging.settings.settings import Settings
-from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
+from messaging.proto.MessageDataPB_pb2 import SMS as SMS_PROTOCOL
 from messaging.internal_types import CombinedMessage
 from typing import Optional
 
@@ -21,7 +22,7 @@ class BandwidthMessage(BaseModel):
     message_from: str = Field(None, alias='from')
     text: str
     applicationId: str
-    media: list[str]
+    media: List[str]
     segmentCount: int
 
 
@@ -42,26 +43,26 @@ class CreateBody(BaseModel):
 @serve.deployment(num_replicas=3, route_prefix="/")
 @serve.ingress(app)
 class PhoneWeb:
-    def __init__(self, settings: Settings, idx: int, poolsize: int):
+    def __init__(self, settings: Settings, poolsize: int):
         self.settings = settings
-        self.idx = idx
         self.poolsize = poolsize
         self.user_pool = utils.LazyNamedPool("user", poolsize)
 
     # FastAPI will automatically parse the HTTP request for us.
     @app.get("/callbacks/inbound/messaging")
-    async def inbound_message(self, messages: list[InboundMessageParams]) -> str:
-        for message in messages:
+    async def inbound_message(self, messages: List[InboundMessageParams]) -> int:
+        for message_params in messages:
+            message = message_params.message
             internal_message = CombinedMessage(
-                text=message.text, to=message.to, protocol=Protocol.SMS,
+                text=message.text, to=message.to, protocol=SMS_PROTOCOL,
                 msg_from=message.message_from, from_device=False
             )
             self.user_pool.get_pool().submit(
                 lambda actor, msg: actor.handle_message.remote(msg), internal_message)
-        return True
+        return 200
 
     @app.post('/callbacks/outbound/messaging/status')
-    async def handle_outbound_status(status_body_array: list[dict]) -> int:
+    async def handle_outbound_status(self, status_body_array: List[dict]) -> int:
         status_body = status_body_array[0]
         if status_body['type'] == "message-sending":
             print("message-sending type is only for MMS")

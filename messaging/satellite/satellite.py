@@ -47,10 +47,11 @@ class SatelliteClientBase():
         self._getMessageURL = self._hiveBaseURL + '/api/v1/messages'
         self._ackMessageURL = self._hiveBaseURL + '/api/v1/messages/rxack/{}'
         self._sendMessageURL = self._hiveBaseURL + '/api/v1/messages'
-        logging.info(f"Starting actor {idx}")
+        logging.info(f"Starting satellite actor {idx}")
 
 #tag::poll_for_msgs[]
     async def run(self):
+        print("Prepairing to run.")
         internal_retries = 0
         self.running = True
         while self.running:

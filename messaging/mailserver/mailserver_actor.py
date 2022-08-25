@@ -10,7 +10,7 @@ from messaging.utils.utils import LazyNamedPool
 import subprocess
 import os
 from messaging.internal_types import CombinedMessage
-from messaging.proto.MessageDataPB_pb2 import Protocol  # type: ignore
+from messaging.proto.MessageDataPB_pb2 import EMAIL as EMAIL_PROTOCOL
 from email.utils import parseaddr
 import platform
 
@@ -156,7 +156,7 @@ class MailServerActorBase():
                 to=parseaddr(rcpt)[1].split('@')[0],
                 msg_from=envelope.mail_from,
                 from_device=False,
-                protocol=Protocol.EMAIL)
+                protocol=EMAIL_PROTOCOL)
             self.user_pool.get_pool().submit(
                 lambda actor, message: actor.handle_message.remote(message),
                 message)

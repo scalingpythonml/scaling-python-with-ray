@@ -1,10 +1,13 @@
 import time
 import ray
 from ray.util import ActorPool
+from ray import serve
 from messaging.satellite.satellite import SatelliteClient
 from messaging.mailserver.mailserver_actor import MailServerActor
 from messaging.users.user_actor import UserActor
 from messaging.settings.settings import Settings
+from messaging.phone.outbound import OutboundPhone
+from messaging.phone.web import PhoneWeb
 
 
 def do_launch(actor_count: int, grace_period: int = 240):
@@ -19,7 +22,7 @@ def do_launch(actor_count: int, grace_period: int = 240):
     # 1) There is an (external to Ray) mailserver which will queue messages for us.
     # 2) Satellite API is polling not push (no harm to shutdown).
     actors_found = 0
-    for actor_name in ["mailserver", "satellite", "user"]:
+    for actor_name in ["mailserver", "sms", "satellite", "user"]:
         for i in actor_idxs:
             try:
                 a = ray.get_actor(f"{actor_name}_{i}")
@@ -29,13 +32,25 @@ def do_launch(actor_count: int, grace_period: int = 240):
                 pass
     if actors_found > 0:
         time.sleep(grace_period)
-        for actor_name in ["mailserver", "satellite", "user"]:
+        for actor_name in ["mailserver", "sms", "satellite", "user"]:
             for i in actor_idxs:
                 try:
                     a = ray.get_actor(f"{actor_name}_{i}")
                     ray.kill(a)
                 except Exception:
                     pass
+
+    def make_sms_actor(idx: int):
+        return (OutboundPhone.options(  # type: ignore
+            name=f"sms_{idx}",
+            max_task_retries=settings.max_retries,
+            lifetime="detached")
+            .remote(settings, idx, actor_count))
+
+    sms_actors = list(map(make_sms_actor, actor_idxs))
+    sms_pool = ActorPool(sms_actors)
+    # binding throws off mypy.
+    serve.run(PhoneWeb.bind(settings, actor_count))  # type: ignore
 
     def make_satellite_actor(idx: int):
         return (SatelliteClient.options(  # type: ignore
@@ -84,7 +99,7 @@ def do_launch(actor_count: int, grace_period: int = 240):
     mailserver_actors = list(map(make_mailserver_actor, actor_idxs))
     mailserver_pool = ActorPool(mailserver_actors)
 
-    return (satellite_pool, mailserver_pool, user_pool)
+    return (sms_pool, satellite_pool, mailserver_pool, user_pool)
 
 
 if __name__ == "__main__":

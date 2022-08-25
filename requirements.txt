@@ -8,3 +8,4 @@ Django==3.2.14
 aioredis<2
 aiohttp >= 3.8.0
 bandwidth-sdk
+fastapi

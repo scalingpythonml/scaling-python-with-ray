@@ -26,6 +26,7 @@ class UserActorBase():
         self.idx = idx
         self.poolsize = poolsize
         self.satellite_pool = utils.LazyNamedPool("satellite", poolsize)
+        self.outbound_sms = utils.LazyNamedPool("sms", poolsize)
         self.mail_client = MailClient(self.settings)
         self.messages_forwarded = Counter(
             "messages_forwarded",

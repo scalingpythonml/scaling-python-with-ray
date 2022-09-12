@@ -8,7 +8,7 @@ from ..utils import test_utils
 from ..proto.MessageDataPB_pb2 import MessageDataPB, EMAIL as EMAIL_PROTOCOL  # type: ignore
 from messaging.settings.settings import Settings
 
-os.environ["hivebaseurl"] = "http://www.farts.com"
+os.environ["hivebaseurl"] = "http://farts.farts.pigscanfly.ca"
 
 from . import satellite  # noqa: E402
 

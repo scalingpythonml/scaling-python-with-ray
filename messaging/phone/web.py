@@ -1,43 +1,24 @@
-from typing import List
 from messaging.utils import utils
 from pydantic import BaseModel, Field
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from ray import serve
 from messaging.settings.settings import Settings
 from messaging.proto.MessageDataPB_pb2 import SMS as SMS_PROTOCOL
 from messaging.internal_types import CombinedMessage
 from typing import Optional
+from twilio.request_validator import RequestValidator
 
 
 # 1: Define a FastAPI app and wrap it in a deployment with a route handler.
 app = FastAPI()
 
 
-# See https://dev.bandwidth.com/docs/messaging/webhooks/
-class BandwidthMessage(BaseModel):
-    time: str
-    owner: str
-    direction: str
-    to: str
+class InboundMessage(BaseModel):
+    x_twilio_signature: str
     message_from: str = Field(None, alias='from')
-    text: str
-    applicationId: str
-    media: List[str]
-    segmentCount: int
-
-
-class InboundMessageParams(BaseModel):
-    time: str
-    description: str
     to: str
-    message: BandwidthMessage
+    body: str
     msg_type: Optional[str] = Field(None, alias="type")
-
-
-# See https://github.com/Bandwidth-Samples/messaging-send-receive-sms-python/blob/main/main.py
-class CreateBody(BaseModel):
-    to: str
-    text: str
 
 
 @serve.deployment(num_replicas=3, route_prefix="/")
@@ -47,30 +28,23 @@ class PhoneWeb:
         self.settings = settings
         self.poolsize = poolsize
         self.user_pool = utils.LazyNamedPool("user", poolsize)
+        self.validator = RequestValidator(settings.TW_AUTH_TOKEN)
 
     # FastAPI will automatically parse the HTTP request for us.
-    @app.get("/callbacks/inbound/messaging")
-    async def inbound_message(self, messages: List[InboundMessageParams]) -> int:
-        for message_params in messages:
-            message = message_params.message
+    @app.get("/sms")
+    async def inbound_message(self, request: Request, message: InboundMessage) -> str:
+        # Validate the message
+        request_valid = self.validator.validate(
+            request.url,
+            request.form,
+            request.headers.get('X-TWILIO-SIGNATURE', ''))
+        if request_valid:
             internal_message = CombinedMessage(
-                text=message.text, to=message.to, protocol=SMS_PROTOCOL,
+                text=message.body, to=message.to, protocol=SMS_PROTOCOL,
                 msg_from=message.message_from, from_device=False
             )
             self.user_pool.get_pool().submit(
                 lambda actor, msg: actor.handle_message.remote(msg), internal_message)
-        return 200
-
-    @app.post('/callbacks/outbound/messaging/status')
-    async def handle_outbound_status(self, status_body_array: List[dict]) -> int:
-        status_body = status_body_array[0]
-        if status_body['type'] == "message-sending":
-            print("message-sending type is only for MMS")
-        elif status_body['type'] == "message-delivered":
-            print("your message has been handed off to the Bandwidth's MMSC network")
-        elif status_body['type'] == "message-failed":
-            print("Message delivery failed")
+            return ""
         else:
-            print("Message type does not match endpoint.")
-
-        return 200
+            raise HTTPException(status_code=403, detail="Validation failed.")

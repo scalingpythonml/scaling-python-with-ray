@@ -1,6 +1,6 @@
 [appendix]
 [[appC]]
-== Appendix C: Debugging with Ray
+== Debugging with Ray
 
 Depending on your debugging techniques, moving to distributed systems could require a new set of techniques. Thankfully, tools like Pdb and PyCharm allow you to connect remote debuggers, and Ray's local mode can allow you to use your existing debugging tools in many other situations. Some errors happen outside Python, making them more difficult to debug, like container OOMs, segmentation faults, and other native errors.
 

@@ -1,6 +1,6 @@
 [appendix]
 [[appA]]
-== Appendix A: Space Beaver Case Study -- Actors, Kubernetes, and more
+== Space Beaver Case Study: Actors, Kubernetes, and more
 
 The https://www.spacebeaver.com/[+++Space Beaver project (from Pigs Can Fly Labs LLC) uses satellite service from swarm.space and SMTP to provide, what is politely called, value-conscious+++]footnote:[Also known as cheap] https://www.spacebeaver.com/[+++off-grid messaging+++].footnote:[Conflict of Interest Disclosure: Holden Karau is the managing partner of Pigs Can Fly Labs LLC, and while she really hope you will buy the off-the-grid-messaging device she realizes the intersection of people reading programming books and people needing low-cost satellite e-mail messaging is pretty small.] The initial draft of the space beaver's core architecture was built using Scala and Akka, but then we switched to using Ray. By using Ray with Python instead of Akka with Scala we were able to re-use the object relation manager (ORM) from the website, and simplify the deployment. While it is possible to deploy Akka applications on Kubernetes, it is (in Holden's opinion) substantially more complicatedfootnote:[In Akka on Kubernetes the user is responsible for scheduling the actors on separate containers manually and restarting actors, whereas Ray can handle this for us.] than accomplishing the same task with Ray. In this appendix, we will walk through the general design of the Space Beaver backend, the code for the different actors, and show how to deploy it (and similar applications).
 
@@ -15,7 +15,7 @@ SpaceBeaver's core requirement is to serve as a bridge between e-mail (through S
 
 [[actor_layout]]
 .Actor Layout
-image:images/appA/image1.png[]
+image::images/appA/image1.png[]
 
 === Implementation
 

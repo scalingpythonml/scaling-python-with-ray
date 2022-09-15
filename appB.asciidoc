@@ -1,6 +1,6 @@
 [appendix]
 [[appB]]
-== Appendix B: Installing and Deploying Ray
+== Installing and Deploying Ray
 
 The power of Ray is the fact that it supports different deployment models ranging from a single node deployment, allowing you to experiment with Ray locally to clusters containing thousands of machines. The same code that is developed on the Ray local install can run on all the spectrum of Ray’s installations. In this Appendix, we will show some of the installation options, that we evaluated while writing this book.
 
@@ -63,7 +63,7 @@ When the cluster is created, it uses a firewall that allows only ssh connection 
 
 [[fig-appb-1]]
 .Placeholder caption
-image:images/appB/image1.png[]
+image::images/appB/image1.png[]
 
 As requested by your YAML file you can see only a head, the worker nodes will be created to satisfy the execution requirements of submitted jobs. To verify that the cluster is running correctly you can use the following https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/localPython.py[+++code+++].
 
@@ -146,7 +146,7 @@ To be able to access the cluster be sure to open the required ports following ht
 
 [[fig-appB-2]]
 .Placeholder caption
-image:images/appB/image2.png[]
+image::images/appB/image2.png[]
 
 As requested by your YAML file you can see only a head, the worker nodes will be created to satisfy the execution requirements of submitted jobs. To verify that the cluster is running correctly you can use the following https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/localPython.py[+++code+++].
 
@@ -252,7 +252,7 @@ Once this is done you can take a look at the Ray dashboard (<<fig-appB-3>>).
 
 [[fig-appB-3]]
 .Ray dashboard
-image:images/appB/image3.png[]
+image::images/appB/image3.png[]
 
 Once done you can uninstall Ray cluster using the following command:footnote:[Note that this command deletes pods, it leaves behind the service created as part of a cluster. You have to delete a service manually for a complete cleanup.]
 

@@ -18,9 +18,9 @@
     "ch10.asciidoc",
     "ch11.asciidoc",
     "ch12.asciidoc",
-    "appendix_a.asciidoc",
-    "appendix_b.asciidoc",
-    "appendix_c.asciidoc",
+    "appA.asciidoc",
+    "appB.asciidoc",
+    "appC.asciidoc",
     "author_bio.html"
   ],
   "formats": {

@@ -1,3 +1,4 @@
+[appendix]
 [[appC]]
 == Appendix C: Debugging with Ray
 

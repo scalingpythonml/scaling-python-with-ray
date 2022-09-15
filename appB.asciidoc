@@ -1,3 +1,4 @@
+[appendix]
 [[appB]]
 == Appendix B: Installing and Deploying Ray
 

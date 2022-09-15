@@ -1,3 +1,4 @@
+[appendix]
 [[appA]]
 == Appendix A: Space Beaver Case Study -- Actors, Kubernetes, and more
 

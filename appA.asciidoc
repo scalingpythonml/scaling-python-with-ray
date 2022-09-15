@@ -120,7 +120,7 @@ Another interesting pattern we used in the satellite actor is exposing serializa
 .Satellite Process Message
 [[process_msgs]]
 ====
-{empty}[source, python]
+[source, python]
 ----
 include::message-backend-ray/messaging/satellite/satellite.py[tags=process]
 ----

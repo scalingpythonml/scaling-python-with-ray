@@ -1,0 +1,305 @@
+[[appB]]
+== Appendix B: Installing and Deploying Ray
+
+The power of Ray is the fact that it supports different deployment models ranging from a single node deployment, allowing you to experiment with Ray locally to clusters containing thousands of machines. The same code that is developed on the Ray local install can run on all the spectrum of Ray’s installations. In this Appendix, we will show some of the installation options, that we evaluated while writing this book.
+
+=== Ray local install
+
+The simplest Ray’s install is a local install with `pip`. Using the following command:
+
+----
+pip install -U ray
+----
+
+This command will install all of the code required to run local Ray programs or launch programs on a Ray cluster (see below at Using Ray clusters). The above command will install the latest official release. In addition, it is possible to install Ray from https://docs.ray.io/en/master/installation.html#daily-releases-nightlies[+++daily releases+++] or a https://docs.ray.io/en/master/installation.html#installing-from-a-specific-commit[+++specific commit+++]. It is also possible to install Ray inside the https://docs.ray.io/en/master/installation.html#installing-ray-with-anaconda[+++Conda+++] environment. Finally, you can build Ray from the source following these https://docs.ray.io/en/master/development.html#building-ray[+++instructions+++].
+
+=== Using Ray Docker images
+
+In addition to natively installing on your local machine, Ray also provides an option for running the provided https://docs.ray.io/en/master/installation.html#launch-ray-in-docker[+++docker image+++]. Ray project provides a wealth of https://hub.docker.com/r/rayproject/ray[+++docker images+++] built for different versions of Python and hardware options. These images can be used for the execution of Ray’s code by starting a corresponding Ray image:
+
+----
+docker run --rm --shm-size=<shm-size> -t -i <image name>
+----
+
+Here `<shm-size>` is the memory that Ray uses internally for its Object Store. A good estimate for this value is to use roughly 30% of your available memory; `<image name>` is the name of the image used.
+
+Once this command is executed, you will get back a command line prompt and you can enter any Ray code.
+
+=== Using Ray clusters
+
+Although a local Ray installation is extremely useful for experimenting and initial debugging, the real power of Ray is its ability to run and scale on clusters of machines.
+
+Ray cluster nodes are logical nodes based on docker images. Docker images provided by the Ray project contain all the code required for running logical nodes, but not necessarily all the code required to run user applications. The issue here is that the user's code might need specific Python libraries, which are not part of Ray’s docker images. To overcome this problem Ray allows the installation of specific libraries to the nodes as part of the cluster installfootnote:[See below], which is great for initial testing but can significantly impact the node’s creation performance. As a result, in production installs, it is typically recommended to use custom images derived from Ray-provided ones and add required libraries.
+
+Ray provides two main options for installation - installation directly on the hardware nodes or cloud provider's VMs and installation on Kubernetes. Here we will only discuss Ray's installation on cloud providers and Kubernetes. For information on Ray's installation on hardware nodes refer to https://docs.ray.io/en/latest/cluster/cloud.html#local-on-premise-cluster-list-of-nodes[+++Ray documentation+++].
+
+==== Installation of Ray using VMs on cloud providers
+
+The official https://docs.ray.io/en/latest/cluster/cloud.html#local-on-premise-cluster-list-of-nodes[+++documentation+++] describes Ray's installation on several cloud providers, including AWS, Azure, Google Cloud, Alibaba, and custom clouds. Here we will discuss installation on AWS (as it is the most popular) and IBM Cloudfootnote:[In the interest of transparency: Boris currently works at IBM and Holden used to work at IBM. Holden has also worked for Google, Microsoft, and Amazon.] (as one of the co-authors work there and they take a unique approach).
+
+==== Installation of Ray on AWS
+
+AWS cloud installation leverages Boto3 - AWS SDK for Python and requires configuring your AWS credentials in __~/.aws/credentials__ filefootnote:[See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration[+++https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration+++] for information on setting up Boto3 configuration.],
+
+Once the credentials are created and Boto3 is installed, you can use this https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/ray-aws.yaml[+++yaml file+++]footnote:[This file is adopted from https://github.com/ray-project/ray/blob/master/python/ray/autoscaler/aws/example-full.yaml[+++Ray Github+++]] to install Ray on AWS using the following command:
+
+----
+ray up <your location>/ray-aws.yaml
+----
+
+This command creates the cluster. It also provides a set of useful commands that you can usefootnote:[The IP addresses that you will see are going to be different from ours.]:
+
+----
+Monitor autoscaling with
+    ray exec /Users/boris/Projects/Platform-Infrastructure/middleware/ray/install/ray-aws.yaml 'tail -n 100 -f /tmp/ray/session_latest/logs/monitor*'
+Connect to a terminal on the cluster head:
+    ray attach /Users/boris/Projects/Platform-Infrastructure/middleware/ray/install/ray-aws.yaml
+Get a remote shell to the cluster manually:
+    ssh -tt -o IdentitiesOnly=yes -i /Users/boris/.ssh/ray-autoscaler_us-east-1.pem ubuntu@54.161.87.170 docker exec -it ray_container /bin/bash
+----
+
+When the cluster is created, it uses a firewall that allows only ssh connection to the cluster. If you want to access the cluster’s dashboard, you need to open port 8265, for GRPC access - port 10001. To do this, find your node in the AWS EC2 dashboard, click on security/security group and modify the inbound rules. The picture below shows a new rule allowing for any instance port access from anywhere. For more information on inbound rules’ configuration refer to https://docs.aws.amazon.com/quicksight/latest/user/vpc-security-groups.html[+++AWS documentation+++].
+
+[[fig-appb-1]]
+.Placeholder caption
+image:images/appB/image1.png[]
+
+As requested by your YAML file you can see only a head, the worker nodes will be created to satisfy the execution requirements of submitted jobs. To verify that the cluster is running correctly you can use the following https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/localPython.py[+++code+++].
+
+An alternative approach to using docker images for installation demonstrated in this https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/ray-aws.yaml[+++yaml file+++] is installing Ray directly on VM as shown https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/aws-ray.yaml[+++here+++]. The advantage of this approach is the ability to easily add additional software to the VM, which can be very useful for real-life use cases. The obvious one here is managing Python libraries. You can do this with Docker-based installation, but you will then need to build docker images for each of the different library configurations. In the VM - based approach, there is no need to create and manage docker images, just do appropriate pip installs. Additionally, you can also install applications on VM to leverage them in the Ray execution (see Wrapping custom programs with Ray in chapter 12)
+
+[TIP]
+====
+This contains a lot of setup commands, and as a result, it can take a significant amount of time for the Ray node to startup. A recommended approach is to start the Ray cluster once, create a new image and then use this image and remove additional setup commands.
+====
+
+==== Installation of Ray on IBM Cloud
+
+IBM Cloud installation is based on the https://github.com/project-codeflare/gen2-connector[+++Gen2 connector+++] that enables the Ray cluster to be deployed on IBMs Gen2 cloud infrastructure. As with Ray on AWS you'll start with creating the cluster specification in a yaml file. You can use the lithopscloud to do this interactively if you don't want to write one by hand. You install lithopscloud with `pip` as normal:
+
+----
+pip3 install lithopscloud
+----
+
+To use lithopscloud you first need to either create an https://www.ibm.com/docs/en/spectrumvirtualizecl/8.1.x?topic=installing-creating-api-key[+++API key+++] or reuse the existing one. With your API key, you can run `lithopscloud -o cluster.yaml` command to generate a cluster.yam file. Once you start it, follow the questionsfootnote:[Note that you need to use up/down arrows to make your selection.] to generate a file. You can find an example of the generated file on https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/IBMCloud/cluster.yaml[+++Github+++].
+
+The limitation of the autogenerated file is that it uses the same image type for both head and worker nodes, which is not always ideal. You often may want to provide different node types for these nodes. To do this you can modify the autogenerated https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/IBMCloud/cluster.yaml[+++yaml file+++] as follows:
+
+[source, yaml]
+----
+available_node_types:
+ ray_head_default:
+   max_workers: 0
+   min_workers: 0
+   node_config:
+     boot_volume_capacity: 100
+     image_id: r006-dd164da8-c4d9-46ba-87c4-03c614f0532c
+     instance_profile_name: bx2-4x16
+     key_id: r006-d6d823da-5c41-4e92-a6b6-6e98dcc90c8e
+     resource_group_id: 5f6b028dc4ef41b9b8189bbfb90f2a79
+     security_group_id: r006-c8e44f9c-7159-4041-a7ab-cf63cdb0dca7
+     subnet_id: 0737-213b5b33-cee3-41d0-8d25-95aef8e86470
+     volume_tier_name: general-purpose
+     vpc_id: r006-50485f78-a76f-4401-a742-ce0a748b46f9
+   resources:
+     CPU: 4
+ ray_worker_default:
+   max_workers: 10
+   min_workers: 0
+   node_config:
+     boot_volume_capacity: 100
+     image_id: r006-dd164da8-c4d9-46ba-87c4-03c614f0532c
+     instance_profile_name: bx2-8x32
+     key_id: r006-d6d823da-5c41-4e92-a6b6-6e98dcc90c8e
+     resource_group_id: 5f6b028dc4ef41b9b8189bbfb90f2a79
+     security_group_id: r006-c8e44f9c-7159-4041-a7ab-cf63cdb0dca7
+     subnet_id: 0737-213b5b33-cee3-41d0-8d25-95aef8e86470
+     volume_tier_name: general-purpose
+     vpc_id: r006-50485f78-a76f-4401-a742-ce0a748b46f9
+   resources:
+     CPU: 8
+----
+
+Here you define two types of nodes - default head node and default worker node (you can define multiple worker node types with a max amount of workers per time), which means that now you can have a relatively small head node (running all the time) and much larger worker nodes that will be created just in time
+
+[TIP]
+====
+If you take a look at the generated yaml file, you will notice that it has a lot of setup commands, and as a result, it can take a significant amount of time for the Ray node to startup. A recommended approach is to start the Ray cluster once, create a new image and then use this image and remove setup commands
+====
+
+Once the yaml file is generated, you can install Gen2-connector to be able to use it. Run `pip3 install gen2-connector`. Once you have installed the connector, you can then create your cluster by running `ray up cluster.yaml`.
+
+Similar to installing Ray on AWS, this installation displays the list of useful commands:
+
+[source]
+----
+Monitor autoscaling with
+    ray exec /Users/boris/Downloads/cluster.yaml 'tail -n 100 -f /tmp/ray/session_latest/logs/monitor*'
+Connect to a terminal on the cluster head:
+    ray attach /Users/boris/Downloads/cluster.yaml
+Get a remote shell to the cluster manually:
+    ssh -o IdentitiesOnly=yes -i /Users/boris/Downloads/id.rsa.ray-boris root@52.118.80.225
+----
+
+To be able to access the cluster be sure to open the required ports following https://cloud.ibm.com/docs/vpc?topic=vpc-configuring-the-security-group&interface=ui[+++IBM cloud documentation+++] similar to the following:
+
+[[fig-appB-2]]
+.Placeholder caption
+image:images/appB/image2.png[]
+
+As requested by your YAML file you can see only a head, the worker nodes will be created to satisfy the execution requirements of submitted jobs. To verify that the cluster is running correctly you can use the following https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/aws/localPython.py[+++code+++].
+
+==== Installation of Ray on Kubernetes
+
+When it comes to the actual cluster’s installation on Kubernetes, Ray provides two basic mechanisms for this:
+
+* Cluster launcher (similar to installation using VMs), which makes it simple to deploy a Ray cluster on any cloud. It will provision a new instance/machine using the cloud provider’s SDK; execute shell commands to set up Ray with the provided options and initialize the cluster
+* Ray Kubernetes operator, making it easier to deploy Ray on an existing Kubernetes cluster. The operator defines a https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/[+++Custom Resource+++] called a RayCluster, which describes the desired state of the Ray cluster, and a https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#custom-controllers[+++Custom Controller+++], the Ray Operator, which processes RayCluster resources and manages the Ray cluster.
+
+
+[TIP]
+====
+When you install Ray on a Kubernetes cluster both using cluster launcher and operator, Ray is leveraging Kubernetes capabilities to create a new Ray node in the form of Kubernetes Pod. Note that although the Ray auto scaler works the same way, it effectively “steals” resources from the Kubernetes cluster. This means that your Kubernetes cluster has to either be large enough to support all of Ray’s resource requirements or provide its own autoscaling mechanism.
+
+Also note, that because Ray’s nodes are in this case implemented as underlying Kubernetes pods, the Kubernetes resource manager can kill these pods at any time to obtain additional resources.
+====
+
+==== Installing Ray on a Kind (Kubernetes in Docker) cluster
+
+To demonstrate both approaches, let’s start by installing and accessing the Ray cluster on a https://kind.sigs.k8s.io/[+++kind cluster+++] - a popular tool for running local Kubernetes clusters using Docker container “nodes” which is often used for local development. To do this you need to create a cluster first by running the following command:
+
+[source]
+----
+kind create cluster
+----
+
+This will create a cluster with a default configuration. To modify the configuration refer to the https://kind.sigs.k8s.io/docs/user/configuration/[+++configuration documentation+++]. Once the cluster is up and running you can use either `ray up` or Kubernetes operator to create a Ray cluster.
+
+==== Using Ray up
+
+To create a Ray cluster using `ray up`, you must specify the resource requirements in a https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/deployment/rayup/raycluster.yaml[+++YAML file+++]footnote:[This file is adopted from https://github.com/ray-project/ray/blob/master/python/ray/autoscaler/kubernetes/defaults.yaml[+++here+++]]. This YAML file contains all the information required to create the Ray cluster. It contains the following:
+
+* General information about the cluster-cluster name and auto-scaling parameters.
+* Information about cluster provider (Kubernetes in our case), which contains provider-specific information required for the creation of Ray cluster’s nodes
+* Node-specific information (CPU/Memory, etc). This also includes a list of node startup commands, including the installation required Python libraries.
+
+With this file in place, a command to create a cluster looks like this:
+
+----
+ray up <your location>/raycluster.yaml
+----
+
+Once the cluster creation completes, you can see that there are several pods running:
+
+[source]
+----
+> get pods -n ray
+NAME                   READY   STATUS    RESTARTS   AGE
+ray-ray-head-88978     1/1     Running   0          2m15s
+ray-ray-worker-czqlx   1/1     Running   0          23s
+ray-ray-worker-lcdmm   1/1     Running   0          23s
+----
+
+As requested by our YAML file you can see one head and two worker nodes. To verify that the cluster is running correctly you can use the following https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/testing/jobexample.yaml[+++job+++]:
+
+[source]
+----
+kubectl create -f <your location>/jobexample.yaml -n ray
+----
+
+The execution results in something similar to this:
+
+[source]
+----
+> kubectl logs ray-test-job-bx4xj-4nfbl -n ray
+--2021-09-28 15:18:59--  https://raw.githubusercontent.com/scalingpythonml/scalingpythonml/d8d6aa39c9fd74dddec41accebdca08585360baa/ray/installRay/kind/testing/servicePython.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.111.133, 185.199.109.133, 185.199.110.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.111.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 1750 (1.7K) [text/plain]
+Saving to: ‘servicePython.py’
+
+     0K .                                                     100% 9.97M=0s
+
+2021-09-28 15:18:59 (9.97 MB/s) - ‘servicePython.py’ saved [1750/1750]
+
+Connecting to Ray at service ray-ray-head, port 10001
+Iteration 0
+Counter({('ray-ray-head-88978', 'ray-ray-head-88978'): 30, ('ray-ray-head-88978', 'ray-ray-worker-czqlx'): 29, ('ray-ray-head-88978', 'ray-ray-worker-lcdmm'): 13, ('ray-ray-worker-czqlx', 'ray-ray-worker-czqlx'): 10, ('ray-ray-worker-czqlx', 'ray-ray-head-88978'): 9, ('ray-ray-worker-czqlx', 'ray-ray-worker-lcdmm'): 9})
+Iteration 1
+……………………………….
+Success!
+----
+
+Once your job is up you can additionally port-forwardfootnote:[Theoretically you can also create an ingress to connect to the Ray cluster through it. Unfortunately in the case of the NGINX ingress controller, it will not work. The issue here is that the Ray client is using unsecure gRPC, while the NGINX ingress controller supports only secure gRPC calls. When using Ray cluster on the specific cloud, check whether an ingress supports unsecure gRPC before exposing Ray’s head service as an ingress.] ray-ray-head service by running the following:
+
+[source]
+----
+kubectl port-forward -n ray service/ray-ray-head 10001
+----
+
+and connect to it from your local machine using this https://github.com/scalingpythonml/scalingpythonml/blob/d8d6aa39c9fd74dddec41accebdca08585360baa/ray/installRay/kind/testing/localPython.py[+++application+++]. Execution of this code produces the same results as above.
+
+Additionally, you can port forward ray service to port 8265 to look at the Ray dashboard
+
+[source]
+----
+kubectl port-forward -n ray service/ray-ray-head 8265
+----
+
+Once this is done you can take a look at the Ray dashboard (<<fig-appB-3>>).
+
+[[fig-appB-3]]
+.Ray dashboard
+image:images/appB/image3.png[]
+
+Once done you can uninstall Ray cluster using the following command:footnote:[Note that this command deletes pods, it leaves behind the service created as part of a cluster. You have to delete a service manually for a complete cleanup.]
+
+[source]
+----
+ray down <your location>/raycluster.yaml
+----
+
+==== Using the Ray Kubernetes operator
+
+In the case of deployment to the Kubernetes cluster, we can also use the Ray operator, which is a recommended approach in the case of Kubernetes. To simplify usage of the operator, Ray provides a https://github.com/ray-project/ray/tree/master/deploy/charts/ray/[+++Helm chart+++] available as part of the Ray GitHub repository. Here instead of the Helm chart, we are using several YAML files to deploy Ray to make installation a bit simpler. Our deployment is split into 3 files: https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/deployment/operator/operatorcrd.yaml[+++operatorcrd.yaml+++] containing all of the commands for CRD creation, https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/deployment/operator/operator.yaml[+++operator.yaml+++] containing all of the commands for the creation of the operator and https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/deployment/operator/rayoperatorcluster.yaml[+++rayoperatorcluster.yaml+++] are all commands for cluster creation. It is assumed in these files that the operator is created in the namespace ray.
+
+To install the operator itself we need to execute these two commands:
+
+[source]
+----
+kubectl apply -f <your location>/operatorcrd.yaml
+kubectl apply -f <your location>/operator.yaml
+----
+
+Once this is done, ensure that the operator pod is running using the command below:
+
+[source]
+----
+> kubectl get pods -n ray
+NAME                            READY   STATUS    RESTARTS   AGE
+ray-operator-6c9954cddf-cjn9c   1/1     Running   0          110s
+----
+
+Once the operator is up and running you can start the cluster itself using the following command:footnote:[Although documentation is mentioning cluster-wide deploy operator, it only works for a namespace where the operator is deployed.]
+
+----
+kubectl apply -f <your location>/rayoperatorcluster.yaml -n ray
+----
+
+Here the content of the https://github.com/scalingpythonml/scalingpythonml/blob/d8d6aa39c9fd74dddec41accebdca08585360baa/ray/installRay/kind/deployment/operator/rayoperatorcluster.yaml[+++rayoperatorcluster.yaml+++] is similar to the content of https://github.com/scalingpythonml/scalingpythonml/blob/d8d6aa39c9fd74dddec41accebdca08585360baa/ray/installRay/kind/deployment/rayup/raycluster.yaml[+++YAML file+++], but formatted slightly different.
+
+Once the cluster is up and running you can use the same validation code as described above for Ray up.
+
+==== Installing Ray on OpenShift
+
+OpenShift is a type of Kubernetes cluster, so theoretically Kubernetes operator can be used to install Ray on the OpenShift cluster. Unfortunately, this installation is a little bit more involved. If you have ever used OpenShift then you know that by default all of the pods in OpenShift run in https://cloud.redhat.com/blog/managing-sccs-in-openshift[+++restrictive mode+++]. This mode denies access to all host features and requires pods to be run with a UID, and SELinux context that are allocated to the namespace. Unfortunately, this does not quite work for the Ray operator, designed to run as user 1000. To enable this, you need to introduce several changes to the files that you used for installing on the Kind (and any other plain Kubernetes cluster).
+
+* `ray-operator-serviceaccount` service account, which is used by the operator should be added to `anyuid` mode, which allows users to run with any non-root UID.
++
+----
+oc adm policy add-scc-to-user anyuid -z ray-operator-serviceaccount
+----
+* You also need to modify https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/deployment/operator/operator_openshift.yaml[+++operator.yaml+++] to ensure that the operator pod is running as a user 1000
+
+Additionally, a testing https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/testing/jobexample_openshift.yaml[+++job+++] has to be modified slightly to run as user 1000. This requires the creation of a _ray-node-serviceaccount_ service account used for running a job and adding this service account to `anyuid` mode, which allows users to run with any non-root UID.

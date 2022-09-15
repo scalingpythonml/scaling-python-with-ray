@@ -1,0 +1,191 @@
+[[appA]]
+== Appendix A: Space Beaver Case Study -- Actors, Kubernetes, and more
+
+The https://www.spacebeaver.com/[+++Space Beaver project (from Pigs Can Fly Labs LLC) uses satellite service from swarm.space and SMTP to provide, what is politely called, value-conscious+++]footnote:[Also known as cheap] https://www.spacebeaver.com/[+++off-grid messaging+++].footnote:[Conflict of Interest Disclosure: Holden Karau is the managing partner of Pigs Can Fly Labs LLC, and while she really hope you will buy the off-the-grid-messaging device she realizes the intersection of people reading programming books and people needing low-cost satellite e-mail messaging is pretty small.] The initial draft of the space beaver's core architecture was built using Scala and Akka, but then we switched to using Ray. By using Ray with Python instead of Akka with Scala we were able to re-use the object relation manager (ORM) from the website, and simplify the deployment. While it is possible to deploy Akka applications on Kubernetes, it is (in Holden's opinion) substantially more complicatedfootnote:[In Akka on Kubernetes the user is responsible for scheduling the actors on separate containers manually and restarting actors, whereas Ray can handle this for us.] than accomplishing the same task with Ray. In this appendix, we will walk through the general design of the Space Beaver backend, the code for the different actors, and show how to deploy it (and similar applications).
+
+[NOTE]
+====
+The code for this case study is at https://github.com/PigsCanFlyLabs/message-backend-ray[+++https://github.com/PigsCanFlyLabs/message-backend-ray+++].
+====
+
+=== High-Level Design
+
+SpaceBeaver's core requirement is to serve as a bridge between e-mail (through SMTP), SMS (through bandwidth.com) and the swarm.space satellite APIs. Most of these involve some amount of state, such as running an SMTP server, but the outbound mail messages can be implemented without any state. A rough outline of the design is shown below in <<actor_layout>>.
+
+[[actor_layout]]
+.Actor Layout
+image:images/appA/image1.png[]
+
+=== Implementation
+
+Now that you've seen a rough design, it's time to explore how the different patterns you've learned throughout the book are applied to bring this all together.
+
+==== Outbound Mail Client
+
+The outbound mail client is the one stateless piece of code, since it establishes a connection for each outbound message. Since it's stateless, we implemented this as a regular remote function, which is created for every incoming request. Ray can then scale up and or down as needed depending on the amount of incoming requests. Being able to scale the number of instances of the remote function containing the e-mail client, which is useful since the client may end up blocking on external hosts.
+
+[TIP]
+====
+There is some overhead to scheduling each remote function invocation. In our case the expected message rate is not that high. If you have a good idea of what the desired concurrency is you should consider using Ray's `multiprocessing.Pool` to avoid function creation overhead.
+====
+
+However, we want to serialize some settings, like in a settings class, so we wrap it with a special method to pass through a self-reference, despite not being an actor, as shown in <<ray_outbound_mail_client>>.
+
+.Mail Client
+[[ray_outbound_mail_client]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/utils/utils.py[tags=code]
+----
+====
+
+Another reasonable approach would be to make this stateful and maintain a connection across messages.
+
+==== Shared Actor Patterns and Utilities
+
+The remaining components of our system are stateful, either in the context of long-lived network connections or database connections. Since the user actor needs to talk to all of the other actors (and vice versa), to simplify discovering the other actors running in the system, we added a "LazyNamedActorPool"footnote:[An alternate pattern to solve this is having the "main" or launching program call the actors with the references as they are created.], which combines the concept of named actors along with actor pools.
+
+.Lazy Named Actor Pool
+[[lazypool]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/utils/utils.py[tags=lazypool]
+----
+====
+
+The other shared pattern we use is graceful shutdown, where we ask the actors to stop processing new messages. Once the actors stop accepting new messages, the existing messages in the queue will drain out – either to the satellite network or SMTP network as needed. Then the actors can be deleted without having to persist and recover the messages the actor was processing. In the mail server, which we will look at next, this pattern is implemented as shown in <<prepare_for_shutdown>>.
+
+.Stop For Upgrade
+[[prepare_for_shutdown]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/mailserver/mailserver_actor.py[tags=prepare_for_shutdown]
+----
+====
+
+==== Mail Server Actor
+
+The mail server actor is responsible for accepting new inbound messages and passing them along to the user actor. This is implemented as an aiosmtpd server handler, as shown in <<handle_data>>.
+
+.Mail Server Message Handling
+[[handle_data]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/mailserver/mailserver_actor.py[tags=handle_data]
+----
+====
+
+An important part of having a mail server is that external users can make connections to the server. For HTTP services, like the inference server, you can use Ray serve to expose your service. However, the mailserver uses SMTP, which is not currently able to be exposed with Ray serve. So, to allow Kubernetes to route requests to the correct hosts, the mail actor tags itself as shown in <<update_label>>.
+
+.Mail Server Kubernetes Labeling
+[[update_label]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/mailserver/mailserver_actor.py[tags=update_label]
+----
+====
+
+==== Satellite Actor
+
+The satellite actor is similar to the mail server actor, except instead of accepting inbound requests, it gets new messages by polling, and we also send messages through it. Polling is like driving with a six-year-old in the car who keeps asking, "are we there yet?" Except in our case, it is "do you have any new messages?" In Ray, async actors are the best option to implement polling, as the polling loop runs forever, but you still want to be able to process other messages. The satellite actors' polling implementation is shown below in <<poll_for_msgs>>.
+
+.Satellite Actor Polling
+[[poll_for_msgs]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/satellite/satellite.py[tags=poll_for_msgs]
+----
+====
+
+This polling loop delegates most of the logic out to `check_msgs` shown in <<check_msgs>>.
+
+.Satellite Check Messages
+[[check_msgs]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/satellite/satellite.py[tags=check_msgs]
+----
+====
+
+Another interesting pattern we used in the satellite actor is exposing serializable results for testing, but keeping the data in the more efficient async representation in the normal flow. This pattern is shown in the way messages are decoded in <<process_msgs>>.
+
+.Satellite Process Message
+[[process_msgs]]
+====
+{empty}[source, python]
+----
+include::message-backend-ray/messaging/satellite/satellite.py[tags=process]
+----
+====
+
+==== User Actor
+
+While the other actors are all async, allowing parallelism within the actor, the user actors are synchronous since the Django Object Relation Mapper (ORM) does not yet handle async. The user actor code is shown relatively completely in <<user_actor>> below, so you can see the shared patterns (which were used in the other actors but skipped for brevity).
+
+.User Actor
+[[user_actor]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/satellite/satellite.py[tags=code]
+----
+====
+
+[NOTE]
+====
+Django is a popular Python web development framework, that includes many different components including the ORM we are using.
+====
+
+==== SMS Actor and Serve implementation
+
+In addition to the actors for satellite and e-mail gateways, SpaceBeaver also uses Ray Serve to expose a phone-api.
+
+=== Testing
+
+To facilitate testing, the actor code was broken into a "base" class and then extended into an actor class. This allowed for testing the mail server independent from its deployment on Ray, as shown in <<standalone_mail_test>>.
+
+.Standalone Mail Test
+[[standalone_mail_test]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/mailserver/mailserver_tests.py[tags=code]
+----
+====
+
+While these standalone tests can run with less overhead, it's a good idea to have some full actor, and you can often speed them up by re-using the Ray context across tests (although when it goes wrong, the debugging is painful), as in <<full_mail_test>>.
+
+.Full actor test
+[[full_mail_test]]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/mailserver/mailserver_actor_tests.py[tags=code]
+----
+====
+
+=== Deployment
+
+While Ray handles most of the deployment, we need to create a Kubernetes service to make our SMTP and SMS services reachable. On our test cluster, we do this by exposing a load balancer service as shown in <<smtp_service>>.
+
+.SMTP and SMS Services
+[[smtp_service]]
+====
+[source, python]
+----
+include::message-backend-ray/service.yaml[]
+----
+====
+
+As shown above, the SMTP and SMS services use different node selectors to route the requests to the correct pods.
+
+=== Conclusion
+
+The Ray port of the SpaceBeaver messaging backend substantially reduced deployment and packaging complexity while increasing code reuse. Some of this comes from the broad Python ecosystem (popular frontend tools and backend tools), but much of the rest comes from the serverless nature of Ray. The equivalent system in Akka required user intention around scheduling actors, whereas, with Ray, we can leave that up to the scheduler. Of course, there are many benefits to Akka, like the powerful JVM ecosystem, but hopefully, this case study has shown you some interesting ways you can use Ray.

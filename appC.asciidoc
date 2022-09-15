@@ -38,7 +38,7 @@ include::examples/ray/debugging/Debugging.py[tags=bad_ser_example]
 .Bad Serialization Result
 ====
 [source]
-—---
+----
 =========================================================================
 Checking Serializability of <function special_business at 0x7f78802820d0>
 =========================================================================
@@ -72,7 +72,7 @@ If you have any suggestions on how to improve this error message, please reach o
 =========================================================================
 (False,
  {FailTuple(notifier [obj=<multiprocessing.queues.SimpleQueue object at 0x7f784e54a2e0>, parent={}])})
-—---
+----
 ====
 
 In the above example, Ray checks the elements for serializability and also calls out that the non-serializable value `pool` is coming in from the global scope.

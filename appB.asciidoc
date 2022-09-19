@@ -304,3 +304,7 @@ oc adm policy add-scc-to-user anyuid -z ray-operator-serviceaccount
 * You also need to modify https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/deployment/operator/operator_openshift.yaml[+++operator.yaml+++] to ensure that the operator pod is running as a user 1000
 
 Additionally, a testing https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/installRay/kind/testing/jobexample_openshift.yaml[+++job+++] has to be modified slightly to run as user 1000. This requires the creation of a _ray-node-serviceaccount_ service account used for running a job and adding this service account to `anyuid` mode, which allows users to run with any non-root UID.
+
+=== Conclusion
+Ray provides a wealth of deployment options. When using it for solving specific problem you will need to decide which option is
+is most suitable for your specific situation

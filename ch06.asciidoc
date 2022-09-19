@@ -420,9 +420,8 @@ There are two important classes of stream processing:
 
 Stateless stream processing implementations are typically simple and straightforward, They require an extension of the _start_ method of the Kafka consumer (Listing 6-2) to implement any required transformation of the incoming messages. The result of these transformations can be sent either to different Kafka topics or to any other part of the code. An example stateless a streaming application can be found https://www.anyscale.com/blog/serverless-kafka-stream-processing-with-ray[+++here+++].
 
-Implementing stateful stream processing is typically more involved. Let’s take a look at different options for implementing stateful stream processing based on https://www.lightbend.com/blog/serve-machine-learning-models-dynamically-controlled-streams[+++dynamically controlled streams+++].
-
-==== Implementing stateful stream processing
+Implementing stateful stream processing is typically more involved. Let’s take a look at different options for implementing stateful stream processing based on
+https://www.lightbend.com/blog/serve-machine-learning-models-dynamically-controlled-streams[+++dynamically controlled streams+++].
 
 Our sample implementation uses the heater controller examplefootnote:[This example is adapted from https://www.lightbend.com/blog/serve-machine-learning-models-dynamically-controlled-streams[+++here+++]] which consists of the following:
 
@@ -440,7 +439,7 @@ The following are simplifications that we made to the original example:
 
 With these simplifications in place, we will here demonstrate two approaches to implement stateful stream processing with Ray - a key-based approach and a key independent one.
 
-===== Key-based approach 
+==== Key-based approach
 
 Many stateful streaming applications rely on Kafka message keys. Remember that Kafka partitioning uses the key hash to determine which partition a message is written to. This means that Kafka guarantees that all of the messages with the same key are always picked up by the same consumer. In this case, it is possible to implement stateful stream processing locally on the Kafka consumer that receives them. Because the consumer is implemented as a Ray Actor, Ray keeps track of the data inside the actorfootnote:[As described in chapter 4, Ray’s actors are not persistent, and as a result in the case of node failures, the actor state will be lost. We can implement persistence here as described in Chapter 4 to overcome this.].
 
@@ -597,7 +596,7 @@ There are two potential pitfalls of such implementations:
 
 Some of these drawbacks can be rectified in a key independent approach.
 
-===== Key independent approach
+==== Key independent approach
 
 The difference of this approach compared to the previous one is that both the temperature controller (Listing 6-8) and temperature controller manager (Listing 6-9) are converted from Python objects to https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/round_robin/ray_kafka_persistent.py[+++Ray actors+++]. By doing this both become individually addressable and can be located anywherefootnote:[Complete code for this example can be found https://github.com/scalingpythonml/scalingpythonml/tree/master/streaming/persistent_ray/round_robin[+++here+++]]. Such an approach loses execution locality (which can lead to a slight execution time increase), but can improve overall scalability of the solution (each actor can run on a separate node). If necessary, you can improve scalability even further by leveraging an actor’s pool (described in chapter 4) and thus allowing Ray to split execution to even more nodes.
 

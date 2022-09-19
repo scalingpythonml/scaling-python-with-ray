@@ -71,6 +71,7 @@ Workflows are built out of various different primitives, and you'll start with l
 The code below shows a simple hello world workflow example, demonstrating how the step, object and workflow primitives work in a simple case.footnote:[Complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/basic_workflow_example.py[+++Github+++]]
 
 [[basic_workflow]]
+.Hello world workflow
 ====
 [source, python]
 ----
@@ -107,6 +108,7 @@ assert workflow.get_output("workflow_1") == "hello world"
 Similar to Ray tasks and Actors described in chapters 3 and 4 you can explicitly assign computing resources (e.g., CPU core, GPUs,) to a step with the same arguments as in core Ray: `num_cpus`, `num_gpus`, and `resources`. For example:
 
 [[step_resources]]
+.Adding resources to steps
 ====
 [source, python]
 ----
@@ -124,6 +126,7 @@ train_model.step().run()
 In addition to the workflows with the predefined DAG. Ray allows you to create steps programmatically based on the current state of workflow execution - Dynamic workflows. You can use this type of workflow, for example, to implement recursion and more complex execution flows. A simple recursion can be illustrated with a recursive factorial program. The example belowfootnote:[The full code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/basic_dynamic_worflow_example.py[+++Github+++]] shows how you can use recursion within a workflow (note that this is for illustration only and that other implementations with better performance exist without the need of Ray Workflows):
 
 [[basic_dynamic_workflow]]
+.Dynamic workflow
 ====
 [source, python]
 ----
@@ -151,6 +154,7 @@ assert factorial_workflow.run() == 120
 Virtual actors are Ray actors (see Chapter 4), backed by durable storage instead of memory and are created with the decorator @virtual_actor. The example belowfootnote:[The full code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/basic_virtual_actor_example.py[+++Github+++]] shows how to use a persistent Virtual actor to implement a counter:
 
 [[basic_virtual_actor]]
+.Virtual actors
 ====
 [source, python]
 ----
@@ -188,6 +192,7 @@ Let us take a look at the common steps for creating and managing a reference use
 As seen before, you start with implementing individual workflow steps and declaring them with the @worfklow.step annotation. Similarly to a Ray task, steps can receive one or more inputs, where each input can be a specific value or a future - result of execution of one or more previous workflow steps. The return type of workflow is Workflow[T] and is a future with the value available after the execution of the workflow is completed. This process is illustrated in the code example belowfootnote:[The full code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/workflow_step_example.py[+++Github+++]]. In this case, the steps get_value1() and get_value2() return futures which are passed to the `sum` step function.
 
 [[workflow_step]]
+.Implementing workflow step
 ====
 [source, python]
 ----
@@ -274,6 +279,7 @@ Ray's Workflow dependencies is actively under development. Once available, this 
 As mentioned before, you can create workflows dynamically by creating steps based on the current state of a given step. When such step is created, it is inserted into the original workflow DAG. The workflow belowfootnote:[The complete code is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/fibonnaci_example.py[+++Github+++]] shows an example of how to use a dynamic workflow to calculate the Fibonacci sequence:
 
 [[dynamic_workflow]]
+.Dynamic workflow
 ====
 [source, python]
 ----
@@ -298,6 +304,7 @@ assert fib.step(10).run() == 55
 Workflows with conditional steps are central to many use cases. The example belowfootnote:[The complete code for this example is in] shows a simplified scenario of the workflow implementing a trip booking:
 
 [[flight_booking_example]]
+.Flight booking example
 ====
 [source, python]
 ----
@@ -347,6 +354,7 @@ You can also pass these to the `workflow.step()` decorator.
 The code belowfootnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/exception_handling_example.py[+++Github+++]] shows an example of exception handling with these options:
 
 [[exception_handling_example]]
+.Exception handling
 ====
 [source, python]
 ----
@@ -396,6 +404,7 @@ This is a beta API at the moment of writing and may change before becoming stabl
 You can durability guarantees to create idempotent workflows that include steps that have side-effects. This is needed because a step can fail before its output is logged. The example belowfootnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/flight_booking_example_2.py[+++Github+++]] shows how to use the durability guarantee to make a workflow idempotent:
 
 [[idempotent_workflow_example]]
+.Idempotent workflow
 ====
 [source, python]
 ----
@@ -430,6 +439,7 @@ You can also define workflows as read only. Because they don’t require logging
 The code below showsfootnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/workflow_management_example.py[+++Github+++]] an example of how Virtual actors can be used to manage state in a workflow:
 
 [[virtual_actor_workflow_example]]
+.Virtual actors
 ====
 [source, python]
 ----
@@ -470,6 +480,7 @@ assert 30 == ray.get(counter.value.run_async())
 Virtual actors can also create sub-workflows that involve other methods in the Virtual actor or steps defined outside the actor class to be invoked. This means that a workflow can be launched inside a method or it can also be passed to another method. The code below shows an example:footnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/subworkflow_example.py[+++Github+++]]
 
 [[subworkflow_example]]
+.Using sub workflows
 ====
 [source, python]
 ----
@@ -526,6 +537,7 @@ predict_tuple = (X_test, y_test, 'predict')
 The power of the workflow Virtual actor is to make the trained model available to another Ray cluster. Furthermore, machine learning workflow backed by a Virtual actor can incrementally update its state, such as recalculated time series features. This makes it easier to implement stateful time series analysis, including forecasting, prediction and anomaly detection.
 
 [[machine_learning_workflow]]
+.Machine learning workflow
 ====
 [source,python]
 ----
@@ -618,6 +630,7 @@ Sub-workflows block future actor method calls. It is not recommended to run a lo
 Below is an examplefootnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/non_blocking_example.py[+++Github+++]] of how to run a long running workflow without blocking:
 
 [[non_blocking_example]]
+.Non blocking workflow
 ====
 [source, python]
 ----
@@ -647,6 +660,7 @@ Ray workflows can be used with core Ray’s primitives. Here we will describe so
 Another common case is passing object references between steps in a workflow. Ray object references can be passed as arguments and returned from any workflow step. The code below shows an examplefootnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/object_reference_example.py[+++Github+++]]:
 
 [[object_reference_example]]
+.Using object references
 ====
 [source, python]
 ----
@@ -674,6 +688,7 @@ Ray actor handlers cannot be passed between steps.
 Another consideration for you to integrate actors and tasks with Workflows is handling of the nested arguments. As described before, Workflow outputs are fully resolved when passed to a step, as a form to guarantee that all the ancestors of a step are executed before the current step is executed. The examplefootnote:[The complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/output_arguments_example.py[+++Github+++]] below illustrates this behavior:
 
 [[output_arguments_example]]
+.Using output arguments
 ====
 [source, python]
 ----
@@ -703,6 +718,7 @@ Workflow events can be seen as a type of workflow step that completes only when 
 The simple examplefootnote:[Complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/event_integration.py[+++Github+++]] below shows a workflow step that finishes after 90 seconds and triggers the execution for an outer workflow:
 
 [[event_integration_example]]
+.Using events
 ====
 [source, python]
 ----
@@ -727,6 +743,7 @@ gather.step(event1_step, event2_step).run()
 Events also support customer listeners by subclassing EventListener interface:footnote:[Complete code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/custom_listeners_example.py[+++Github+++]]
 
 [[custom_listeners_example]]
+.Custom event listeners
 ====
 [source, python]
 ----

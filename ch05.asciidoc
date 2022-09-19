@@ -202,7 +202,19 @@ While you won't interact directly with gRPC(gRPC remote procedure calls) in the 
 
 By default Ray assumes that all functions and actors have the same resource requirements (e.g. 1 CPU). For actors or functions with different resource requirements, you can specify the resources that your function or actor needs. The scheduler will attempt to find a node that has these resources available, and if there are none, the autoscaler, covered next, will attempt to allocate a node that meets those requirements.
 
-The ray.remote decorator takes num_cpus, num_gpus, and memory as parameters to indicate the amount of resources an actor or remote function will consume. The defaults are one CPU and zero GPUs. You can override this value by specifying required resources in the _@ray.remote_ annotation, for example, usage of annotation _@ray.remote(num_cpus=4, num_gpus=2)_ will request four CPUs and two GPUs for function execution.
+The ray.remote decorator takes num_cpus, num_gpus, and memory as parameters to indicate the amount of resources an actor or remote function will consume. The defaults are one CPU and zero GPUs.
+
+[TIP]
+====
+When no CPU requirements are specified, the resource allocation behaviour is different between remote functions and actors.
+In the case of remote functions 1 CPU requirement is used for both allocation and running. Alternatively, in the case of
+actors, if no CPU resources are specified, Ray uses 1 CPU for scheduling and 0 CPU for running. This means the actor cannot
+get scheduled on a zero-cpu node, but an infinite number of them can run on any non-zero cpu node. On another hand, if
+resources are specified explicitly, they are required for both scheduling and running. We recommend to always specify CPU
+resource requirements explicitely and not rely on defauts.
+====
+
+You can override this value by specifying required resources in the _@ray.remote_ annotation, for example, usage of annotation _@ray.remote(num_cpus=4, num_gpus=2)_ will request four CPUs and two GPUs for function execution.
 
 [TIP]
 ====

@@ -13,9 +13,13 @@ Serverless is a bit of a buzzword, and despite its name, it does contain servers
 
 We would like to acknowledge the contribution of Carlos Andrade Costa who cowrote with us Chapter 8 - Ray Workflows. This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
 
-Holden would also like to thank her wife and partners for putting up with her long in-the-bath-tub writing sessions. A special thank you to Timbit for guarding the house and generally giving me a reason to get out of bed (albeit often a bit too early for my taste).
+==== From Holden
+I would also like to thank my wife and partners for putting up with her long in-the-bath-tub writing sessions. A special thank you to Timbit for guarding the house and generally giving me a reason to get out of bed (albeit often a bit too early for my taste).
 
 image::images/preface/timbit.png[]
+
+==== From Boris
+I would also like to thank my wife, Marina, for putting up with long writing sessions and sometimes neglecting her for hours, and my colleagues in IBM for many fruitful discussions, that helped him to better understand the power of Ray.
 
 === A note on responsibility
 

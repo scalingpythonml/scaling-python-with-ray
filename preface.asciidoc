@@ -12,6 +12,10 @@ Serverless is a bit of a buzzword, and despite its name, it does contain servers
 
 In reading this book you will learn how to take your existing Python skills to make programs capable of scaling beyond a single machine. You will learn about different techniques for distributed computing, from remote procedure calls to actors all the way to distributed data sets and machine learning. We wrap up this book with a "real-ish" world example in <<appA>> that uses many of the techniques to build a scalable backend, while integrating with a Python based web-application and deploying on Kubernetes.
 
+=== A note on responsibility
+
+As the saying goes, with great power comes great responsibility. Ray, and tools like it, enable you to build more complex systems handling more data and users. It's important not to get too excited and carried away solving problems because they are fun, and stop to ask yourself what the impact of your decisions will be. You don't have to search very hard to find stories of well-meaning engineers and data scientists accidentally building models or tools that caused devastating impacts, like the new VA payment system breaking, to hiring algorithms that discriminate based on gender. We ask that you use your newfound powers keeping this in mind, for one never wants to end up in a textbook for the wrong reasons.
+
 
 === Acknowledgments
 
@@ -25,10 +29,6 @@ image::images/preface/timbit.png[]
 
 ==== From Boris
 I would also like to thank my wife, Marina, for putting up with long writing sessions and sometimes neglecting her for hours, and my colleagues in IBM for many fruitful discussions, that helped him to better understand the power of Ray.
-
-=== A note on responsibility
-
-As the saying goes, with great power comes great responsibility. Ray, and tools like it, enable you to build more complex systems handling more data and users. It's important not to get too excited and carried away solving problems because they are fun, and stop to ask yourself what the impact of your decisions will be. You don't have to search very hard to find stories of well-meaning engineers and data scientists accidentally building models or tools that caused devastating impacts, like the new VA payment system breaking, to hiring algorithms that discriminate based on gender. We ask that you use your newfound powers keeping this in mind, for one never wants to end up in a textbook for the wrong reasons.
 
 
 === License

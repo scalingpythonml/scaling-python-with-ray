@@ -37,7 +37,7 @@ However, we want to serialize some settings, like in a settings class, so we wra
 ====
 [source, python]
 ----
-include::message-backend-ray/messaging/utils/utils.py[tags=code]
+include::message-backend-ray/messaging/mailclient/mailclient.py[tags=code]
 ----
 ====
 

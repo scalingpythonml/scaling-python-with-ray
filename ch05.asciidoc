@@ -43,7 +43,7 @@ If your flaky function fails, you will see `WARNING worker.py:1215 -- A worker d
 Alternatively, to see fault tolerance in action, if you're running a distributed Ray cluster, you can find the node running your remote function by returning the hostname and then shut down the node while running a request.
 ====
 
-Remote actors are a complicated case for fault tolerance as they contain state within them. In chapter <<actors>>, this is why you explored the different options for persisting & recovering that state. Actors can experience failure at any stage: setup, message processing, or between messages.
+Remote actors are a complicated case for fault tolerance as they contain state within them. In chapter <<ch04>>, this is why you explored the different options for persisting & recovering that state. Actors can experience failure at any stage: setup, message processing, or between messages.
 
 Unlike Ray Remote functions, if an actor fails while processing a message, Ray does not automatically retry it. This is true even if you have set `max_restarts`. Ray will restart your actor for processing the next message. On error, you will get back a `RayActorError` exception.
 
@@ -121,7 +121,7 @@ Earlier versions of Ray had the ability to create per-actor object eviction by s
 
 It's possible that you may wish to fine-tune the object store settings. Depending on your use case, you may need more or less memory for the object store. You configure the object store through the `_system_config` settings. Two important configuration options include the minimum aggregate size to spill to disk, `min_spilling_size`, and total memory allocated to the object store, `object_store_memory_mb`. You can set these when calling `ray.init` as shown in <<ray_obj_store_config>>.
 
-If you have a mixture of fast and slow disks (e.g. SSD, HDD, network), you should consider using the faster storage for spilled objects. Unlike the rest of the storage configs, you configure the spilled object storage location with a nested JSON blob. Like the rest of the object store settings, `object_spilling_config` is stored under `_system_config`. This is a bit counterintuitive, but if your machine had fast temporary storage at "/tmp/fast" you would configure Ray to use it as in <<ray_obj_storage>>.
+If you have a mixture of fast and slow disks (e.g. SSD, HDD, network), you should consider using the faster storage for spilled objects. Unlike the rest of the storage configs, you configure the spilled object storage location with a nested JSON blob. Like the rest of the object store settings, `object_spilling_config` is stored under `_system_config`. This is a bit counterintuitive, but if your machine had fast temporary storage at "/tmp/fast" you would configure Ray to use it as in <<ray_obj_store_config>>.
 
 [[ray_obj_store_config]]
 .Ray Object Store Configuration
@@ -246,7 +246,7 @@ Ray can also keep track of and assign custom resources using the same mechanism 
 These resources don't need to be limited to hardware, if you have certain libraries or datasets only available on some nodes due to licensing, you can use the same technique.
 ====
 
-So far we've focused on horizontal scaling, but you can also use Ray to get more resources for each process. Scaling by using machines with more resources is known as vertical scaling. You can request different amounts of memory, CPU cores, or even GPUs from Ray for your tasks and actors. The default Ray configuration only supports machines of the same size, but as covered in <<app_deploying>>, you can create multiple node types. If you create node or container types of different sizes this can be used for vertical scaling.
+So far we've focused on horizontal scaling, but you can also use Ray to get more resources for each process. Scaling by using machines with more resources is known as vertical scaling. You can request different amounts of memory, CPU cores, or even GPUs from Ray for your tasks and actors. The default Ray configuration only supports machines of the same size, but as covered in <<appB>>, you can create multiple node types. If you create node or container types of different sizes this can be used for vertical scaling.
 
 === Autoscaler
 
@@ -387,7 +387,7 @@ You can get the current namespace by calling `ray.get_runtime_context().namespac
 
 One of the big draws of Python is the amazing ecosystem of tools available. Ray supports managing dependencies with both conda and virtualenv. Ray dynamically creates these virtual environments inside of your larger container as needed and launches workers using the matching environment.
 
-The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from thttps://pypi.org/[+++he Python Package Index (PyPI)+++] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
+The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from https://pypi.org/[+++the Python Package Index (PyPI)+++] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
 
 [[pip_pkg_list]]
 .pip package list
@@ -398,7 +398,7 @@ include::examples/ray_examples/concepts/Ray-Concepts.py[tags=pip_pkg_list]
 ----
 ====
 
-This works well for a few dependencies, but if you've got a requirements.txt like Holden's link:$$https://github.com/holdenk/print-the-world$$%5Bprint[+++https://github.com/holdenk/print-the-world$$[print+++] the world] project, you can also just point this to your local `requirements.txt` as shown in <<pip_pkg_reqs>>.
+This works well for a few dependencies, but if you've got a requirements.txt like Holden's https://github.com/holdenk/print-the-world[+++print the world+++] project, you can also just point this to your local `requirements.txt` as shown in <<pip_pkg_reqs>>.
 
 [[pip_pkg_reqs]]
 .pip package requirements file
@@ -416,12 +416,31 @@ If you have an even more complex setup using Conda, you can make a runtime conte
 
 Once you've created a runtime context you can specify it either globally when creating your ray client, like in <<runtime_env_init>>, or inside of the ray.remote decorator <<ex_local_ctx>>.
 
+[[runtime_env_init]]
+.Using a runtime environment for an entire program.
+====
+[source, python]
+----
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=runtime_env_init]
+----
+====
+
+[[ex_local_ctx]]
+.Using a runtime environment for a specific function.
+====
+[source, python]
+----
+include::examples/ray_examples/concepts/Ray-Concepts.py[tags=runtime_env_local]
+----
+====
+
+
 [WARNING]
 ====
 Not all dependencies are well suited to the dynamically created execution context. Anything involving large native code compilation without a pre-existing wheel takes too long, for example Tensorflow on ARM.
 ====
 
-Adding certain packages to a runtime execution context can result in a slower start & scale-up. Think of, for example, how long it takes to install Tensorflow without a wheel. If Ray had to do that for each time it started another worker, this would be much slower. You can solve this by creating conda environments in your cluster or container. We discuss how to do this in <<app_deploying>>.
+Adding certain packages to a runtime execution context can result in a slower start & scale-up. Think of, for example, how long it takes to install Tensorflow without a wheel. If Ray had to do that for each time it started another worker, this would be much slower. You can solve this by creating conda environments in your cluster or container. We discuss how to do this in <<appB>>.
 
 === Deploying Ray Applications with the Ray Job API
 
@@ -433,7 +452,7 @@ In addition to connecting your job to an existing cluster with `ray.init`, Ray o
 
 .Why another API?
 ****
-Although you can theoretically attach your program to the existing Ray cluster using the Ray https://docs.ray.io/en/latest/cluster/ray-client.html[+++client+++], it often does not always work, especially when Ray is deployed on a Kubernetes cluster. The issue here is that Ray node’s gRPC interface is using insecure gRPC, which is not supported by the majority of https://kubernetes.io/docs/concepts/services-networking/ingress/[+++Kubernetes Ingress+++] implementations. To overcome this issue, Ray has introduced a new https://docs.ray.io/en/latest/ray-job-submission/overview.html#ray-job-sdk[+++Ray job SDK+++], using HTTP instead of gRPC. The job API is on port 8625 and <<appa_deploying>> covers how to make this available.
+Although you can theoretically attach your program to the existing Ray cluster using the Ray https://docs.ray.io/en/latest/cluster/ray-client.html[+++client+++], it often does not always work, especially when Ray is deployed on a Kubernetes cluster. The issue here is that Ray node’s gRPC interface is using insecure gRPC, which is not supported by the majority of https://kubernetes.io/docs/concepts/services-networking/ingress/[+++Kubernetes Ingress+++] implementations. To overcome this issue, Ray has introduced a new https://docs.ray.io/en/latest/ray-job-submission/overview.html#ray-job-sdk[+++Ray job SDK+++], using HTTP instead of gRPC. The job API is on port 8625 and <<appa_deploying>>.
 ****
 
 A job request consists of:

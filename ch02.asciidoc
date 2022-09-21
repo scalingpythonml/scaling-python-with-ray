@@ -22,7 +22,7 @@ M1 ARM users on OSX can use the x86 packages with Rosetta. There is some perform
 Most users can run `pip install -U ray` to install Ray from PyPi automatically. When you go to distribute your computation on multiple machines it's often easier to have been working in a conda environment so you can match Python versions with your cluster and know your package dependencies. The commands in <<ex_ray_conda>> set up a fresh conda environment with Python and install Ray with some minimal dependencies:
 
 [[ex_ray_conda]]
-.Example title here
+.Install Ray inside a Conda environment
 ====
 [source, bash]
 ----
@@ -37,7 +37,7 @@ For ARM users or any users with a system architecture that does not have a pre b
 On our ARM Ubuntu system, we need to install some additional packages, as shown below:
 
 [[debian_ray_arms_pkgs]]
-.Example title here
+.Installing Ray from source
 ====
 [source, bash]
 ----
@@ -48,7 +48,7 @@ include::examples/ray/installRay/ray_setup_on_arm.sh[tags=deps]
 If you are an M1 Mac user who doesn't want to use Rosetta you'll need to install some dependencies. You can install them with homebrew and pip as shown below:
 
 [[m1_ray_arms_pkgs]]
-.Example title here
+.Installing extra dependencies needed on the M1
 ====
 [source, bash]
 ----
@@ -59,7 +59,7 @@ include::examples/ray/installRay/ray_setup_on_arm_osx.sh[tags=deps]
 You need to build some of the Ray components separately because they are written in different languages. This does make it more complicated, but you can follow the steps in <<build_ray>>:
 
 [[build_ray]]
-.Example title here
+.Installing the build tools for Ray's native build tool-chain.
 ====
 [source, bash]
 ----
@@ -83,7 +83,7 @@ One of the core building blocks of Ray is that of "remote" functions/futures. Th
 To understand this better, you can write a function that returns where it is running. Ray distributes work between multiple processes and, when in distributed mode, multiple hosts. A local (non-ray) version of this function is shown in <<ex_local_fun>>.
 
 [[ex_local_fun]]
-.Example title here
+.A local/regular function
 ====
 [source, python]
 ----
@@ -94,7 +94,7 @@ include::examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=local_fun
 You can use the `ray.remote` decorator to create a remote function. Calling remote functions is a bit different and is done by calling `.remote` on the function. Ray will immediately return a future when you call a remote function instead of blocking for the result. You can use `ray.get` to get the values returned in those futures. To convert <<ex_local_fun>> to a remote function, all you need to do is use the `ray.remote` decorator, as shown in <<ex_remote_fun>>.
 
 [[ex_remote_fun]]
-.Example title here
+.Turning the previous function into a remote function
 ====
 [source, python]
 ----
@@ -109,7 +109,7 @@ When you run these two examples, you'll see that the first is executed in the sa
 While artificial, an easy way to understand how remote futures can help is by making an intentionally slow function, in our case `slow_task`, and having Python compute in regular function calls and Ray remote calls.
 
 [[sleepy_task]]
-.Example title here
+.Using Ray to Parallelize an intentionally slow function
 ====
 [source, python]
 ----
@@ -117,7 +117,7 @@ include::./examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=sleepy_
 ----
 ====
 
-When you run the <<sleep_task>> example, you'll see that by using Ray remote functions your code is able to execute multiple remote functions at the same time. While you can do this without ray by using `multiprocessing`, Ray handles all of the details for you and can also eventually scale up to multiple machines.
+When you run the <<sleepy_task>> example, you'll see that by using Ray remote functions your code is able to execute multiple remote functions at the same time. While you can do this without ray by using `multiprocessing`, Ray handles all of the details for you and can also eventually scale up to multiple machines.
 
 ===== Nested and chained tasks
 
@@ -125,10 +125,15 @@ Ray is notable in the distributed processing world for allowing nested and chain
 
 One of the more straightforward examples using nested tasks is a web crawler. In the web crawler, each page we visit can launch multiple additional visits to the links on that page.
 
+
+[[nested_task]]
+.Web Crawler with nested tasks
+====
 [source, python]
 ----
 include::examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=mini_crawl_task]
 ----
+====
 
 Many other systems require that all tasks launch on a central coordinator node. Even those that support launching tasks in a nested fashion still usually depend on a central scheduler.
 
@@ -158,14 +163,14 @@ include::examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=ray_wordc
 ----
 ====
 
-When you need to go beyond the built-in operations, Ray supports custom aggregations provided you implement its interface. We will cover more on Datasets, including aggregate functions, in <<ch_dataframe>>.
+When you need to go beyond the built-in operations, Ray supports custom aggregations provided you implement its interface. We will cover more on Datasets, including aggregate functions, in <<ch09>>.
 
 [NOTE]
 ====
 Ray uses blocking evaluation for its Dataset API. This means that when you call a function on a Ray dataset, it will wait until it completes the result instead of returning a future. The rest of the Ray core API uses futures.
 ====
 
-If you want a full-featured DataFrame API, you can convert your Ray dataset into Dask. The <<ch_dataframe>> covers how you can use Dask for more complex operations. If you are interested in learning more about Dask, you should check out Holden's book _Scaling Python with Dask_ (O'Reilly).
+If you want a full-featured DataFrame API, you can convert your Ray dataset into Dask. <<ch09>> covers how you can use Dask for more complex operations. If you are interested in learning more about Dask, you should check out Holden's book _Scaling Python with Dask_ (O'Reilly).
 
 ==== Actor Hello World
 
@@ -191,11 +196,11 @@ include::examples/ray_examples/helloWorld/Ray-Ch2-Hello-Worlds.py[tags=actor]
 ----
 ====
 
-This example is fairly basic; it lacks any fault tolerance or concurrency within each actor. We'll explore those more in <<ch_actors_intro>>.
+This example is fairly basic; it lacks any fault tolerance or concurrency within each actor. We'll explore those more in <<ch04>>.
 
 // ==== Workflow Hello World
 // TODO: Write once the
 
 === Conclusion
 
-In this chapter, you have installed Ray on your local machine and used many of its core APIs. For the most part, you can continue to run the examples we've picked for this book in local mode. Naturally, a local mode can limit your scale or take longer to run. In the next chapter, we’ll look at some of the core concepts behind Ray. One of the concepts (fault tolerance) will be easier to illustrate with a cluster or cloud. So if you have access to a cloud account or a cluster, now would be an excellent time to jump over to <<appendix_deploying>> and look at the different deployment options.
+In this chapter, you have installed Ray on your local machine and used many of its core APIs. For the most part, you can continue to run the examples we've picked for this book in local mode. Naturally, a local mode can limit your scale or take longer to run. In the next chapter, we’ll look at some of the core concepts behind Ray. One of the concepts (fault tolerance) will be easier to illustrate with a cluster or cloud. So if you have access to a cloud account or a cluster, now would be an excellent time to jump over to <<appB>> and look at the different deployment options.

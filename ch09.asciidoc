@@ -1,7 +1,7 @@
 [[ch09]]
 == Advanced Data With Ray
 
-Despite, or perhaps because of, the data ecosystems' rapid advances, you will likely end up needing to use multiple tools as part of your data pipeline. Ray Datasets allow data sharing between tools in the data and ML ecosystems. This allows you to switch tools without having to manage copying data. Ray Datasets support Spark, Modin, Dask, and Mars and can also be used with ML tools like Tensorflow. You can also use Apache Arrow with Ray to allow more tools to work on top of Datasets, like R or even MATLAB. Ray Datasets act as a common format for all steps of your machine learning pipeline, simplifying legacy pipelines like <<legacy_pipe>> to <<unified_pipe>>.
+Despite, or perhaps because of, the data ecosystems' rapid advances, you will likely end up needing to use multiple tools as part of your data pipeline. Ray Datasets allow data sharing between tools in the data and ML ecosystems. This allows you to switch tools without having to manage copying data. Ray Datasets support Spark, Modin, Dask, and Mars and can also be used with ML tools like Tensorflow. You can also use Apache Arrow with Ray to allow more tools to work on top of Datasets, like R or even MATLAB. Ray Datasets act as a common format for all steps of your machine learning pipeline, simplifying legacy pipelines.
 
 All this boils down to: you can use the same dataset in multiple tools without worrying about the details. Internally many of these tools have their own formats but Ray and Apache Arrow manage the translations transparently.
 
@@ -120,7 +120,7 @@ image::images/ch09/fig_09-01.png[]
 
 [NOTE]
 ====
-Datasets do not use Ray's runtime environments for dependencies, so you must have your desired tools installed in your worker image, see <<appa_deploying>>. This is more involved for Spark as it requires the JVM and other non-Python components.
+Datasets do not use Ray's runtime environments for dependencies, so you must have your desired tools installed in your worker image, see <<appB>>. This is more involved for Spark as it requires the JVM and other non-Python components.
 ====
 
 You are not limited to the tools that are built into Ray. If you have a new tool that supports Apache Arrow, and https://arrow.apache.org/docs/python/api/datatypes.html[+++you are using Apache Arrow supported types+++], `to_arrow_refs()` gives you a zero copy Arrow representation of your dataset. Many tools and languages support Arrow including Tensorflow, R, and even Matlab. You can then use this list of Ray Arrow objects to pass into your tool, be it model training or any other purpose. You will learn more about this in the "Built-in Ray DataSet operations" section.
@@ -134,6 +134,7 @@ Dask and Spark both have non-DataFrame collections (Bags, Arrays, and RDDs) whic
 
 This section assumes you have a good understanding of the data wrangling tools you're going to use with ray, either pandas or Apache Spark. Pandas is ideal for users scaling Python analytics, and Spark is well suited for users connecting to big data tools. If you're not familiar with the Pandas APIs, you should check out _Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython_ by Wes McKinney. New Spark users should check out _Learning Spark_, and if you want to go super deep Holden recommends _High Performance Spark_ by Holden and Rachelfootnote:[Note: this is like a ford dealer recommending a ford, so take the advice here with a grain of salt.].
 
+[[basic_partitioning]]
 .Partitioning
 ****
 Partitioning gives you the ability to control the number of tasks used to process your data. If you have billions of rows, using a single task, to process it can take forever. On another hand, using one task for each row would spend more time scheduling the tasks than the work itself. As a result, proper data partitioning is one of the fundamental requirements for its efficient processing. Usage of Ray Datasets allows you to efficiently split your data into partitions or chunks so that you can parallelize computation while keeping the overhead of scheduling a task at the acceptable level. As the number of partitions increases the maximum parallelism increases but so does the scheduling and communication overhead.
@@ -159,6 +160,12 @@ Here we focus on Dask's high level DataFrame collection as Ray has its own techn
 ****
 
 Dask on Ray benefits from using Ray's per-node/container shared memory storage for data. This is especially important when doing operations like broadcast joins, in Dask the same data will need to be stored in each worker process.footnote:[Operations in native code can avoid this problem in Dask using multi-threading, but the details are beyond the scope of this book.] However, in Ray, it only needs to be stored once per-node/container.
+
+[WARNING]
+====
+Unlike Ray, Dask is generally lazy, meaning it does not evaluate data until forced. This can make debugging a challenge as errors may appear several lines removed from their root cause.
+====
+
 
 Most of the distributed components of Dask's DataFrames use the three core building blocks `map_partitions`, `reduction`, and `rolling`. You mostly won't need to call these functions directly, instead you will use higher level APIs, but understanding them and how they work is important to understanding how Dask works. `shuffle` is a critical building block of distributed DataFrames for re-organizing your data. Unlike the other building blocks, you may use it directly more frequently as Dask is unable to abstract away partitioning.
 
@@ -401,7 +408,7 @@ Not all multi-DataFrame operations are implemented, like `compare`, which leads 
 
 Dask's DataFrame implements most, but not all, of the pandas DataFrame API. Some of the pandas API is not implemented in Dask due to the development time involved, and other parts to avoid exposing an API that would be unexpectedly slow.
 
-Sometimes the API is just missing small parts as both pandas and Dask are under active development. An example of this is the `split` function from <<wc_dataframe>>. In local pandas, instead of doing `split().explode()`, you could have called `split(expand=true)`. Some of these can be excellent places where you can get involved and https://github.com/dask/dask/contribute[+++contribute to the Dask project if you are interested.+++]
+Sometimes the API is just missing small parts as both pandas and Dask are under active development. An example of this is the `split` function from <<ds_hello>>. In local pandas, instead of doing `split().explode()`, you could have called `split(expand=true)`. Some of these can be excellent places where you can get involved and https://github.com/dask/dask/contribute[+++contribute to the Dask project if you are interested.+++]
 
 Some libraries do not parallelize as well as others. In these cases, a common approach is to try and filter or aggregate the data down enough that it can be represented locally and then apply the local libraries to the data. For example, with graphing it's common to pre-aggregate the counts or take a random sample and graph the result.
 
@@ -430,11 +437,6 @@ For performance reasons, various parts of Dask DataFrames behave a little differ
 [TIP]
 ====
 If you are interested in going deeper with Dask there are several Dask focused books in active development, including _Scaling Python with Dask_ by Holden Karau and Mika Kimmins where much of this data frame chapter is based from.
-====
-
-[WARNING]
-====
-Unlike Ray, Dask is generally lazy, meaning it does not evaluate data until forced. This can make debugging a challenge as errors may appear several lines removed from their root cause.
 ====
 
 ==== Pandas Like DataFrames with Modin

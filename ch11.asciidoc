@@ -86,7 +86,7 @@ Most of the high-level libraries that can be accelerated by GPUs also have CPU f
 If you want to use GPU resources when the cluster has them and fall back to CPU you'll need to do a bit of extra work. The simplest way to determine if a cluster has useable GPU resources is to ask Ray to run a remote task with a GPU and then set the resources based on this as shown in <<cpu_fallback>>.
 
 [[cpu_fallback]]
-.Example title here
+.Falling back to a CPU if no GPU
 ====
 [source, python]
 ----

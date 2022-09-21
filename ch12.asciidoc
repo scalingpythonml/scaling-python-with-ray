@@ -5,7 +5,7 @@ Deploying software in enterprise environments often comes with additional requir
 
 === Ray Dependency Security issues
 
-Unfortunately, Ray's default requirements file brings in some insecure libraries. Many enterprise environments have some kind of container scanning or similar system to detect such issues.footnote:[Some common ones include Grype, Anchore, and Dagda.] In some cases, you can simply remove or upgrade the dependency issues flagged, but when Ray includes the dependencies in its wheel (e.g. the log4j issue), limiting yourself to pre-built wheels has serious drawbacks. If you find a Java or native library flagged, you will need to rebuild Ray from source with the version upgraded, as described in <<appendix_deploying>>. Derwen.ai has an example of doing this for Docker in their https://github.com/DerwenAI/ray_base[+++ray_base+++] repo.
+Unfortunately, Ray's default requirements file brings in some insecure libraries. Many enterprise environments have some kind of container scanning or similar system to detect such issues.footnote:[Some common ones include Grype, Anchore, and Dagda.] In some cases, you can simply remove or upgrade the dependency issues flagged, but when Ray includes the dependencies in its wheel (e.g. the log4j issue), limiting yourself to pre-built wheels has serious drawbacks. If you find a Java or native library flagged, you will need to rebuild Ray from source with the version upgraded. Derwen.ai has an example of doing this for Docker in their https://github.com/DerwenAI/ray_base[+++ray_base+++] repo.
 
 === Interacting with the existing tools
 

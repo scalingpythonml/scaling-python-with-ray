@@ -1,6 +1,6 @@
 [role="pagenumrestart"]
 [[ch01]]
-== What is Ray, why do you need it, and where does it fit?
+== What is Ray, and where does it fit?
 
 Ray is primarily a Python toolfootnote:[You can also use Ray from Java. Like many Python applications, under the hood there is a lot C++ & some Fortran. Ray streaming also has some Java components.] for "Fast and Simple Distributed Computing."
 
@@ -10,20 +10,20 @@ The goal of Ray is to solve a wider variety of problems than its ancestors, supp
 
 Ray automatically scales compute resources as needed, allowing you to focus on your code instead of managing servers. Ray can manage and scale cloud resources directly on its own (using `ray up`) or by using a cluster manager like Kubernetes. In addition to traditional horizontal scaling (e.g., adding more machines) Ray can schedule tasks to take advantage of different machine sizes and accelerators like GPUs.
 
-Since the introduction of AWS Lambda, interest in serverless computing - a cloud computing model in which the cloud provider allocates machine resources on demand, taking care of the servers on behalf of their customers has exploded. Ray https://www.anyscale.com/blog/the-ideal-foundation-for-a-general-purpose-serverless-platform[provides] a great foundation for general purpose serverless platform by providing the following features:
+Since the introduction of AWS Lambda, interest in serverless computing footnote:[a cloud computing model in which the cloud provider allocates machine resources on demand, taking care of the servers on behalf of their customers] has exploded. Ray https://www.anyscale.com/blog/the-ideal-foundation-for-a-general-purpose-serverless-platform[provides] a great foundation for general purpose serverless platform by providing the following features:
 
 * It hides servers. Ray autoscaling transparently manages servers based on the application requirements.
 * By providing an actors programming model Ray implements not only stateless (typical for the majority of serverless implementations) but also a stateful programming model.
-* Ray allows you to specify resources, including hardware accelerators required for the execution of your serverless functions.
-* Ray supports direct communications between your tasks thus providing support not only for simple functions but also complex distributed applications.
+* It allows you to specify resources, including hardware accelerators required for the execution of your serverless functions.
+* It supports direct communications between your tasks thus providing support not only for simple functions but also complex distributed applications.
 
 Ray provides a wealth of libraries that are implemented leveraging its serverless capabilities, thus simplifying the creation of applications fully leveraging its capabilities. Normally, you would need different tools for everything from data processing, to workflow management. By using a single tool for a larger portion of your application you simplify not only development but also your operation management.
 
 In this chapter, we'll look at where Ray fits in the ecosystem and help you decide if it's a good fit for your project.
 
-=== Why do you need it?
+=== Why do you need Ray?
 
-We often need something like Ray when our problems get too big to handle in a single process, covering from multicore to multicomputer. If you find yourself wondering how you can handle the next month's growth in users, data, or complexity, our hope is you will take a look at Ray. Ray exists because scaling software is hard, and it tends to be the kind of problem that gets harder rather than simpler with time.
+We often need something like Ray when our problems get too big to handle in a single process. Depending on how large our problems get this can mean scaling from multicore to all the way through multicomputer, all of which Ray supports. If you find yourself wondering how you can handle the next month's growth in users, data, or complexity, our hope is you will take a look at Ray. Ray exists because scaling software is hard, and it tends to be the kind of problem that gets harder rather than simpler with time.
 
 Not only can Ray scale to multiple computers, it also scales without you having to directly manage servers. Leslie Lamport has said, "A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable." While this kind of failure is still possible, Ray is able to automatically recover from many types of failures.
 
@@ -31,7 +31,7 @@ Ray runs cleanly on your laptop as well as at scale with the same APIs. This pro
 
 === Where can you run Ray?
 
-Ray can be deployed in a variety of environments ranging from your laptop to the cloud, to cluster managers like Kubernetes or Yarn, to six raspberry pis hidden under your desk.footnote:[ARM support, including for PIs and native M1s, requires manual building for now] In local mode, getting started can be as simple as a `pip install` and a call to `ray.init()`footnote:[Much of modern ray will automatically initialize a context if one is not present, allowing you to skip even this part.].
+Ray can be deployed in a variety of environments ranging from your laptop to the cloud, to cluster managers like Kubernetes or Yarn, to six raspberry pis hidden under your desk.footnote:[ARM support, including for PIs and native M1s, requires manual building for now] In local mode, getting started can be as simple as a `pip install` and a call to `ray.init()` footnote:[Much of modern ray will automatically initialize a context if one is not present, allowing you to skip even this part.].
 
 .Ray Cluster
 ****
@@ -64,7 +64,7 @@ When we are talking about nodes in a Ray cluster we are not talking about physic
 
 In addition to `ray up`, if running on kubernetes you can use Ray kubernetes operator. Although `ray up` or kubernetes operators are preferred ways of Ray cluster creation, if you have a set of existing machines (either physical or VMs) you can set up the Ray cluster manually.
 
-Regardless of which deployment approach you take, the same Ray code should work everywhere.footnote:[With large variances in speed. This can get more complicated when you need specific libraries or hardware for code, for example.] We'll look more at running Ray in local mode in the next chapter, and if you want to scale even more we'll cover deploying to the cloud and resource managers in <<appendix_deploying>>.
+Regardless of which deployment approach you take, the same Ray code should work everywhere.footnote:[With large variances in speed. This can get more complicated when you need specific libraries or hardware for code, for example.] We'll look more at running Ray in local mode in the next chapter, and if you want to scale even more we'll cover deploying to the cloud and resource managers in <<appB>>.
 
 === Running your code with Ray
 
@@ -126,11 +126,18 @@ Spark has more data tools but depends on centralized scheduling and state manage
 Ray and Spark are complementary and can be used together. A common pattern is data processing with Spark and then machine learning with Ray. In fact, the `RayDP` library provides you a way to use Spark Dataframes inside of Ray.
 ****
 
+
+We cover scalable dataframes in <<ch09>>.
+
 ==== Machine learning
 
 Ray has multiple machine learning libraries, and for the most part, they serve to delegate much of the fancy parts to existing tools like PyTorch, Scikit-Learn, and Tensorflow while using Ray’s distributed computing facilities to scale. Ray Tune implements hyper-parameter tuning, using Ray's ability to train many local Python-based models in parallel across a distributed set of machines. Ray Train implements distributed training with PyTorch or Tensorflow. Ray's RLlib interface offers reinforcement learning with a number of core algorithms.
 
+
 Part of what allows Ray to stand out from pure data-parallel systems for machine learning is its actor model, which allows easier tracking of “state” - like parameters and inter-worker communication. You can use this to implement your own custom algorithms that are not a part of Ray core.
+
+
+We cover ML in more detail in <<ch10>> .
 
 ==== Workflow scheduling
 
@@ -140,11 +147,17 @@ Ray is unique in workflow scheduling because it allows tasks to schedule other t
 
 If you find Ray's workflow engine too low-level, you can use Ray to run Apache Airflow. Airflow is one of the more popular workflow scheduling engines in the big data space. The https://github.com/anyscale/airflow-provider-ray[Ray Airflow Provider] lets you use your Ray cluster as a worker pool for Airflow.
 
+
+We cover workflow scheduling in <<ch08>>.
+
 ==== Streaming
 
 Streaming is generally considered to be processing "real-time-ish" data, or data "as-it-arrives-ish." Streaming adds another layer of complexity, especially the closer to real-time you try to get, as not all of your data will always arrive in order or on time. Ray offers some standard streaming primitives and can use Kafka as a streaming data source and sink. Ray uses its actor model APIs to interact with streaming data.
 
 Ray streaming, like many streaming systems bolted on batch systems, has some interesting quirks. Ray streaming, notably, implements more of its logic in Java, unlike the rest of Ray. This can make debugging streaming applications more challenging than other components in Ray.
+
+
+We cover how to build streaming applications with Ray in <<ch06>>.
 
 ==== Interactive
 

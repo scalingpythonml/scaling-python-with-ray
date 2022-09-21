@@ -1,7 +1,7 @@
 [[ch03]]
 == Remote Functions
 
-You often need some form of distributed or parallel computing when building modern applications at scale. Many Python developers' introduction to parallel comping is through the https://docs.python.org/3.7/library/multiprocessing.html[+++multiprocessing module+++]. Multiprocessing is limited in its ability to handle the requirements of modern applications. These requirements include the following:
+You often need some form of distributed or parallel computing when building modern applications at scale. Many Python developers' introduction to parallel computing is through the https://docs.python.org/3.7/library/multiprocessing.html[+++multiprocessing module+++]. Multiprocessing is limited in its ability to handle the requirements of modern applications. These requirements include the following:
 
 * Running the same code on multiple cores or machines
 * Tooling to handle machine and processing failures.
@@ -125,7 +125,7 @@ Canceling a task should not be part of your normal program flow. If you find you
 
 Another minor point that we skipped in the previous chapter is that while the examples so far return only a single value. Ray remote functions can return multiple values, as with regular Python functions.
 
-Fault tolerance is an important consideration for those running in a distributed environment. If the worker executing the task dies unexpectedlyfootnote:[either because the process crashed or because the machine failed] Ray will rerun the task (after a delay) until either the task succeeds or the maximum number of retries is exceeded. We cover fault tolerance more in <<ray_details_fault_tolerance>>.
+Fault tolerance is an important consideration for those running in a distributed environment. If the worker executing the task dies unexpectedlyfootnote:[either because the process crashed or because the machine failed] Ray will rerun the task (after a delay) until either the task succeeds or the maximum number of retries is exceeded. We cover fault tolerance more in <<ch05>>.
 
 === Composition of remote Ray functions
 

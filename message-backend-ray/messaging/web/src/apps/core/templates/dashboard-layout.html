@@ -1,0 +1,198 @@
+{% load cms_tags sekizai_tags menu_tags %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="{% static 'core/style/style.css' %}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <title>SB:
+            {% block title %}
+                {{ title }}
+            {% endblock %}
+        </title>
+        <style>
+          .alert-btn{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            border-radius: 45%;
+          }
+
+          .alert-btn:hover{
+            background-color: #dedede;
+          }
+
+        </style>
+        {% render_block "css" %}
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body>
+        {% cms_toolbar %}
+        {% if user.dont_have_active_subscriptions %}
+            <div class="alert alert-danger" role="alert">
+                You have not active subscription. Click
+                <a href="{% url 'core:subscription' %}">here</a>
+                to solve it.
+            </div>
+        {% endif %}
+        <!-- NAVBAR -->
+        <nav class="navbar navbar--simple navbar-expand-lg d-lg-none d-block">
+            <div class="container-fluid">
+                <a class="navbar-brand d-none d-lg-block"   href="{% url 'core:index' %}">
+                    SpaceBeaver
+                    {% block navname %}
+                            {{ navname }}
+                        {% endblock %}
+                </a>
+                <a   href="{% url 'core:index' %}" class="logo logo-with-beaver d-block d-lg-none">
+                    <img class="logo__img" src="{% static 'core/img/svg/logo-with-beaver.svg' %}" alt="">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+
+                    <img class="navbar-toggler__icon" src="{% static 'core/img/svg/burger.svg' %}" alt="">
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class=" text-uppercase nav-link nav-link text-dark" href="{% url 'core:dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class=" text-uppercase nav-link nav-link text-dark" href="{% url 'core:billing' %}">Billing</a>
+                        </li>
+                        {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'accounts:profile' %}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'accounts:logout' %}">Logout</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'core:login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class=" text-uppercase nav-link text-dark" href="{% url 'core:sign-up' %}">sign up</a>
+                        </li>
+                        {% endif %}
+                        {% show_menu 0 100 100 100 "bootstrap_menu.html" %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        {% block page_head %}
+
+        {% endblock %}
+        <!-- END NAVBAR -->
+        <!-- <div class="page-container"> -->
+        <div class="container-fluid p-0 h-100vh">
+            <div class="row h-100vh m-0">
+                <nav class="side-nav side-nav--smaller">
+                    <a  href="{% url 'core:dashboard' %}" class="logo logo-with-beaver">
+                        <img class="logo__img" src="{% static 'core/img/svg/logo-with-beaver.svg' %}" alt="">
+                    </a>
+                    <div class="navigation-block">
+                        <p class="navigation-block__title">MAIN PAGES</p>
+                        <ul class="navigation-list p-0">
+                            <li class="navigation-list__item">
+                                <a href="{% url 'core:dashboard' %}"  class="nav-item {% if step == 1 %}nav-item--active{% endif %}">
+                                    <svg class="nav-item__icon {% if step == 1 %}nav-item__icon--active {% endif %}" width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M21.9887 9.93749C21.3016 5.74419 17.7166 2.62467 13.442 2.50041C13.0141 2.49058 12.6014 2.65775 12.3024 2.96196C12.0136 3.25955 11.8641 3.6641 11.8904 4.07665L12.3287 10.6167C12.3971 11.4422 13.0904 12.078 13.9241 12.0798H14.0293L20.6037 11.6444C20.9985 11.622 21.3679 11.4438 21.6297 11.1493C21.8914 10.8549 22.0239 10.4688 21.9975 10.0768V9.93749H21.9887ZM13.9241 10.5122L13.4858 4.08536C16.9251 4.224 19.8051 6.71929 20.4109 10.0855L13.9241 10.5122ZM16.7993 14.9884C16.9225 14.5712 17.3582 14.3277 17.7811 14.4398C17.9885 14.489 18.1671 14.6195 18.2761 14.8016C18.3851 14.9837 18.4152 15.2019 18.3597 15.4064C17.7643 17.5651 16.3122 19.3911 14.3361 20.4661C11.9113 21.8013 8.97567 21.8458 6.51098 20.5848C4.04629 19.3238 2.37792 16.9237 2.06387 14.1872C2.01293 13.8677 1.99238 13.544 2.00251 13.2206C1.99827 9.29931 4.76558 5.91373 8.62952 5.11297C9.06523 5.02639 9.48909 5.30712 9.57623 5.73998C9.66338 6.17284 9.3808 6.59393 8.94509 6.6805C5.82643 7.33954 3.59908 10.0792 3.60667 13.2467C3.5994 13.4943 3.61407 13.742 3.6505 13.9869C4.03513 17.1495 6.61427 19.6021 9.81143 19.8456C13.0086 20.0891 15.9339 18.0558 16.7993 14.9884Z" fill="#222223"/>
+                                    </svg>
+                                    <span class="nav-item__text {% if step == 1 %}nav-item__text--active {% endif %}">Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="navigation-list__item">
+
+                                <a class="nav-item {% if step == 2 %}nav-item--active {% endif %}" href="{% url 'core:billing' %}">
+                                    <svg class="nav-item__icon {% if step == 2 %}nav-item__icon--active {% endif %}" width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M7.78489 2.5H16.2142C19.4044 2.5 22 5.15478 22 8.41891V15.5811C22 18.8452 19.4044 21.5 16.2142 21.5C15.8462 21.5 15.5476 21.1944 15.5476 20.8179C15.5476 20.4414 15.8462 20.1358 16.2142 20.1358C18.6693 20.1358 20.6667 18.0931 20.6667 15.5811V9.86499H17.3831C16.3049 9.8659 15.4258 10.7645 15.4249 11.8686C15.4258 12.9727 16.3049 13.8713 17.3831 13.8722H18.7476C19.1156 13.8722 19.4142 14.1778 19.4142 14.5543C19.4142 14.9308 19.1156 15.2364 18.7476 15.2364H17.3831C15.5689 15.2355 14.0924 13.7248 14.0916 11.8686C14.0924 10.0123 15.5689 8.50168 17.3831 8.50077H20.6667V8.41891C20.6667 5.90692 18.6693 3.86422 16.2142 3.86422H7.78489C5.80622 3.86422 4.14578 5.19934 3.56711 7.02831H12.3547C12.7227 7.02831 13.0213 7.3339 13.0213 7.71043C13.0213 8.08786 12.7227 8.39254 12.3547 8.39254H3.336C3.336 8.39709 3.33533 8.40141 3.33467 8.40573C3.334 8.41004 3.33333 8.41436 3.33333 8.41891V15.5811C3.33333 18.0931 5.32978 20.1358 7.78489 20.1358H12.0258C12.3938 20.1358 12.6924 20.4414 12.6924 20.8179C12.6924 21.1944 12.3938 21.5 12.0258 21.5H7.78489C4.59467 21.5 2 18.8452 2 15.5811V8.41891C2 5.15478 4.59467 2.5 7.78489 2.5ZM16.861 11.8071C16.861 11.4306 17.1596 11.125 17.5276 11.125H17.8308C18.1988 11.125 18.4974 11.4306 18.4974 11.8071C18.4974 12.1836 18.1988 12.4892 17.8308 12.4892H17.5276C17.1596 12.4892 16.861 12.1836 16.861 11.8071Z" fill="#222223"/>
+                                    </svg>
+                                    <span class="nav-item__text {% if step == 2 %}nav-item__text--active {% endif %}">Billing</span>
+                                </a>
+                            </li>
+                            <li class="navigation-list__item">
+                                <a href="{% url 'accounts:profile' %}" class="nav-item {% if step == 3 %}nav-item--active {% endif %}">
+                                    <svg class="nav-item__icon nav-item__icon--stroke {% if step == 3 %}nav-item__icon--active {% endif %}" width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 13.0801V14.8801C3 17.0001 3 17.0001 5 18.3501L10.5 21.5301C11.33 22.0101 12.68 22.0101 13.5 21.5301L19 18.3501C21 17.0001 21 17.0001 21 14.8901V9.11011C21 7.00011 21 7.00011 19 5.65011L13.5 2.47011C12.68 1.99011 11.33 1.99011 10.5 2.47011L5 5.65011C3 7.00011 3 7.00011 3 9.11011" stroke="#222223" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M15 12C15 10.34 13.66 9 12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C12.41 15 12.81 14.92 13.17 14.76" stroke="#222223" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="nav-item__text  {% if step == 3 %}nav-item__text--active {% endif %}">Settings</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="navigation-controls-block">
+                        <button class="log-out d-flex align-items-center" type="button" data-toggle="modal" data-target="#logoutPopup">
+                            <svg class="log-out__icon" width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.5 12H9.5" stroke="#222223" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M11.5 9L8.5 12L11.5 15" stroke="#222223" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4 6C2.75 7.67 2 9.75 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C10.57 2 9.2 2.3 7.97 2.85" stroke="#222223" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+
+                            <span class="log-out__text">Log out</span>
+                        </button>
+                        <button
+                            class="hide-panel d-flex align-items-center" type="button">
+                            <svg class="hide-panel__icon" width="16" height="16" viewbox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.8105 1.96694C12.0629 2.21701 12.0647 2.62242 11.8087 2.87249L8.02452 6.57833L7.95767 6.63543C7.70188 6.82567 7.33627 6.80579 7.10405 6.57577C6.97826 6.45116 6.91406 6.28729 6.91406 6.12428C6.91406 5.96041 6.97826 5.79568 7.10579 5.67107L10.89 1.96438L10.9569 1.90728C11.2127 1.71704 11.5783 1.73692 11.8105 1.96694ZM11.8671 13.194C12.0624 13.445 12.0416 13.8048 11.8102 14.034C11.5569 14.2841 11.1448 14.285 10.8898 14.0349L5.19173 8.45307L5.13324 8.38767C5.04458 8.27382 5 8.13714 5 7.99987C5 7.83685 5.0642 7.67298 5.18999 7.54838C5.44332 7.29745 5.8554 7.2966 6.11046 7.54667L11.8085 13.1285L11.8671 13.194Z" fill="#222223"/>
+                                <path d="M11.8087 2.87249L11.634 2.69368L11.6338 2.69387L11.8087 2.87249ZM11.8105 1.96694L11.9864 1.78933L11.9864 1.78932L11.8105 1.96694ZM8.02452 6.57833L8.18688 6.76844L8.19335 6.76291L8.19944 6.75695L8.02452 6.57833ZM7.95767 6.63543L8.10687 6.83602L8.11362 6.831L8.12002 6.82553L7.95767 6.63543ZM7.10405 6.57577L6.92812 6.75338L6.92812 6.75339L7.10405 6.57577ZM7.10579 5.67107L7.28051 5.84989L7.28073 5.84967L7.10579 5.67107ZM10.89 1.96438L10.7277 1.77427L10.7212 1.77981L10.7151 1.78578L10.89 1.96438ZM10.9569 1.90728L10.8077 1.70669L10.8009 1.71171L10.7945 1.71718L10.9569 1.90728ZM11.8102 14.034L11.9859 14.2119L11.9862 14.2116L11.8102 14.034ZM11.8671 13.194L12.0644 13.0405L12.0592 13.0338L12.0535 13.0274L11.8671 13.194ZM10.8898 14.0349L11.0648 13.8564L11.0647 13.8563L10.8898 14.0349ZM5.19173 8.45307L5.00537 8.61972L5.01088 8.62588L5.01678 8.63166L5.19173 8.45307ZM5.13324 8.38767L4.936 8.54127L4.94122 8.54798L4.94689 8.55432L5.13324 8.38767ZM5.18999 7.54838L5.01406 7.37076L5.01405 7.37076L5.18999 7.54838ZM6.11046 7.54667L5.93543 7.72518L5.93551 7.72526L6.11046 7.54667ZM11.8085 13.1285L11.9949 12.9619L11.9894 12.9557L11.9834 12.9499L11.8085 13.1285ZM11.9835 3.0513C12.3404 2.70249 12.3369 2.13654 11.9864 1.78933L11.6345 2.14455C11.7889 2.29748 11.7889 2.54235 11.634 2.69368L11.9835 3.0513ZM8.19944 6.75695L11.9837 3.05111L11.6338 2.69387L7.8496 6.39971L8.19944 6.75695ZM8.12002 6.82553L8.18688 6.76844L7.86216 6.38822L7.79531 6.44532L8.12002 6.82553ZM6.92812 6.75339C7.24982 7.07204 7.75384 7.09859 8.10687 6.83602L7.80847 6.43483C7.64993 6.55275 7.42271 6.53953 7.27999 6.39816L6.92812 6.75339ZM6.66406 6.12428C6.66406 6.3528 6.75407 6.58098 6.92812 6.75338L7.27999 6.39816C7.20245 6.32135 7.16406 6.22179 7.16406 6.12428H6.66406ZM6.93107 5.49226C6.7539 5.66537 6.66406 5.89522 6.66406 6.12428H7.16406C7.16406 6.02559 7.20262 5.92599 7.28051 5.84989L6.93107 5.49226ZM10.7151 1.78578L6.93085 5.49248L7.28073 5.84967L11.065 2.14298L10.7151 1.78578ZM10.7945 1.71718L10.7277 1.77427L11.0524 2.15449L11.1192 2.09739L10.7945 1.71718ZM11.9864 1.78932C11.6647 1.47067 11.1607 1.44412 10.8077 1.70669L11.1061 2.10788C11.2646 1.98996 11.4918 2.00318 11.6346 2.14456L11.9864 1.78932ZM11.9862 14.2116C12.3074 13.8934 12.3374 13.3914 12.0644 13.0405L11.6698 13.3476C11.7873 13.4986 11.7758 13.7162 11.6343 13.8564L11.9862 14.2116ZM10.7147 14.2134C11.0671 14.5589 11.6353 14.558 11.9859 14.2119L11.6346 13.8561C11.4785 14.0102 11.2225 14.011 11.0648 13.8564L10.7147 14.2134ZM5.01678 8.63166L10.7148 14.2135L11.0647 13.8563L5.36667 8.27448L5.01678 8.63166ZM4.94689 8.55432L5.00537 8.61972L5.37808 8.28642L5.3196 8.22102L4.94689 8.55432ZM4.75 7.99987C4.75 8.19139 4.8123 8.38243 4.936 8.54127L5.33049 8.23407C5.27686 8.1652 5.25 8.08289 5.25 7.99987H4.75ZM5.01405 7.37076C4.84001 7.54317 4.75 7.77135 4.75 7.99987H5.25C5.25 7.90236 5.28839 7.8028 5.36593 7.72599L5.01405 7.37076ZM6.28548 7.36816C5.93306 7.02263 5.36467 7.02346 5.01406 7.37076L5.36593 7.72599C5.52196 7.57144 5.77773 7.57056 5.93543 7.72518L6.28548 7.36816ZM11.9834 12.9499L6.2854 7.36808L5.93551 7.72526L11.6335 13.3071L11.9834 12.9499ZM12.0535 13.0274L11.9949 12.9619L11.6221 13.2951L11.6807 13.3607L12.0535 13.0274Z" fill="#222223"/>
+                            </svg>
+
+                            <span class="hide-panel__text">Hide panel</span>
+                        </button>
+                    </div>
+                </nav>
+                <main class="main-layout main-layout__dashbord">
+                    <header class="form-header dashbord-header d-flex align-items-center justify-content-between">
+                        <h1 class="title dashbord-header__title">{{ title }}</h1>
+
+                        <div class="constrols d-lg-flex d-none align-items-center">
+{#                            <button class="notification alert-btn" type="button">#}
+{#                                <i class="bi bi-bell" ></i>#}
+{#                            </button>#}
+                            <div class="user user-dropdown__user-ava  d-flex align-items-center">
+                                <img class="user__icon" src="{% static 'core/img/jpg/ava.jpg' %}" alt="">
+                                <span class="user__name">{{ user.get_username }} </span>
+                            </div>
+
+                        </div>
+                    </header>
+
+                    {% block content %}{% endblock %}
+                </main>
+            </div>
+        </div>
+
+        <div class="modal fade" id="logoutPopup" tabindex="-1" aria-labelledby="logoutPopupLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content modal__content">
+                    <div class="modal-body p-0">
+                        <header class="form-header text-center">
+                            <img class="form-header-icon" src="{% static 'core/img/svg/icon-warning.svg' %}" alt="">
+                            <h1 class="title title--sm">Log out</h1>
+                            <p class="subtitle">Are you sure you want to Log out?</p>
+
+                        </header>
+                    </div>
+                    <div class="modal-footer modal__footer p-0 border-0">
+                        <a class="btn modal__footer-btn" href="{% url 'accounts:logout' %}">Log out</a>
+                        <button type="button" class="btn-outline modal__footer-btn" data-dismiss="modal">Back to Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% block footer %}{% endblock %}
+        {% render_block "js" %}
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

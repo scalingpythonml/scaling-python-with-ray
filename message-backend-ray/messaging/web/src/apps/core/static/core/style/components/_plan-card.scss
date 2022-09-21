@@ -1,0 +1,123 @@
+.plan-card {
+    border: 1px solid $progress-item-back;
+    border-radius: 16px;
+    padding: width(1);
+    width: width(10);
+    margin-right: width(1);
+    margin-bottom: width(1);
+    flex-shrink: 0;
+
+    &__header {
+        margin-bottom: 24px;
+    }
+
+    &__img-wrap {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: rgba(108, 47, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &__img {
+        width: 22px;
+        height: 22px;
+        object-fit: cover;
+    }
+
+    &__title {
+        @include text-config($font-weight: 700, $fs: 20px, $lh: 150%);
+        width: calc(100% - 45px - 16px);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    &__pricing {
+        margin-bottom: 16px;
+    }
+
+    &__price {
+        @include text-config($font-weight: 700, $fs: 28px, $lh: 150%);
+    }
+
+    &__period {
+        @include text-config($font-weight: 400, $fs: 16px, $lh: 150%);
+
+    }
+
+    &__options {
+        list-style: none;
+        margin-bottom: 32px;
+    }
+
+    &__options-item {
+        @include text-config($font-weight: 400, $fs: 16px, $lh: 150%);
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 14px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &::before {
+            content: '';
+            width: 21px;
+            height: 21px;
+            background: transparent url(../../img/svg/icon-check-circle.svg) center center no-repeat;
+            background-size: contain;
+            position: absolute;
+            top: 2px;
+            left: 0;
+        }
+    }
+
+
+    &__btn {
+        @include btn($outline: true);
+        padding: 9.5px 0;
+        width: 100%;
+    }
+}
+
+.plan-card-simple {
+    width: 100%;
+    padding: 24px;
+
+    &__description-wrap {
+        margin-right: auto;
+    }
+
+    &__title {
+        @include text-config($font-weight: 700, $fs: 18px, $lh: 140%);
+        margin-bottom: 4px;
+    }
+
+    &__status {
+        @include tag();
+    }
+
+    &__duration {
+        @include text-config($font-weight: 400, $fs: 16px, $lh: 150%);
+        margin: 0;
+    }
+
+    &__btn {
+        padding: 9.5px 28px;
+    }
+}
+
+@media  (max-width: 1024px) {
+
+    .plan-card-simple {
+        &__btn {
+            width: 100%;
+            margin-top: 32px;
+        }
+    }
+}

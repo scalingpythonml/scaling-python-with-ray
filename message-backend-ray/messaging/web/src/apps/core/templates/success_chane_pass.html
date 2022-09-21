@@ -1,0 +1,17 @@
+{% extends 'spacebeaver.html' %}
+
+
+{% block content %}
+<div class="col-12 col-lg-6 d-flex align-items-center">
+    <div class="form-container form-container--centered centered">
+        <header class="form-header text-center">
+            <img class="form-header-icon"  src="{% static 'core/img/svg/icon-aprove.svg' %}" alt="">
+            <h1 class="title">Success!</h1>
+            <p class="subtitle">Your password has been successfully changed</p>
+        </header>
+        <footer class="form-footer text-center">
+            <a href="{% url 'core:login' %}" class="btn">Back to Log in</a>
+        </footer>
+    </div>
+  </div>
+{% endblock %}

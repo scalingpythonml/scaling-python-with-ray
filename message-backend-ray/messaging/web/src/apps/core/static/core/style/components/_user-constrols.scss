@@ -1,0 +1,67 @@
+.constrols {
+    position: absolute;
+    top: -8px;
+    right: 0;
+}
+
+
+.notification {
+    appearance: unset;
+    background-color: transparent;
+    cursor: pointer;
+    width:  24px;
+    height:  24px;
+    flex-shrink: 0;
+    margin-top: -3px;
+
+    &__icon {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+.user-dropdown {
+
+    .dropdown-toggle {
+        appearance: unset;
+        background-color: transparent;
+        cursor: pointer;
+        padding: 0 10px;
+        margin-left: 8px;
+        margin-right: -10px;
+
+        &::after{
+            display: none;
+        }
+
+    }
+    &__user-ava {
+        margin-left: 31px;
+    }
+}
+
+.user {
+    &__icon {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 12px;
+        flex-shrink: 0;
+        background-color: $grayscale-gray-900;
+    }
+
+    &__name{
+        @include text-config($font-weight: 500, $fs: 16px, $lh: 150%);
+    }
+}
+
+.dashbord-header {
+    position: relative;
+
+    &__title.title {
+        margin-bottom: 0;
+    }
+}

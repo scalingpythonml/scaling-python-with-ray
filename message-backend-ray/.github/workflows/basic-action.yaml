@@ -1,0 +1,56 @@
+name: Build and test
+
+on:
+  push:
+    branches:
+    - '**'
+    - '!branch-*.*'
+
+jobs:
+  # Build: build spark-testing-base and run the tests for specified modules.
+  build:
+    # Ubuntu 20.04 is the latest LTS. The next LTS is 22.04.
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      # In order to fetch changed files
+      with:
+        fetch-depth: 0
+        repository: PigsCanFlyLabs/message-backend-ray
+    - name: Sync the current branch with the latest in message-backend-ray
+      if: github.repository != 'PigsCanFlyLabs/message-backend-ray'
+      id: sync-branch
+      run: |
+        apache_spark_ref=`git rev-parse HEAD`
+        git fetch https://github.com/$GITHUB_REPOSITORY.git ${GITHUB_REF##*/}
+        git -c user.name='Spark Test Account' -c user.email='sparktestacc@gmail.com' merge --no-commit --progress --squash FETCH_HEAD
+        git -c user.name='Spark Test Account' -c user.email='sparktestacc@gmail.com' commit -m "Merged commit"
+        echo "::set-output name=SPARK_REF::$apache_spark_ref"
+    # Cache local repositories. Note that GitHub Actions cache has a 2G limit.
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        python-version: 3.8
+    - name: Activate conda env
+      run: |
+        echo `which python`
+        conda init bash
+        source ~/.bashrc
+        conda activate test
+        echo `which python`
+    - name: Install requirements
+      run: |
+        pip install -r requirements.txt
+    - name: Check conda setup
+      run: |
+        conda info
+        conda list
+    # Run the tests.
+    - name: Run tests
+      run: nosetests -vs --traverse-namespace messaging
+    # Verify the style
+    - name: Style check
+      run: flake8 messaging --max-line-length=100  --exclude "*/proto/* */web/*" --ignore E265,W504

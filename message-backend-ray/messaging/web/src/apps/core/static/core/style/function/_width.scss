@@ -1,0 +1,5 @@
+$col-width: 30px;
+
+@function width($col) {
+    @return $col-width * $col;
+}

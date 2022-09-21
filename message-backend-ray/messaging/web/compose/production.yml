@@ -1,0 +1,63 @@
+version: '3.8'
+
+volumes:
+  data: {}
+  broker: {}
+  cache: {}
+  certs: {}
+  outside_db: {}
+
+networks:
+  proxy:
+    external: true
+  external:
+    external: true
+  internal:
+    external: true
+
+
+x-update:
+  &default-update
+  update_config:
+    parallelism: 1
+    delay: 2s
+    order: stop-first
+    failure_action: rollback
+    max_failure_ratio: 0.1
+x-rollback:
+  &default-rollback
+  rollback_config:
+    parallelism: 1
+    delay: 2s
+    failure_action: pause
+    max_failure_ratio: 0.1
+    order: stop-first
+x-restart:
+  &default-restart
+  restart_policy:
+    condition: any
+    delay: 2s
+    max_attempts: 5
+    window: 60s
+x-logging:
+  &default-logging
+  driver: json-file
+  options:
+    max-size: 500k
+    max-file: 10
+
+services:
+  app:
+    image: production
+    build:
+      context: .
+      dockerfile: compose/build/Dockerfile
+      target: cd
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+      cache_from:
+        - revolutionsystems/python:3.8.9-wee-optimized-lto
+    environment:
+      __ENV__: Runtime
+      ENVIRONMENT: "production"
+      SSL: 'on'

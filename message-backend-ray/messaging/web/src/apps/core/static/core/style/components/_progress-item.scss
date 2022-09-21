@@ -1,0 +1,106 @@
+.progress-bar {
+    list-style-type: none;
+    background-color: unset;
+    overflow: visible;
+
+    &__item {
+        margin-bottom: 8px;
+    }
+}
+
+.progress-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    position: relative;
+
+    &::before{
+        content: '';
+        display: block;
+        width: calc(100% + 28px);
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: -14px;
+        right: -14px;
+        background: $progress-item-back;
+        opacity: 0;
+        border-radius: 16px;
+        z-index: 0;
+        transition: 0.3s opacity ease-in-out;
+    }
+
+    &:hover{
+        &::before {
+            background: $progress-item-back;
+            opacity: 0.3;
+        }
+    }
+
+    &--active::before {
+        background: $progress-item-back;
+        opacity: 0.5;
+    }
+
+    &__step {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #E4E5ED;
+        border-radius: 8px;
+        margin-right: 20px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+
+        &--active {
+            border-color: $primary-blue;
+            background-color: $primary-blue;
+        }
+
+        &--checked {
+            border-color: #EDEDED;
+            background-color: #EDEDED;
+        }
+    }
+
+    &__step--checked > &__number {
+        display: none;
+    }
+
+    &__check{
+        display: none;
+        &--checked {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+    }
+    &__check-icon {
+        height: 12px;
+        width: 16px;
+        object-fit: contain;
+    }
+
+    &__number{
+        @include text-config($font-weight: 500, $fs: 22px, $lh: 22px);
+
+        &--active {
+            color: white;
+        }
+    }
+
+    &__text{
+        @include text-config($fs: 15px, $lh: 150%);
+        position: relative;
+        z-index: 1;
+        width: calc(100% - 60px);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        text-align: left;
+    }
+}

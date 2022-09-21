@@ -1,0 +1,22 @@
+.user-card {
+    &__img{
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: rgba(244, 128, 255, 0.2);
+        flex-shrink: 0;
+        margin-right: 12px;
+    }
+
+    &__icon {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+
+    &__name{
+        @include text-config($font-weight: 700, $fs: 14px, $lh: 140%);
+        margin: 0;
+    }
+}

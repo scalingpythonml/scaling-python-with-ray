@@ -1,0 +1,153 @@
+.navigation-block {
+    margin-top: 33px;
+    position: relative;
+
+    &__title {
+        margin-bottom: 20px;
+        @include text-config($font-weight: 500, $fs: 12px, $lh: 150%);
+    }
+}
+
+.navigation-list {
+    list-style-type: none;
+
+    &__item {
+        margin-bottom: 32px;
+        position: relative;
+
+        &:last-child{
+            margin-bottom: 0;
+        }
+    }
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &::before {
+        content: '';
+        width: 4px;
+        height: 200%;
+        background: $primary-blue;
+        position: absolute;
+        left: width(1) * -1;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: 0.3s opacity ease-in-out;
+    }
+
+    &:hover::before{
+            opacity: 0.3;
+        }
+
+
+    &:hover &{
+        &__icon *{
+            fill: $primary-blue-hover;
+        }
+
+        &__icon--stroke *{
+            fill: unset;
+            stroke: $primary-blue-hover;
+        }
+
+        &__text {
+            color: $primary-blue-hover;
+        }
+
+    }
+
+    &--active {
+        &::before, &:hover::before {
+            opacity: 1;
+        }
+    }
+
+    &__icon {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        margin-right: 12px;
+        flex-shrink: 0;
+        
+        * {
+            transition: 0.3s fill ease-in-out;
+            transition-property: fill, stroke;
+        }
+
+        &--active * {
+            fill: $primary-blue;
+
+        }
+
+        
+    }
+    &__icon--stroke.nav-item__icon--active * {
+        stroke: $primary-blue;
+        fill: unset;
+    }
+
+    &__text {
+        @include text-config($font-weight: 500, $fs: 16px, $lh: 150%);
+        transition: 0.3s color ease-in-out;
+        
+        &--active {
+            color: $primary-blue;
+        }
+    }
+}
+
+.navigation-controls-block {
+    position: absolute;
+    bottom: 30px;
+}
+
+.log-out,
+.hide-panel {
+    appearance: none;
+    background-color: transparent;
+    cursor: pointer;
+    margin-top: 24px;
+
+    &__text {
+        @include text-config($font-weight: 500, $fs: 16px, $lh: 150%);
+        transition: 0.3s color ease-in-out;
+    }
+
+    &:hover &{
+        &__text {
+            color: $primary-blue-hover;
+        }
+
+        &__icon *{
+            stroke: $primary-blue-hover;
+        }
+    }
+
+    &__icon {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        margin-right: 12px;
+        flex-shrink: 0;
+        * {
+            transition: 0.3s fill ease-in-out;
+            transition-property: fill, stroke;
+        }
+    }
+}
+
+.hide-panel {
+    &__icon {
+        width: 16px;
+        height: 16px;
+    }
+    &:hover &{
+        &__icon *{
+            stroke: unset;
+            fill: $primary-blue-hover;
+        }
+    }
+}

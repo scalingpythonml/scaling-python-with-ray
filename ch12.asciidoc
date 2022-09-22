@@ -189,7 +189,7 @@ Ray metrics support the https://prometheus.io/docs/concepts/metric_types/#counte
 ====
 [source, python]
 ----
-include::examples/ray_examples/enterprise/Ray-Enterprise.py[tags=ray_counters_actor]
+include::examples/ray_examples/enterprise/Ray-Enterprise.py[tags=ray_metrics_actor]
 ----
 ====
 
@@ -198,7 +198,7 @@ include::examples/ray_examples/enterprise/Ray-Enterprise.py[tags=ray_counters_ac
 ====
 [source, python]
 ----
-include::./examples/ray/enterprise/Ray-Enterprise.py[tags=ray_counters_singleton]
+include::./examples/ray/enterprise/Ray-Enterprise.py[tags=ray_metrics_singleton]
 ----
 ====
 

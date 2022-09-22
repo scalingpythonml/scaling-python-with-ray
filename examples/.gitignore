@@ -149,3 +149,4 @@ make_k8s_cluster/
 scratch
 
 spark/containers/spark-*bin*
+ray_examples/installRay/helm/ray/

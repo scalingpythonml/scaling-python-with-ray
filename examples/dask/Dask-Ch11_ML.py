@@ -430,7 +430,13 @@ pred = np.exp(pred) - 1
 # In[62]:
 
 
-
+#tag::dask_delayed_load_model[]
+@dask.delayed
+def load_model(path):
+    with fs.open(path, 'rb') as f:
+        img = Image.open(f)
+        return img
+#end::dask_delayed_load_model
 
 
 # In[63]:
@@ -439,7 +445,69 @@ pred = np.exp(pred) - 1
 
 
 
-# In[64]:
+# In[ ]:
+
+
+#tag::Dask_DataFrame_map_partition_inference[]
+import dask.dataframe as dd
+import dask.bag as db
+
+def rowwise_operation(row, arg*):
+    #row-wise compute
+    return result
+def partition_operation(df):
+    #partition wise logic
+    result = df[col1].apply(rowwise_operation)
+    return result
+
+ddf = dd.read_csv(“metadata_of_files”)
+results = ddf.map_partitions(partition_operation)
+results.compute()
+#end::Dask_DataFrame_map_partition_inference
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+#tag::batched_operations[]
+def handle_batch(batch, conn, nlp_model):
+    #run_inference_here.
+    conn.commit()
+
+def handle_partition(df):
+    worker = get_worker()
+    conn = connect_to_db()
+    try:
+        nlp_model = worker.roberta_model
+    except:
+        nlp_model = load_model()
+        worker.nlp_model = nlp_model
+    result, batch = [], []
+    for _, row in part.iterrows():
+        if len(batch) % batch_size == 0 and len(batch) > 0:
+            batch_results = handle_batch(batch, conn, nlp_model)
+            result.append(batch_results)
+            batch = []
+        batch.append((row.doc_id, row.sent_id, row.utterance))
+    if len(batch) > 0:
+        batch_results = handle_batch(batch, conn, nlp_model)
+        result.append(batch_results)
+    conn.close()
+    return result
+
+ddf = dd.read_csv("metadata.csv”)
+results = ddf.map_partitions(handle_partition)
+results.compute()
+#end::batched_operations
+
+
+# In[ ]:
 
 
 

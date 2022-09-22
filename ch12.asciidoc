@@ -198,7 +198,7 @@ include::examples/ray_examples/enterprise/Ray-Enterprise.py[tags=ray_metrics_act
 ====
 [source, python]
 ----
-include::./examples/ray/enterprise/Ray-Enterprise.py[tags=ray_metrics_singleton]
+include::./examples/ray_examples/enterprise/Ray-Enterprise.py[tags=ray_metrics_singleton]
 ----
 ====
 

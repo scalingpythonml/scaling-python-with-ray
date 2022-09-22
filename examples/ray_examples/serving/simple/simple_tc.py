@@ -53,7 +53,7 @@ print(serve.list_deployments())
 print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&type=CF").text)
 print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&type=FC").text)
 print(requests.get("http://127.0.0.1:8000/Converter?temp=100.0&type=CC").text)
-#end:query[]
+#end::query[]
 
 #direct invoke
 #tag::direct_invoke[]

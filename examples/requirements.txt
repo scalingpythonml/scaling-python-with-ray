@@ -7,4 +7,4 @@ cloudpickle
 packaging
 pygments
 # For now install ray nightly, when book gets closer pin this
-https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-2.0.0.dev0-cp38-cp38-manylinux2014_x86_64.whl
+# https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-2.0.0.dev0-cp38-cp38-manylinux2014_x86_64.whl

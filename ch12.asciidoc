@@ -248,3 +248,6 @@ Although Ray was initially created in a research lab, you can start bringing Ray
 * decide whether you need permanent or ephemeral Ray clusters.
 
 These considerations will change based on your enterprise environment and specific use cases for Ray usage.
+
+
+At this point in the book you should now have a solid grasp of all of the Ray basics as well as pointers on where to go next. We certainly hope to see you in the Ray community and encourage you to check out the different link:$$https://www.ray.io/community$$[community resources], including the link:$$https://forms.gle/9TSdDYUgxYs8SA9e8$$[Ray's slack]. If you want to see one of the ways you can put the different pieces of Ray together, the next section <<appA>>, explores how to build a backend for an open-source satellite communication system.

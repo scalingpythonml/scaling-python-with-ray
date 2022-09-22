@@ -1,3 +1,5 @@
 #!/bin/bash
 set -ex
-find . -name "*ipynb" |grep -v venv |grep -v .ipynb_checkpoints | xargs -d '\n' jupyter nbconvert --to script
+for file in $(find . -name "*ipynb" |grep -v venv |grep -v .ipynb_checkpoints); do
+  jupyter nbconvert --to script $file || echo "Bad code?"
+done

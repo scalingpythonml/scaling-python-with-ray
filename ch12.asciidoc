@@ -164,7 +164,7 @@ Ray metrics can also be exported to Prometheus, and by default, Ray will pick a 
 
 [[sample-grafana-dashboard-for-ray]]
 .Sample Grafana dashboard for Ray
-image::images/ch12/fig_12-01.png[]
+image::images/ch12/fig_12-03.png[]
 
 To obtain exported metrics, Prometheus needs to be configured for which hosts/pods to scrape. For users with a static cluster, this is as simple as providing a host file, but for dynamic users, you https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config[+++have many options+++]. Kubernetes users can use https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/enterprise/ray-pod-monitor.yaml[+++podmonitors+++] to configure Prometheus pod scraping. Because Ray cluster does not have a unifying label for all nodes, here we are using two podmonitors - one for the head node and one for workers.
 

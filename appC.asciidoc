@@ -30,7 +30,7 @@ Serialization plays an important part in Ray, but can also be a source of headac
 ====
 [source, python]
 ----
-include::examples/ray/debugging/Debugging.py[tags=bad_ser_example]
+include::examples/ray_examples/debugging/Debugging.py[tags=bad_ser_example]
 ----
 ====
 
@@ -116,7 +116,7 @@ PyCharm is a popular Python IDE with an integrated debugger. While it is not int
 ====
 [source, python]
 ----
-include::examples/ray/debugging/Debugging.py[tags=ex_pydev_charm]
+include::examples/ray_examples/debugging/Debugging.py[tags=ex_pydev_charm]
 ----
 ====
 

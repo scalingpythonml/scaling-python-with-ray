@@ -154,7 +154,6 @@ PyTorch is simple and flexible, making it a favorite for many academics and rese
 
 We will continue with our wine quality problem and show how to use PyTorch to build a Multilayer Perceptrons (MLP) model for predicting wine quality. To do this you need to start from creating a custom PyTorch https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset[+++Dataset class+++] that can be extended and customized to load your dataset. For our wine quality example the custom dataset class looks as follows in <<torch_data>>.
 
-// AU: in the following `include`, I changed the tag `data` to `dataset`. Is this correct?
 [[torch_data]]
 .PyTorch dataset class for loading wine quality data
 ====

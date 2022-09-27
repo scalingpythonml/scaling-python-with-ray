@@ -285,7 +285,6 @@ To create an actor that uses AsyncIo, you need to define at least one async meth
 
 An example of a very simple async actor is presented below in <<simple_async_actor>>:
 
-// AU: please check the following example. Is this correct? The tag originally used here, `persist_pool`, doesn't exist in the referenced file.
 [[simple_async_actor]]
 .Simple async actor
 ====

@@ -183,7 +183,6 @@ The metrics that you add to Ray metrics are exposed as prometheus metrics just l
 
 Ray metrics support the https://prometheus.io/docs/concepts/metric_types/#counter[+++Counter+++], https://prometheus.io/docs/concepts/metric_types/#gauge[+++Gauge+++], https://prometheus.io/docs/concepts/metric_types/#histogram[+++Histogram+++] metrics types inside `ray.util.metrics`. These metrics objects are not serializable as they reference C objects. You need to create the metric explicitly before you can record any values in the metric. When creating a new metric you can specify a name, description, and tags. A common tag used is the name of the actor a metric is used inside of, for actor sharding. Since they are not serializable you need to either create and use them inside of actors as in <<ray_counters_actor>> or https://python-patterns.guide/gang-of-four/singleton/[+++use the lazy singleton+++ +++pattern+++] as in <<ray_counters_singleton>>.
 
-// AU: please add example file to repo
 [[ray_counters_actor]]
 .Using Ray Counters inside of an actor
 ====

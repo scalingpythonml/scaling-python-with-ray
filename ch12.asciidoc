@@ -243,7 +243,7 @@ Running Docker images is just one of the useful applications of usage of subproc
 Although Ray was initially created in a research lab, you can start bringing Ray to the mainstream enterprise computing infrastructure with the implementation enchancements described here. Specifically, be sure to:
 
 * carefully evaluate the security and multi-tenancy issues that this can create
-* Be mindful ofintegration with CI/CD and observability tools.
+* Be mindful of integration with CI/CD and observability tools.
 * decide whether you need permanent or ephemeral Ray clusters.
 
 These considerations will change based on your enterprise environment and specific use cases for Ray usage.

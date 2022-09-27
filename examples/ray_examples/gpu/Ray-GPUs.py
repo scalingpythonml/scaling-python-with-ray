@@ -76,5 +76,19 @@ resources
 # In[ ]:
 
 
+#tag::numba_ex[]
+from numba import cuda, float32
 
+# CUDA kernel
+@cuda.jit
+def mul_two(io_array):
+    pos = cuda.grid(1)
+    if pos < io_array.size:
+        io_array[pos] *= 2 # do the computation
+        
+@ray.remote
+def remote_mul(input_array):
+    # This implicitly transfers the array into the GPU and back which is not free
+    return mul_two(input_array)
+#end::numba_ex[]
 

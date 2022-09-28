@@ -135,7 +135,7 @@ While the other actors are all async, allowing parallelism within the actor, the
 ====
 [source, python]
 ----
-include::message-backend-ray/messaging/satellite/satellite.py[tags=code]
+include::message-backend-ray/messaging/users/user_actor.py[tags=code]
 ----
 ====
 
@@ -147,6 +147,16 @@ Django is a popular Python web development framework, that includes many differe
 ==== SMS Actor and Serve implementation
 
 In addition to the actors for satellite and e-mail gateways, SpaceBeaver also uses Ray Serve to expose a phone-api.
+
+.Phone API
+[[phone_serve]
+====
+[source, python]
+----
+include::message-backend-ray/messaging/phone/web.py[]
+----
+====
+
 
 === Testing
 

@@ -16,6 +16,95 @@ In reading this book you will learn how to take your existing Python skills to m
 
 As the saying goes, with great power comes great responsibility. Ray, and tools like it, enable you to build more complex systems handling more data and users. It's important not to get too excited and carried away solving problems because they are fun, and stop to ask yourself what the impact of your decisions will be. You don't have to search very hard to find stories of well-meaning engineers and data scientists accidentally building models or tools that caused devastating impacts, like the new VA payment system breaking, to hiring algorithms that discriminate based on gender. We ask that you use your newfound powers keeping this in mind, for one never wants to end up in a textbook for the wrong reasons.
 
+=== Conventions Used in This Book
+
+The following typographical conventions are used in this book:
+
+_Italic_:: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+
++Constant width+:: Used for program listings, as well as within paragraphs to refer to program elements such as variable or function names, databases, data types, environment variables, statements, and keywords.
+
+**`Constant width bold`**:: Shows commands or other text that should be typed literally by the user.
+
+_++Constant width italic++_:: Shows text that should be replaced with user-supplied values or by values determined by context.
+
+
+[TIP]
+====
+This element signifies a tip or suggestion.
+====
+
+[NOTE]
+====
+This element signifies a general note.
+====
+
+[WARNING]
+====
+This element indicates a warning or caution.
+====
+
+=== License
+
+Once published in print and excluding O’Reilly’s distinctive design elements (i.e. cover art, design format, “look and feel”) or O’Reilly’s trademarks, service marks, and trade names, this book is available under a Creative Commons Attribution-Noncommercial-NoDerivatives 4.0 International Public License. We thank O'Reilly for allowing us to make this book available under a creative commons license. We hope that you will choose to support this book (and the authors) by purchasing several copies of this book with your corporate expense account (it makes an excellent gift for whichever holiday season is coming up next).
+
+=== Using Code Examples
+++++
+<!--PROD: Please reach out to author to find out if they will be uploading code examples to oreilly.com or their own site (e.g., GitHub). If there is no code download, delete this whole section. If there is, when you email digidist with the link, let them know what you filled in for title_title (should be as close to book title as possible, i.e., learning_python_2e). This info will determine where digidist loads the files.-->
+++++
+
+The https://github.com/scalingpythonml/scalingpythonml[Scaling Python ML Github] contains most of the examples for this book. The examples in this book are in the "ray" directory, with some parts (namely Dask on Ray) being found in the "dask" directory and Spark on Ray in the "spark" directory. 
+
+Supplemental material (code examples, exercises, etc.) is available for download at link:$$https://github.com/oreillymedia/title_title$$[].
+
+If you have a technical question or a problem using the code examples, please send email to pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>].
+
+This book is here to help you get your job done. In general, if example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you’re reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing examples from O’Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. Incorporating a significant amount of example code from this book into your product’s documentation does require permission.
+
+We appreciate, but generally do not require, attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: “_Book Title_ by Some Author (O’Reilly). Copyright 2012 Some Copyright Holder, 978-0-596-xxxx-x.”
+
+If you feel your use of code examples falls outside fair use or the permission given above, feel free to contact us at pass:[<a class="email" href="mailto:permissions@oreilly.com"><em>permissions@oreilly.com</em></a>].
+
+=== O'Reilly Online Learning
+
+[role = "ormenabled"]
+[NOTE]
+====
+For more than 40 years, pass:[<a href="https://oreilly.com" class="orm:hideurl"><em class="hyperlink">O’Reilly Media</em></a>] has provided technology and business training, knowledge, and insight to help companies succeed.
+====
+
+Our unique network of experts and innovators share their knowledge and expertise through books, articles, and our online learning platform. O’Reilly’s online learning platform gives you on-demand access to live training courses, in-depth learning paths, interactive coding environments, and a vast collection of text and video from O'Reilly and 200+ other publishers. For more information, visit pass:[<a href="https://oreilly.com" class="orm:hideurl"><em>https://oreilly.com</em></a>].
+
+=== How to Contact Us
+
+Please address comments and questions concerning this book to the publisher:
+
+++++
+<ul class="simplelist">
+  <li>O’Reilly Media, Inc.</li>
+  <li>1005 Gravenstein Highway North</li>
+  <li>Sebastopol, CA 95472</li>
+  <li>800-998-9938 (in the United States or Canada)</li>
+  <li>707-829-0515 (international or local)</li>
+  <li>707-829-0104 (fax)</li>
+</ul>
+++++
+
+We have a web page for this book, where we list errata, examples, and any additional information. You can access this page at link:$$https://www.oreilly.com/catalog/<catalog page>$$[].
+
+++++
+<!--Don't forget to update the link above.-->
+++++
+
+Email pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>] to comment or ask technical questions about this book.
+
+For news and information about our books and courses, visit link:$$https://oreilly.com$$[].
+
+Find us on LinkedIn: link:$$https://linkedin.com/company/oreilly-media$$[]
+
+Follow us on Twitter: link:$$https://twitter.com/oreillymedia$$[]
+
+Watch us on YouTube: link:$$https://www.youtube.com/oreillymedia$$[]
 
 === Acknowledgments
 
@@ -30,20 +119,4 @@ image::images/spwr_00in01.png[]
 ==== From Boris
 I would also like to thank my wife, Marina, for putting up with long writing sessions and sometimes neglecting her for hours, and my colleagues in IBM for many fruitful discussions, that helped him to better understand the power of Ray.
 
-
-=== License
-
-Once published in print and excluding O’Reilly’s distinctive design elements (i.e. cover art, design format, “look and feel”) or O’Reilly’s trademarks, service marks, and trade names, this book is available under a Creative Commons Attribution-Noncommercial-NoDerivatives 4.0 International Public License. We thank O'Reilly for allowing us to make this book available under a creative commons license. We hope that you will choose to support this book (and the authors) by purchasing several copies of this book with your corporate expense account (it makes an excellent gift for whichever holiday season is coming up next).
-
-
-=== Code Examples
-
-The https://github.com/scalingpythonml/scalingpythonml[Scaling Python ML Github] contains most of the examples for this book. The examples in this book are in the "ray" directory, with some parts (namely Dask on Ray) being found in the "dask" directory and Spark on Ray in the "spark" directory. 
-
-This book is here to help you get your job done. In general, if an example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you’re reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing a CD-ROM of examples from O’Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. The code is also available under an Apache 2 License. Incorporating a significant amount of example code from this book into your product’s documentation may require permission.
-
-//TODO update this to be our book. I.e. a how to cite us thingy
-We appreciate, but do not require attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: “_Scaling Python with Ray_ (O’Reilly). Copyright 2022, ISBNGOHERE.”
-
-If you feel your use of code examples falls outside fair use or the permission given above, feel free to contact us at pass:[<a class="email" href="mailto:permissions@oreilly.com"><em>permissions@oreilly.com</em></a>].
 

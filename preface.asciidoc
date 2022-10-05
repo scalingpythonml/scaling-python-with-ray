@@ -55,13 +55,11 @@ Once published in print and excluding O’Reilly’s distinctive design elements
 
 The https://github.com/scalingpythonml/scalingpythonml[Scaling Python ML Github] contains most of the examples for this book. The examples in this book are in the "ray" directory, with some parts (namely Dask on Ray) being found in the "dask" directory and Spark on Ray in the "spark" directory. 
 
-Supplemental material (code examples, exercises, etc.) is available for download at link:$$https://github.com/oreillymedia/title_title$$[].
-
 If you have a technical question or a problem using the code examples, please send email to pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>].
 
 This book is here to help you get your job done. In general, if example code is offered with this book, you may use it in your programs and documentation. You do not need to contact us for permission unless you’re reproducing a significant portion of the code. For example, writing a program that uses several chunks of code from this book does not require permission. Selling or distributing examples from O’Reilly books does require permission. Answering a question by citing this book and quoting example code does not require permission. Incorporating a significant amount of example code from this book into your product’s documentation does require permission.
 
-We appreciate, but generally do not require, attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: “_Book Title_ by Some Author (O’Reilly). Copyright 2012 Some Copyright Holder, 978-0-596-xxxx-x.”
+We appreciate, but generally do not require, attribution. An attribution usually includes the title, author, publisher, and ISBN. For example: “_Scaling Python with Ray_ by Holden Karau and Boris Lublinsky (O’Reilly). Copyright 2023 Holden Karau and Boris Lublinsky, 978-1-098-11880-8.”
 
 If you feel your use of code examples falls outside fair use or the permission given above, feel free to contact us at pass:[<a class="email" href="mailto:permissions@oreilly.com"><em>permissions@oreilly.com</em></a>].
 
@@ -90,11 +88,7 @@ Please address comments and questions concerning this book to the publisher:
 </ul>
 ++++
 
-We have a web page for this book, where we list errata, examples, and any additional information. You can access this page at link:$$https://www.oreilly.com/catalog/<catalog page>$$[].
-
-++++
-<!--Don't forget to update the link above.-->
-++++
+We have a web page for this book, where we list errata, examples, and any additional information. You can access this page at https://oreil.ly/scaling-python-ray.
 
 Email pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>] to comment or ask technical questions about this book.
 
@@ -117,6 +111,7 @@ I would also like to thank my wife and partners for putting up with my long in-t
 image::images/spwr_00in01.png[]
 
 ==== From Boris
+
 I would also like to thank my wife, Marina, for putting up with long writing sessions and sometimes neglecting her for hours, and my colleagues in IBM for many fruitful discussions, that helped him to better understand the power of Ray.
 
 

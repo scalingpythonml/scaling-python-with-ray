@@ -27,21 +27,22 @@
     "pdf": {
       "version": "print",
       "toc": true,
-      "index": false,
+      "index": true,
       "syntaxhighlighting": true,
       "show_comments": false,
-      "antennahouse_version": "AHFormatterV62_64-MR4",
-      "color_count": false,
+      "antennahouse_version": "AHFormatterV71_64-MR2",
+      "color_count": "1",
       "trim_size": "7inx9.1875in"
     },
     "epub": {
       "toc": true,
-      "index": false,
+      "index": true,
       "syntaxhighlighting": true,
       "epubcheck": true,
       "show_comments": false,
       "mathmlreplace": false,
-      "downsample_images": false
+      "downsample_images": false,
+      "mathmlreplacement": false
     },
     "mobi": {
       "toc": true,

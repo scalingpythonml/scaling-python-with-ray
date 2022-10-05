@@ -496,7 +496,7 @@ include::examples/ray_examples/data/Ray-DataSets.py[tags=batch_op_on_pandas]
 The result you return must be a list, `pandas`, or `pyarrow`, and it does not need to match the same type that you take in.
 ====
 
-Ray Datasets do not have a built-in way to specify additional libraries to be installed. You can use `map_batches` along with a task to accomplish this, as shown in <<more_awesome_wordcount>> where we install extra libraries to parse the HTML.
+Ray Datasets do not have a built-in way to specify additional libraries to be installed. You can use `map_batches` along with a task to accomplish this, as shown in <<more_awesome_wordcount_with_batchest>> where we install extra libraries to parse the HTML.
 
 [[more_awesome_wordcount_with_batches]]
 .Ray map_batches with extra libraries

@@ -19,7 +19,7 @@ As the saying goes, with great power comes great responsibility. Ray, and tools 
 
 === Acknowledgments
 
-We would like to acknowledge the contribution of Carlos Andrade Costa who cowrote with us Chapter 8 - Ray Workflows. This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
+We would like to acknowledge the contribution of Carlos Andrade Costa who cowrote with us <<ch08>> - Ray Workflows. This book would not exist if not for the communities it is built on. Thank you to the Ray/Berkeley community and the PyData community. Thank you for your contributions and guidance to all the early readers and reviewers. These reviewers include Dean Wampler, Jonathan Dinu, Adam Breindel, Bill Chambers, Trevor Grant, Ruben Berenguel, Michael Behrendt, and many more. A special thanks to Ann Spencer for reviewing the early proposals of what eventually became this and Scaling Python with Dask. Any remaining mistakes are the authors' fault, sometimes against the advice of our reviewers.
 
 ==== From Holden
 

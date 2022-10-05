@@ -352,7 +352,7 @@ One of the common application use cases is the execution of the same remote func
 
 === Conclusion
 
-In this chapter, you have learned how to use Ray remote actors to implement stateful execution in Ray. You have learned about the actor model and how to implement Ray remote actors. Note that Ray internally heavily relies on using actors, for example, for multi-node https://docs.ray.io/en/master/advanced.html#multi-node-synchronization-using-signalactor[+++synchronization+++], streaming (see <<ch06>>), microservices implementation (see chapter 7), etc. It is also widely used for ML implementations, see, for example, usage of actors for implementing https://ray-project.github.io/2018/07/15/parameter-server-in-fifteen-lines.html[+++parameter server+++].
+In this chapter, you have learned how to use Ray remote actors to implement stateful execution in Ray. You have learned about the actor model and how to implement Ray remote actors. Note that Ray internally heavily relies on using actors, for example, for multi-node https://docs.ray.io/en/master/advanced.html#multi-node-synchronization-using-signalactor[+++synchronization+++], streaming (see <<ch06>>), microservices implementation (see <ch07>>), etc. It is also widely used for ML implementations, see, for example, usage of actors for implementing https://ray-project.github.io/2018/07/15/parameter-server-in-fifteen-lines.html[+++parameter server+++].
 
 You have also learned how to improve an actor’s reliability by implementing an actor’s persistence and saw a simple example of persistence implementation.
 

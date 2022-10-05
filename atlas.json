@@ -43,7 +43,7 @@
       "epubcheck": true,
       "show_comments": false,
       "mathmlreplace": false,
-      "downsample_images": false,
+      "downsample_images": true,
       "mathmlreplacement": false
     },
     "mobi": {

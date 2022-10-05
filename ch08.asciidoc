@@ -105,7 +105,7 @@ assert workflow.get_output("workflow_1") == "hello world"
 ----
 ====
 
-Similar to Ray tasks and Actors described in chapters 3 and 4 you can explicitly assign computing resources (e.g., CPU core, GPUs,) to a step with the same arguments as in core Ray: `num_cpus`, `num_gpus`, and `resources`. For example:
+Similar to Ray tasks and Actors described in <<ch03>> and <<ch04>> you can explicitly assign computing resources (e.g., CPU core, GPUs,) to a step with the same arguments as in core Ray: `num_cpus`, `num_gpus`, and `resources`. For example:
 
 [[step_resources]]
 .Adding resources to steps
@@ -151,7 +151,7 @@ assert factorial_workflow.run() == 120
 
 ==== Virtual actors
 
-Virtual actors are Ray actors (see Chapter 4), backed by durable storage instead of memory and are created with the decorator @virtual_actor. The example belowfootnote:[The full code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/basic_virtual_actor_example.py[+++Github+++]] shows how to use a persistent Virtual actor to implement a counter:
+Virtual actors are Ray actors (see <<ch04>>), backed by durable storage instead of memory and are created with the decorator @virtual_actor. The example belowfootnote:[The full code for this example is in https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/wf/basic_virtual_actor_example.py[+++Github+++]] shows how to use a persistent Virtual actor to implement a counter:
 
 [[basic_virtual_actor]]
 .Virtual actors

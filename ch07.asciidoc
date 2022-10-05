@@ -112,7 +112,7 @@ We will demonstrate the usage of async handles later in this chapter.
 
 Finally, deployments can be updated by simply modifying the code or configuration options and calling deploy() again.
 
-In addition to HTTP and direct Python invocation, described here, you can also use the Python APIs for invoking deployment using Kafka (see chapter 6 for Kafka integration approach).
+In addition to HTTP and direct Python invocation, described here, you can also use the Python APIs for invoking deployment using Kafka (see <<ch06>> for Kafka integration approach).
 
 Now that you know the basics of Deployment, let’s take a look at additional capabilities available for deployments.
 

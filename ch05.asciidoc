@@ -43,7 +43,7 @@ If your flaky function fails, you will see `WARNING worker.py:1215 -- A worker d
 Alternatively, to see fault tolerance in action, if you're running a distributed Ray cluster, you can find the node running your remote function by returning the hostname and then shut down the node while running a request.
 ====
 
-Remote actors are a complicated case for fault tolerance as they contain state within them. In chapter <<ch04>>, this is why you explored the different options for persisting & recovering that state. Actors can experience failure at any stage: setup, message processing, or between messages.
+Remote actors are a complicated case for fault tolerance as they contain state within them. In <<ch04>>, this is why you explored the different options for persisting & recovering that state. Actors can experience failure at any stage: setup, message processing, or between messages.
 
 Unlike Ray Remote functions, if an actor fails while processing a message, Ray does not automatically retry it. This is true even if you have set `max_restarts`. Ray will restart your actor for processing the next message. On error, you will get back a `RayActorError` exception.
 
@@ -387,7 +387,7 @@ You can get the current namespace by calling `ray.get_runtime_context().namespac
 
 One of the big draws of Python is the amazing ecosystem of tools available. Ray supports managing dependencies with both conda and virtualenv. Ray dynamically creates these virtual environments inside of your larger container as needed and launches workers using the matching environment.
 
-The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from https://pypi.org/[+++the Python Package Index (PyPI)+++] you need. Looking at the web scraping example from chapter 2 where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
+The fastest way to add a "few" packages to your runtime context is by specifying a list of packages from https://pypi.org/[+++the Python Package Index (PyPI)+++] you need. Looking at the web scraping example from <<ch02>> where you used the beautiful soup library, you can ensure this package is available in a distributed environment by creating an execution context with it as shown in <<pip_pkg_list>>.
 
 [[pip_pkg_list]]
 .pip package list

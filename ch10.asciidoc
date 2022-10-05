@@ -32,7 +32,7 @@ Scikit-Learn also contains important tooling to support machine learning:
 
 Although you can use most of the Scikit-Learn APIs directly with Ray for tuning the model’s hyperparameters, things get a bit more involved when you want to parallelize execution.
 
-If we take the basic code used for the creation of the model in Chapter 7, and try to optimize parameters for the decision tree, our code will look as in <<skex>>:
+If we take the basic code used for the creation of the model in <<ch07>>, and try to optimize parameters for the decision tree, our code will look as in <<skex>>:
 
 [[skex]]
 .Using Scikit-Learn to build wine quality model
@@ -47,7 +47,7 @@ Note that here, in the _GridSearchCV_footnote:[In this example we are using Grid
 
 Unfortunately, this does not work out of the box with Ray clusters. GridSearchCV, and many other Scikit-Learn algorithms, use https://joblib.readthedocs.io/en/latest/[+++Joblib+++] for parallel execution. Joblib does not work with Ray out of the box.
 
-Ray https://docs.ray.io/en/master/ray-more-libs/joblib.html[+++implements+++] a backend for joblib with Ray actors pool (see chapter 4) instead of local processes. This allows you to simply change the joblib backend to switch scikit learn from using local processes to Ray.
+Ray https://docs.ray.io/en/master/ray-more-libs/joblib.html[+++implements+++] a backend for joblib with Ray actors pool (see <<ch04>>) instead of local processes. This allows you to simply change the joblib backend to switch scikit learn from using local processes to Ray.
 
 Concretely, to make the above code <<skex>> run using Rayfootnote:[Complete code for this implementation can be found on https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/ml/sklearn/wine-quality-ray.py[+++github+++]] you need to register Ray backend for joblib and use it for the _GridSearchCV_, execution as in <<skex_joblib>>.
 

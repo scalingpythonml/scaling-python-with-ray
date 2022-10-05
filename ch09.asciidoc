@@ -116,7 +116,7 @@ include::examples/ray_examples/data/Ray-DataSets.py[tags=to_dask]
 
 [[tools-arrow-ray]]
 .Some of the different tools you can connect with Arrow and Ray
-image::images/ch09/fig_09-01.png[]
+image::images/spwr_0901.png[]
 
 [NOTE]
 ====

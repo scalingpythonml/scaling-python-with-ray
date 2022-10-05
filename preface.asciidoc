@@ -25,7 +25,7 @@ We would like to acknowledge the contribution of Carlos Andrade Costa who cowrot
 
 I would also like to thank my wife and partners for putting up with my long in-the-bath-tub writing sessions. A special thank you to Timbit for guarding the house and generally giving me a reason to get out of bed (albeit often a bit too early for my taste).
 
-image::images/preface/timbit.png[]
+image::images/spwr_00in01.png[]
 
 ==== From Boris
 I would also like to thank my wife, Marina, for putting up with long writing sessions and sometimes neglecting her for hours, and my colleagues in IBM for many fruitful discussions, that helped him to better understand the power of Ray.

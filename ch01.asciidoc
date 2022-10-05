@@ -37,7 +37,7 @@ Ray can be deployed in a variety of environments ranging from your laptop to the
 ****
 A Ray cluster consists of a head node and a set of worker nodes.
 
-image::images/ch01/ch01_image01_inline.png[]
+image::images/spwr_01in01.png[]
 
 As you can see from the figure above, a head node, in addition to supporting all the functionality of the worker node has two additional components:
 
@@ -86,7 +86,7 @@ Overall Ray ecosystem is presented at <<figure-ray-ecosystem>> below:
 
 [[figure-ray-ecosystem]]
 .Ray ecosystem
-image::images/ch01/ch01_image01.png[]
+image::images/spwr_0101.png[]
 
 Let's take a look at some of the different problem spaces and see how Ray fits in and compares with existing tools.
 

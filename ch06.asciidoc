@@ -47,7 +47,7 @@ Although many people consider Kafka to be a type of messaging system, similar to
 
 [[Distributed-log]]
 .Distributed log
-image::images/ch06/fig_0601.png[]
+image::images/spwr_0601.png[]
 
 The main differences between log-oriented systems like Kafka and messaging systems, like RabbitMQ, are:
 
@@ -58,7 +58,7 @@ Similar to the messaging systems, Kafka organizes data into topics. Unlike messa
 
 [[Anatomy-of-topic]]
 .Anatomy of topic
-image::images/ch06/fig_0602.png[]
+image::images/spwr_0602.png[]
 
 Data in a partition is sequential and can be replicated across multiple brokers (see below). Partitioning is a vital scalability mechanism, allowing individual consumers to read dedicated partitions in parallel and allowing Kafka to store the partitions separately.
 
@@ -72,7 +72,7 @@ To understand how applications scale with Kafka, you will need to understand how
 
 [[Kafka-consumer-group]]
 .Kafka consumer group
-image::images/ch06/fig_0603.png[]
+image::images/spwr_0603.png[]
 
 You can assign consumer that read from the same set of topics to a consumer group.
 

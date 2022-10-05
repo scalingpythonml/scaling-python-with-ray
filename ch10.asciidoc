@@ -246,13 +246,13 @@ Ray was initially created as a platform for Reinforcement Learning(RL), which is
 
 [[different-types-of-machine-learning]]
 .Different types of machine learning
-image::images/ch10/fig_10-01.png[]
+image::images/spwr_1001.png[]
 
 Both supervised and reinforcement learning create the mapping between input and output, but unlike supervised learning which is using a set of known inputs and output for training, reinforcement learning uses rewards and punishments as signals for positive and negative behavior. Both unsupervised and reinforcement learning leverage experiment data, but they have different goals. While in unsupervised learning we are finding similarities and differences between data points, in the case of reinforcement learning we are trying to find a suitable action model that would maximize the total cumulative reward - and improve the model.
 
 [[reinforcement-model-implementation]]
 .Reinforcement model implementation
-image::images/ch10/fig_10-02.png[]
+image::images/spwr_1002.png[]
 
 The key components of an RL implementation are (<<reinforcement-model-implementation>>):
 
@@ -270,7 +270,7 @@ It supports both https://en.wikipedia.org/wiki/Model-free_(reinforcement_learnin
 
 [[rllib-components]]
 .RLlib components
-image::images/ch10/fig_10-03.png[]
+image::images/spwr_1003.png[]
 
 As shown in <<rllib-components>>, RLlib is built on top of Ray and offers off-the-shelf, highly distributed algorithms, policies, loss functions, and default models.
 

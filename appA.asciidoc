@@ -15,7 +15,7 @@ SpaceBeaver's core requirement is to serve as a bridge between e-mail (through S
 
 [[actor_layout]]
 .Actor Layout
-image::images/appA/image1.png[]
+image::images/spwr_aa01.png[]
 
 === Implementation
 

@@ -146,12 +146,12 @@ Ray's dashboard is excellent for when you are working by yourself or debugging a
 // AU: please add this image file to images/ch12
 [[old_dashboard]]
 .The old (pre-2.0) dashboard
-image::images/ch12/old_dash.png[]
+image::images/spwr_1201.png[]
 
 // AU: please add this image file to images/ch12
 [[new_dashboard]]
 .The new dashboard
-image::images/ch12/new_dash.png[]
+image::images/spwr_1202.png[]
 
 As you can see the new dashboard did not evolve organically; rather, it was intentionally designed and contains some new information. Both versions of the dashboard contain information about the executor processes and memory usage. The new dashboard also has a web UI for looking up objects by ID.
 
@@ -164,7 +164,7 @@ Ray metrics can also be exported to Prometheus, and by default, Ray will pick a 
 
 [[sample-grafana-dashboard-for-ray]]
 .Sample Grafana dashboard for Ray
-image::images/ch12/fig_12-03.png[]
+image::images/spwr_1203.png[]
 
 To obtain exported metrics, Prometheus needs to be configured for which hosts/pods to scrape. For users with a static cluster, this is as simple as providing a host file, but for dynamic users, you https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config[+++have many options+++]. Kubernetes users can use https://github.com/scalingpythonml/scalingpythonml/blob/master/ray_examples/enterprise/ray-pod-monitor.yaml[+++podmonitors+++] to configure Prometheus pod scraping. Because Ray cluster does not have a unifying label for all nodes, here we are using two podmonitors - one for the head node and one for workers.
 

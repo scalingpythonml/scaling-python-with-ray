@@ -1,0 +1,8 @@
+{
+  "isbn": "9781098118808",
+  "jira": "DCPSPROD-7007",
+  "in_ER": "yes",
+  "incoming": "asciidoc",
+  "outgoing": "asciidoc",
+  "est_tools_hrs": -1
+}

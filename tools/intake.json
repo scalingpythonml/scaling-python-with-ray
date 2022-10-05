@@ -4,5 +4,8 @@
   "in_ER": "yes",
   "incoming": "asciidoc",
   "outgoing": "asciidoc",
+  "n_pages": 255,
+  "n_code_listings": 177,
+  "n_highlighted": 148,
   "est_tools_hrs": -1
 }

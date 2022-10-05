@@ -418,7 +418,7 @@ There are two important classes of stream processing:
 * *Stateless stream processing,* where each event is handled completely independently from any previous events or mutable shared state. Given an event, the stream processor will treat it exactly the same way every time, no matter what data arrived beforehand or the state of the execution.
 * *Stateful stream processing*, which means that a "state" is shared between events and can influence the way current events are processed. The state, in this case, can be a result of previous events or produced by an external system, controlling stream processing.
 
-Stateless stream processing implementations are typically simple and straightforward, They require an extension of the _start_ method of the Kafka consumer (Listing 6-2) to implement any required transformation of the incoming messages. The result of these transformations can be sent either to different Kafka topics or to any other part of the code. An example stateless a streaming application can be found https://www.anyscale.com/blog/serverless-kafka-stream-processing-with-ray[+++here+++].
+Stateless stream processing implementations are typically simple and straightforward, They require an extension of the _start_ method of the Kafka consumer (<<Kafka-consumer-actor>>) to implement any required transformation of the incoming messages. The result of these transformations can be sent either to different Kafka topics or to any other part of the code. An example stateless a streaming application can be found https://www.anyscale.com/blog/serverless-kafka-stream-processing-with-ray[+++here+++].
 
 Implementing stateful stream processing is typically more involved. Let’s take a look at different options for implementing stateful stream processing based on
 https://www.lightbend.com/blog/serve-machine-learning-models-dynamically-controlled-streams[+++dynamically controlled streams+++].
@@ -456,7 +456,7 @@ include::examples/ray_examples/streaming/shared/controller.py[tags=shared]
 
 The implementation is a Python class with the following methods:
 
-* A constructor taking Kafka producer actor (Listing 6-1), that is used by this class to write control data to Kafka and an ID - an ID of this temperature controller (which is the same as heater device ID).
+* A constructor taking Kafka producer actor (<<Kafka-producer-actor>>), that is used by this class to write control data to Kafka and an ID - an ID of this temperature controller (which is the same as heater device ID).
 * The erocess_new_message method that receives messages and depending on their contents calls either _set_temperature_ or _process_sensordata_.
 * The set_temperature method is processing a new set temperature method from the thermostat. This message contains the new desired temperature along with additional heater-specific parameters - temperature intervals where controls are ignored.
 * The process_sensordata method which handles the temperature control. If the desired temperature is set, then it compares the current temperature with the desired one and calculates the desired control (heater on/off). To avoid resending the same control over and over again, this method additionally compares the calculated control value with the current (cached) and only submits a new control value if it has changed.
@@ -484,10 +484,10 @@ class TemperatureControllerManager:
 
 This implementation is based on a dictionary keeping track of temperature controllers based on their IDs. The class provides 2 methods:
 
-* The constructor taking Kafka producer actor (Listing 6-1). The constructor then creates a new empty dictionary of the individual temperature controllers.
+* The constructor taking Kafka producer actor (<<Kafka-producer-actor>>). The constructor then creates a new empty dictionary of the individual temperature controllers.
 * The process_controller_message function that takes every new message received by the “local” Kafka consumer and, based on a key, decides if a required temperature controller exists. If it is not, a new temperature controller is created and stores a reference to it. After it finds or creates the controller, it then passes the message to it for processing.
 
-To link this implementation to the Kafka consumer, we do need to modify the Kafka consumer (Listing 6-2) a little bit (<<integrating-kafka-consumer-with-temperature-controller-manager>>).
+To link this implementation to the Kafka consumer, we do need to modify the Kafka consumer (<<Kafka-consumer-actor>>) a little bit (<<integrating-kafka-consumer-with-temperature-controller-manager>>).
 
 [[integrating-kafka-consumer-with-temperature-controller-manager]]
 .Integrating Kafka consumer with temperature controller manager
@@ -549,7 +549,7 @@ A couple of notable differences between this and the original implementations ar
 * The constructor takes an additional parameter - the Kafka producer, which is used internally to create a _temperature controller manager_ as part of the actor’s initialization.
 * For every incoming message, in addition to printing it out, we are invoking the temperature _controller manager_ to process it.
 
-With these changes in place, you can implement the main program, similar to (Listing 6-4)footnote:[You can find the complete code for this implementation https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/keyed/keyed_ray_kafka_persistent.py[+++here+++]] and start an execution. The partial execution result (in <<controller-execution-results>>) shows the output of processing:
+With these changes in place, you can implement the main program, similar to (<<bringing-it-all-together>>)footnote:[You can find the complete code for this implementation https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/keyed/keyed_ray_kafka_persistent.py[+++here+++]] and start an execution. The partial execution result (in <<controller-execution-results>>) shows the output of processing:
 
 [[controller-execution-results]]
 .Controller execution results
@@ -598,7 +598,7 @@ Some of these drawbacks can be rectified in a key independent approach.
 
 ==== Key independent approach
 
-The difference of this approach compared to the previous one is that both the temperature controller (Listing 6-8) and temperature controller manager (Listing 6-9) are converted from Python objects to https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/round_robin/ray_kafka_persistent.py[+++Ray actors+++]. By doing this both become individually addressable and can be located anywherefootnote:[Complete code for this example can be found https://github.com/scalingpythonml/scalingpythonml/tree/master/streaming/persistent_ray/round_robin[+++here+++]]. Such an approach loses execution locality (which can lead to a slight execution time increase), but can improve overall scalability of the solution (each actor can run on a separate node). If necessary, you can improve scalability even further by leveraging an actor’s pool (described in <<ch04>>) and thus allowing Ray to split execution to even more nodes.
+The difference of this approach compared to the previous one is that both the temperature controller (<<implementation-of-temperature-controller-manager>>) and temperature controller manager (<<integrating-kafka-consumer-with-temperature-controller-manager>>) are converted from Python objects to https://github.com/scalingpythonml/scalingpythonml/blob/master/streaming/persistent_ray/round_robin/ray_kafka_persistent.py[+++Ray actors+++]. By doing this both become individually addressable and can be located anywherefootnote:[Complete code for this example can be found https://github.com/scalingpythonml/scalingpythonml/tree/master/streaming/persistent_ray/round_robin[+++here+++]]. Such an approach loses execution locality (which can lead to a slight execution time increase), but can improve overall scalability of the solution (each actor can run on a separate node). If necessary, you can improve scalability even further by leveraging an actor’s pool (described in <<ch04>>) and thus allowing Ray to split execution to even more nodes.
 
 === Going beyond Kafka 
 

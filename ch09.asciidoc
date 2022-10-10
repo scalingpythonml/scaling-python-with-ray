@@ -114,16 +114,24 @@ include::examples/ray_examples/data/Ray-DataSets.py[tags=to_dask]
 ----
 ====
 
-[[tools-arrow-ray]]
-.Some of the different tools you can connect with Arrow and Ray
-image::images/spwr_0901.png[]
-
 [NOTE]
 ====
 Datasets do not use Ray's runtime environments for dependencies, so you must have your desired tools installed in your worker image, see <<appB>>. This is more involved for Spark as it requires the JVM and other non-Python components.
 ====
 
-You are not limited to the tools that are built into Ray. If you have a new tool that supports Apache Arrow, and https://arrow.apache.org/docs/python/api/datatypes.html[+++you are using Apache Arrow supported types+++], `to_arrow_refs()` gives you a zero copy Arrow representation of your dataset. Many tools and languages support Arrow including Tensorflow, R, and even Matlab. You can then use this list of Ray Arrow objects to pass into your tool, be it model training or any other purpose. You will learn more about this in the "Built-in Ray DataSet operations" section.
+You are not limited to the tools that are built into Ray. If you have a new tool that supports Apache Arrow, and https://arrow.apache.org/docs/python/api/datatypes.html[+++you are using Apache Arrow supported types+++], `to_arrow_refs()` gives you a zero copy Arrow representation of your dataset. You can then use this list of Ray Arrow objects to pass into your tool, be it model training or any other purpose. You will learn more about this in the "Built-in Ray DataSet operations" section.
+
+Many tools and languages can be connected with Arrow and Ray, including the following:
+
+* https://spark.apache.org[Apache Spark]
+* https://www.dask.org[Dask]
+* https://parquet.apache.org[Apache Parquet]
+* https://github.com/modin-project/modin[Modin]
+* https://pandas.pydata.org[Pandas]
+* https://www.tensorflow.org[Tensorflow]
+* https://www.r-project.org[R]
+* https://www.json.org[JSON]
+* https://www.mathworks.com/products/matlab.html[Matlab]
 
 [TIP]
 ====
